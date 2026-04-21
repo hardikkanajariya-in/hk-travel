@@ -41,6 +41,13 @@ class RolesAndPermissionsSeeder extends Seeder
         'admin.pages.manage',
         'admin.menus.manage',
         'admin.widgets.manage',
+        'admin.seo.manage',
+        'admin.forms.manage',
+        'admin.forms.submissions.view',
+        'admin.crm.leads.view',
+        'admin.crm.leads.manage',
+        'admin.crm.leads.assign',
+        'admin.crm.pipelines.manage',
         'pages.developer-blocks',
     ];
 

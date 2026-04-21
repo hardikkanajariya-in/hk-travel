@@ -29,4 +29,15 @@ Route::middleware(['auth', 'verified'])
         Route::livewire('widgets', 'pages::admin.widgets')->middleware('can:admin.widgets.manage')->name('widgets');
         Route::livewire('pages', 'pages::admin.pages')->middleware('can:admin.pages.manage')->name('pages');
         Route::livewire('pages/{page}/edit', 'pages::admin.page-editor')->middleware('can:admin.pages.manage')->name('pages.edit');
+        Route::livewire('seo', 'pages::admin.seo')->middleware('can:admin.seo.manage')->name('seo');
+        Route::livewire('contact-forms', 'pages::admin.contact-forms')->middleware('can:admin.forms.manage')->name('contact-forms');
+        Route::livewire('contact-forms/{form}/edit', 'pages::admin.contact-form-builder')->middleware('can:admin.forms.manage')->name('contact-forms.edit');
+        Route::livewire('contact-submissions', 'pages::admin.contact-submissions')->middleware('can:admin.forms.submissions.view')->name('contact-submissions');
+
+        Route::prefix('crm')->name('crm.')->group(function () {
+            Route::livewire('leads', 'pages::admin.leads')->middleware('can:admin.crm.leads.view')->name('leads');
+            Route::livewire('kanban', 'pages::admin.leads-kanban')->middleware('can:admin.crm.leads.view')->name('kanban');
+            Route::livewire('leads/{lead}', 'pages::admin.lead-detail')->middleware('can:admin.crm.leads.view')->name('leads.show');
+            Route::livewire('pipelines', 'pages::admin.pipelines')->middleware('can:admin.crm.pipelines.manage')->name('pipelines');
+        });
     });

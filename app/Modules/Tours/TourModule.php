@@ -3,6 +3,8 @@
 namespace App\Modules\Tours;
 
 use App\Core\Modules\Module;
+use App\Modules\Tours\Models\Tour;
+use Illuminate\Support\Facades\Schema;
 
 /**
  * Tours module manifest.
@@ -38,5 +40,32 @@ class TourModule extends Module
             'tours.publish',
             'tours.bookings.manage',
         ];
+    }
+
+    public function adminMenu(): array
+    {
+        return [[
+            'label' => 'Tours',
+            'route' => 'admin.tours.index',
+            'icon' => 'map',
+            'permission' => 'tours.view',
+            'group' => 'Catalogue',
+        ]];
+    }
+
+    public function sitemapEntries(): iterable
+    {
+        if (! Schema::hasTable('tours')) {
+            return [];
+        }
+
+        foreach (Tour::query()->where('is_published', true)->get(['slug', 'updated_at']) as $row) {
+            yield [
+                'loc' => route('tours.show', $row->slug),
+                'lastmod' => $row->updated_at,
+                'changefreq' => 'weekly',
+                'priority' => 0.8,
+            ];
+        }
     }
 }

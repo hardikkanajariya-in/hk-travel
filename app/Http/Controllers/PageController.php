@@ -32,7 +32,7 @@ class PageController extends Controller
     {
         $page = $renderer->findPublished($slug);
 
-        abort_unless($page, 404);
+        abort_if($page === null, 404);
 
         return response()->view('page', ['page' => $page]);
     }

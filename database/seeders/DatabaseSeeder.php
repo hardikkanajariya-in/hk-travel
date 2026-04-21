@@ -16,6 +16,7 @@ class DatabaseSeeder extends Seeder
             LanguagesSeeder::class,
             EmailTemplatesSeeder::class,
             NotificationChannelsSeeder::class,
+            PipelinesSeeder::class,
         ]);
     }
 }

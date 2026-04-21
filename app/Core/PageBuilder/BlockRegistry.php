@@ -5,6 +5,7 @@ namespace App\Core\PageBuilder;
 use App\Core\PageBuilder\Blocks\ButtonBlock;
 use App\Core\PageBuilder\Blocks\CardsBlock;
 use App\Core\PageBuilder\Blocks\ColumnsBlock;
+use App\Core\PageBuilder\Blocks\ContactFormBlock;
 use App\Core\PageBuilder\Blocks\CtaBlock;
 use App\Core\PageBuilder\Blocks\CustomCssBlock;
 use App\Core\PageBuilder\Blocks\CustomHtmlBlock;
@@ -97,6 +98,7 @@ class BlockRegistry
             CustomHtmlBlock::class,
             CustomCssBlock::class,
             CustomJsBlock::class,
+            ContactFormBlock::class,
         ] as $class) {
             $this->register(app($class));
         }

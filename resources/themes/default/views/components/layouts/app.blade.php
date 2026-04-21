@@ -23,6 +23,7 @@
     {!! $branding->headTags() !!}
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @livewireStyles
+    <x-theme.seo />
     @stack('head')
 </head>
 <body class="min-h-full bg-white dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 antialiased">

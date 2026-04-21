@@ -2,25 +2,44 @@
 
 namespace App\Modules\Tours\Livewire\Public;
 
+use App\Core\Seo\SeoManager;
 use App\Modules\Tours\Models\Tour;
 use Illuminate\Contracts\View\View;
 use Livewire\Attributes\Layout;
-use Livewire\Attributes\Title;
 use Livewire\Component;
 
-#[Title('Tour')]
-#[Layout('components.layouts.installer')]
+#[Layout('components.layouts.public')]
 class TourShow extends Component
 {
     public Tour $tour;
 
-    public function mount(string $slug): void
+    public function mount(string $slug, SeoManager $seo): void
     {
-        $this->tour = Tour::query()->where('slug', $slug)->where('is_published', true)->firstOrFail();
+        $this->tour = Tour::query()
+            ->with('destination')
+            ->where('slug', $slug)
+            ->where('is_published', true)
+            ->firstOrFail();
+
+        $meta = $this->tour->toSeoMeta();
+        $seo->title($meta['title'])
+            ->description($meta['description'])
+            ->image($meta['image'])
+            ->canonical(route('tours.show', $this->tour->slug));
     }
 
     public function render(): View
     {
-        return view('tours::public.show', ['tour' => $this->tour]);
+        $related = Tour::query()
+            ->where('is_published', true)
+            ->whereKeyNot($this->tour->id)
+            ->when($this->tour->destination_id, fn ($q) => $q->where('destination_id', $this->tour->destination_id))
+            ->limit(3)
+            ->get();
+
+        return view('tours::public.show', [
+            'tour' => $this->tour,
+            'related' => $related,
+        ]);
     }
 }

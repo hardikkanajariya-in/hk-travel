@@ -10,6 +10,12 @@
         ['label' => 'Branding', 'route' => 'admin.branding', 'icon' => 'paint-brush'],
         ['label' => 'Languages', 'route' => 'admin.languages', 'icon' => 'language'],
         ['label' => 'Permalinks', 'route' => 'admin.permalinks', 'icon' => 'link'],
+        ['label' => 'SEO', 'route' => 'admin.seo', 'icon' => 'magnifying-glass'],
+        ['label' => 'Forms', 'route' => 'admin.contact-forms', 'icon' => 'inbox'],
+        ['label' => 'Submissions', 'route' => 'admin.contact-submissions', 'icon' => 'inbox-arrow-down'],
+        ['label' => 'Leads', 'route' => 'admin.crm.leads', 'icon' => 'user-plus'],
+        ['label' => 'Kanban', 'route' => 'admin.crm.kanban', 'icon' => 'view-columns'],
+        ['label' => 'Pipelines', 'route' => 'admin.crm.pipelines', 'icon' => 'queue-list'],
         ['label' => 'Email templates', 'route' => 'admin.email-templates', 'icon' => 'envelope'],
         ['label' => 'Notifications', 'route' => 'admin.notifications', 'icon' => 'bell'],
         ['label' => 'Security', 'route' => 'admin.security', 'icon' => 'shield-check'],
@@ -17,6 +23,8 @@
         ['label' => 'Audit log', 'route' => 'admin.audit', 'icon' => 'clipboard-document-list'],
         ['label' => 'Users', 'route' => 'admin.users', 'icon' => 'users'],
     ];
+
+    $moduleItems = app(\App\Core\Modules\ModuleManager::class)->adminMenuItems();
 @endphp
 
 <aside class="hidden md:flex w-64 shrink-0 flex-col border-r border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900">
@@ -40,6 +48,24 @@
                 <span>{{ $item['label'] }}</span>
             </a>
         @endforeach
+
+        @if (! empty($moduleItems))
+            <div class="mt-6 mb-2 px-3 text-[11px] font-semibold uppercase tracking-wider text-zinc-400">
+                Modules
+            </div>
+            @foreach ($moduleItems as $item)
+                @php $active = request()->routeIs($item['route']) || request()->routeIs($item['route'].'.*'); @endphp
+                <a href="{{ \Illuminate\Support\Facades\Route::has($item['route']) ? route($item['route']) : '#' }}"
+                   wire:navigate
+                   class="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition
+                          {{ $active
+                                ? 'bg-hk-primary-50 text-hk-primary-700 dark:bg-hk-primary-950 dark:text-hk-primary-300'
+                                : 'text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800' }}">
+                    <span class="size-4 inline-block">{{-- icon slot reserved --}}</span>
+                    <span>{{ $item['label'] }}</span>
+                </a>
+            @endforeach
+        @endif
     </nav>
 
     <div class="border-t border-zinc-200 dark:border-zinc-800 p-3 text-xs text-zinc-500">

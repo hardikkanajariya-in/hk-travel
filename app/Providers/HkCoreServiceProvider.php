@@ -4,10 +4,15 @@ namespace App\Providers;
 
 use App\Core\Captcha\CaptchaService;
 use App\Core\Installer\InstallationState;
+use App\Core\Livewire\EnquiryForm;
 use App\Core\Localization\LocaleManager;
 use App\Core\Modules\ModuleManager;
 use App\Core\PageBuilder\BlockRegistry;
 use App\Core\PageBuilder\BlockRenderer;
+use App\Core\Seo\BreadcrumbService;
+use App\Core\Seo\JsonLd;
+use App\Core\Seo\SeoManager;
+use App\Core\Seo\SitemapGenerator;
 use App\Core\Settings\SettingsRepository;
 use App\Core\Storage\StorageManager;
 use App\Core\Theme\ThemeManager;
@@ -19,6 +24,7 @@ use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Translation\Translator;
+use Livewire\Livewire;
 
 /**
  * Boots HK Travel core services.
@@ -62,6 +68,11 @@ class HkCoreServiceProvider extends ServiceProvider
 
         $this->app->singleton(BlockRegistry::class);
         $this->app->singleton(BlockRenderer::class);
+
+        $this->app->singleton(SeoManager::class);
+        $this->app->singleton(JsonLd::class);
+        $this->app->scoped(BreadcrumbService::class);
+        $this->app->singleton(SitemapGenerator::class);
     }
 
     public function boot(): void
@@ -76,6 +87,14 @@ class HkCoreServiceProvider extends ServiceProvider
         // Page-builder views can be overridden by the active theme by
         // shipping a `page-builder/blocks/{name}.blade.php` file.
         View::addNamespace('page-builder', resource_path('views/page-builder'));
+
+        // Shared core views (enquiry form, etc.) used by every module.
+        View::addNamespace('hk-core', resource_path('views/hk-core'));
+
+        // Reusable enquiry form Livewire component.
+        if (class_exists(Livewire::class)) {
+            Livewire::component('hk.enquiry-form', EnquiryForm::class);
+        }
 
         // `@zone('footer-1')` renders every active widget bound to that zone.
         Blade::directive('zone', function (string $expression): string {

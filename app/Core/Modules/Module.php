@@ -44,6 +44,29 @@ abstract class Module implements ModuleContract
         return null;
     }
 
+    /**
+     * Admin sidebar entries contributed by this module.
+     * Each: ['label' => string, 'route' => string, 'icon' => string,
+     *        'permission' => string|null, 'group' => string|null].
+     *
+     * @return array<int, array{label:string, route:string, icon?:?string, permission?:?string, group?:?string}>
+     */
+    public function adminMenu(): array
+    {
+        return [];
+    }
+
+    /**
+     * Sitemap entries contributed by this module. Implementations may
+     * be heavy (DB queries) — caller is expected to cache.
+     *
+     * @return iterable<int, array{loc:string, lastmod?:?\DateTimeInterface, changefreq?:?string, priority?:?float}>
+     */
+    public function sitemapEntries(): iterable
+    {
+        return [];
+    }
+
     protected function path(string $relative): ?string
     {
         $base = $this->basePath().DIRECTORY_SEPARATOR.$relative;

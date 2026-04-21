@@ -118,4 +118,49 @@ class ModuleManager
             ->values()
             ->all();
     }
+
+    /**
+     * Aggregated admin sidebar items from every enabled module. Filters
+     * out items whose `permission` the current user lacks (when one is
+     * declared).
+     *
+     * @return array<int, array{label:string, route:string, icon?:?string, permission?:?string, group?:?string, module:string}>
+     */
+    public function adminMenuItems(): array
+    {
+        $user = $this->app->bound('auth') ? $this->app->make('auth')->user() : null;
+
+        $items = [];
+        foreach ($this->modules as $module) {
+            if (! $module instanceof Module) {
+                continue;
+            }
+            foreach ($module->adminMenu() as $item) {
+                $perm = $item['permission'] ?? null;
+                if ($perm && $user && method_exists($user, 'can') && ! $user->can($perm)) {
+                    continue;
+                }
+                $items[] = $item + ['module' => $module->key()];
+            }
+        }
+
+        return $items;
+    }
+
+    /**
+     * Aggregated sitemap entries from every enabled module.
+     *
+     * @return iterable<int, array<string, mixed>>
+     */
+    public function sitemapEntries(): iterable
+    {
+        foreach ($this->modules as $module) {
+            if (! $module instanceof Module) {
+                continue;
+            }
+            foreach ($module->sitemapEntries() as $entry) {
+                yield $entry;
+            }
+        }
+    }
 }

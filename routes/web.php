@@ -1,12 +1,20 @@
 <?php
 
 use App\Http\Controllers\PageController;
+use App\Http\Controllers\RobotsController;
+use App\Http\Controllers\SitemapController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [PageController::class, 'home'])->name('home');
 
+Route::get('robots.txt', RobotsController::class)->name('robots');
+Route::get('sitemap.xml', [SitemapController::class, 'index'])->name('sitemap');
+Route::get('sitemaps/{name}', [SitemapController::class, 'child'])
+    ->where('name', '[A-Za-z0-9_\-]+\.xml')
+    ->name('sitemap.child');
+
 Route::middleware(['auth', 'verified'])->group(function () {
-    Route::view('dashboard', 'dashboard')->name('dashboard');
+    Route::livewire('dashboard', 'pages::customer.dashboard')->name('dashboard');
 });
 
 require __DIR__.'/settings.php';
@@ -15,5 +23,5 @@ require __DIR__.'/settings.php';
 // module routes registered via ModuleServiceProvider. The constraint
 // blocks reserved admin/dashboard/settings prefixes.
 Route::get('{slug}', [PageController::class, 'show'])
-    ->where('slug', '^(?!admin|dashboard|settings|livewire|api|storage|build)[A-Za-z0-9\-_/]+$')
+    ->where('slug', '^(?!admin|dashboard|settings|livewire|api|storage|build|sitemap|sitemaps|robots)[A-Za-z0-9\-_/]+$')
     ->name('page.show');
