@@ -21,10 +21,18 @@
         filled($hint) ? "$inputId-hint" : null,
     ])->filter()->implode(' ');
 
-    $inputClass = 'block w-full rounded-md border bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 px-3 py-2 text-sm shadow-sm transition focus:outline-none focus:ring-2 focus:ring-offset-0 disabled:bg-zinc-50 disabled:text-zinc-500 dark:disabled:bg-zinc-800';
+    $inputClass = implode(' ', [
+        'block w-full rounded-xl border bg-white dark:bg-zinc-900',
+        'text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 dark:placeholder:text-zinc-500',
+        'px-3.5 py-2.5 text-sm shadow-sm',
+        'transition-[border-color,box-shadow,background-color] duration-200 ease-out',
+        'hover:border-zinc-400 dark:hover:border-zinc-600',
+        'focus:outline-none focus:ring-4 focus:ring-offset-0',
+        'disabled:bg-zinc-50 disabled:text-zinc-500 disabled:cursor-not-allowed dark:disabled:bg-zinc-800',
+    ]);
     $inputClass .= $hasError
-        ? ' border-hk-danger focus:ring-hk-danger/30 focus:border-hk-danger'
-        : ' border-zinc-300 dark:border-zinc-700 focus:ring-hk-primary-500/30 focus:border-hk-primary-500';
+        ? ' border-hk-danger focus:ring-hk-danger/15 focus:border-hk-danger'
+        : ' border-zinc-300 dark:border-zinc-700 focus:ring-hk-primary-500/15 focus:border-hk-primary-500';
     if ($iconLeading)  { $inputClass .= ' pl-10'; }
     if ($iconTrailing) { $inputClass .= ' pr-10'; }
 @endphp

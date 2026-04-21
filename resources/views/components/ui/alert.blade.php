@@ -6,12 +6,12 @@
 
 @php
     $variants = [
-        'info'    => 'bg-hk-primary-50 text-hk-primary-900 border-hk-primary-200 dark:bg-hk-primary-950 dark:text-hk-primary-100 dark:border-hk-primary-800',
-        'success' => 'bg-green-50 text-green-900 border-green-200 dark:bg-green-950 dark:text-green-100 dark:border-green-800',
-        'warning' => 'bg-amber-50 text-amber-900 border-amber-200 dark:bg-amber-950 dark:text-amber-100 dark:border-amber-800',
-        'danger'  => 'bg-red-50 text-red-900 border-red-200 dark:bg-red-950 dark:text-red-100 dark:border-red-800',
+        'info'    => 'bg-hk-primary-50/80 text-hk-primary-900 border-hk-primary-200 ring-hk-primary-100 dark:bg-hk-primary-950/60 dark:text-hk-primary-100 dark:border-hk-primary-800 dark:ring-hk-primary-900',
+        'success' => 'bg-emerald-50/80 text-emerald-900 border-emerald-200 ring-emerald-100 dark:bg-emerald-950/60 dark:text-emerald-100 dark:border-emerald-800 dark:ring-emerald-900',
+        'warning' => 'bg-amber-50/80 text-amber-900 border-amber-200 ring-amber-100 dark:bg-amber-950/60 dark:text-amber-100 dark:border-amber-800 dark:ring-amber-900',
+        'danger'  => 'bg-red-50/80 text-red-900 border-red-200 ring-red-100 dark:bg-red-950/60 dark:text-red-100 dark:border-red-800 dark:ring-red-900',
     ];
-    $cls = 'rounded-md border p-4 text-sm '.($variants[$variant] ?? $variants['info']);
+    $cls = 'relative rounded-xl border p-4 text-sm shadow-sm ring-1 ring-inset backdrop-blur-sm '.($variants[$variant] ?? $variants['info']);
 @endphp
 
 <div

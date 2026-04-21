@@ -214,16 +214,54 @@ new #[Title('HK Travel — Install')] #[Layout('components.layouts.installer')] 
 
 ?>
 
-<div class="mx-auto max-w-3xl px-6 py-12">
-    <div class="mb-8 flex items-center justify-between">
-        <h1 class="text-2xl font-semibold text-zinc-900 dark:text-zinc-100">
-            HK Travel — Setup
+<div class="mx-auto w-full max-w-3xl">
+    <div class="mb-8 text-center">
+        <div class="mb-4 inline-flex items-center gap-2 rounded-full bg-white/70 dark:bg-zinc-900/60 px-4 py-1.5 text-xs font-semibold uppercase tracking-wider text-hk-primary-700 dark:text-hk-primary-300 ring-1 ring-hk-primary-200/60 dark:ring-hk-primary-800/60 shadow-sm backdrop-blur">
+            <span class="size-1.5 rounded-full bg-hk-primary-500 animate-pulse"></span>
+            Setup wizard
+        </div>
+        <h1 class="text-3xl sm:text-4xl font-bold tracking-tight">
+            <span class="hk-gradient-text">HK Travel</span>
+            <span class="text-zinc-900 dark:text-zinc-100">— Setup</span>
         </h1>
-        <span class="text-sm text-zinc-500">Step {{ $step }} of {{ $this->totalSteps }}</span>
+        <p class="mt-2 text-sm text-zinc-500 dark:text-zinc-400">
+            Step {{ $step }} of {{ $this->totalSteps }} — let's get your site online.
+        </p>
     </div>
 
-    <div class="mb-8 h-2 w-full rounded-full bg-zinc-200 dark:bg-zinc-800">
-        <div class="h-2 rounded-full bg-hk-primary-600 transition-all"
+    <ol class="mb-8 hidden sm:flex items-center justify-between gap-2" aria-label="Progress">
+        @foreach ([1 => 'Server', 2 => 'App', 3 => 'Database', 4 => 'Admin', 5 => 'Modules'] as $i => $label)
+            <li class="flex flex-1 items-center gap-2">
+                <span @class([
+                    'flex size-8 shrink-0 items-center justify-center rounded-full text-xs font-bold transition-all duration-300',
+                    'hk-gradient-primary text-white shadow-md shadow-hk-primary-500/40 scale-110' => $step === $i,
+                    'bg-hk-primary-100 text-hk-primary-700 dark:bg-hk-primary-900 dark:text-hk-primary-200' => $step > $i,
+                    'bg-zinc-100 text-zinc-400 dark:bg-zinc-800 dark:text-zinc-500' => $step < $i,
+                ])>
+                    @if ($step > $i)
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="size-4"><path fill-rule="evenodd" d="M16.704 5.29a1 1 0 010 1.42l-7.5 7.5a1 1 0 01-1.42 0l-3.5-3.5a1 1 0 111.42-1.42L8.5 12.08l6.79-6.79a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                    @else
+                        {{ $i }}
+                    @endif
+                </span>
+                <span @class([
+                    'text-xs font-medium transition-colors',
+                    'text-zinc-900 dark:text-zinc-100' => $step >= $i,
+                    'text-zinc-400 dark:text-zinc-600' => $step < $i,
+                ])>{{ $label }}</span>
+                @if ($i < 5)
+                    <span @class([
+                        'h-px flex-1 transition-colors',
+                        'bg-hk-primary-400' => $step > $i,
+                        'bg-zinc-200 dark:bg-zinc-800' => $step <= $i,
+                    ])></span>
+                @endif
+            </li>
+        @endforeach
+    </ol>
+
+    <div class="mb-8 sm:hidden h-2 w-full overflow-hidden rounded-full bg-zinc-200/70 dark:bg-zinc-800/70 shadow-inner">
+        <div class="h-2 rounded-full hk-gradient-primary shadow-[0_0_12px_rgb(59_130_246/0.5)] transition-all duration-500 ease-out"
              style="width: {{ ($step / $this->totalSteps) * 100 }}%"></div>
     </div>
 

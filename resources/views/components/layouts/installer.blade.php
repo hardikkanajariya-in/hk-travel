@@ -8,8 +8,10 @@
     @vite(['resources/css/admin.css', 'resources/js/app.js'])
     @livewireStyles
 </head>
-<body class="min-h-full bg-zinc-50 dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 antialiased">
-    {{ $slot }}
+<body class="hk-aurora min-h-full bg-gradient-to-br from-zinc-50 via-white to-zinc-100 dark:from-zinc-950 dark:via-zinc-900 dark:to-zinc-950 text-zinc-900 dark:text-zinc-100 antialiased">
+    <main class="relative z-10 flex min-h-screen items-center justify-center px-4 py-10 sm:py-16">
+        {{ $slot }}
+    </main>
     @livewireScriptConfig
 </body>
 </html>
