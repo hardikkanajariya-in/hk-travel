@@ -11,7 +11,7 @@
 <div {{ $attributes->merge(['class' => 'space-y-4']) }}
      x-data="{ tab: @js($current) }"
      x-init="$watch('tab', v => { const url = new URL(window.location); url.searchParams.set(@js($param), v); window.history.replaceState({}, '', url); })">
-    <nav class="flex gap-1 border-b border-zinc-200 dark:border-zinc-800 overflow-x-auto">
+    <nav class="flex gap-1 border-b border-zinc-200 dark:border-zinc-800 overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
         @foreach ($tabs as $key => $label)
             <button type="button"
                     x-on:click="tab = @js($key)"

@@ -149,7 +149,7 @@ new #[Title('Email templates')] #[Layout('components.layouts.admin')] class exte
 ?>
 
 <div class="space-y-6">
-    <x-admin.page-header title="Email templates" subtitle="Customize transactional emails per locale. Variables use {{ '{{ var }}' }} syntax." />
+    <x-admin.page-header title="Email templates" subtitle="Customize transactional emails per locale. Use double curly braces around a variable name to insert it." />
 
     <x-admin.flash :message="session('settings.saved')" />
 
@@ -206,8 +206,12 @@ new #[Title('Email templates')] #[Layout('components.layouts.admin')] class exte
                         <div>
                             <label class="block text-sm font-medium mb-1">Body (HTML)</label>
                             <x-ui.rich-text wire:model="body_html" rows="14" />
+                            @php
+                                $vars = EmailTemplate::find($editingId)?->variables ?? [];
+                                $varHints = collect($vars)->map(fn ($v) => '{{ '.$v.' }}')->implode(' ');
+                            @endphp
                             <p class="text-xs text-zinc-500 mt-1">
-                                Variables: <span class="font-mono">{{ collect((EmailTemplate::find($editingId)->variables ?? []))->map(fn ($v) => '{{ '.$v.' }}')->implode(' ') }}</span>
+                                Variables: <span class="font-mono">{{ $varHints }}</span>
                             </p>
                         </div>
 

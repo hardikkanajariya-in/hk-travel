@@ -107,7 +107,7 @@ new #[Title('Pages')] #[Layout('components.layouts.admin')] class extends Compon
     <x-ui.card padding="none">
         <div class="flex flex-wrap gap-3 border-b border-zinc-200 px-4 py-3 dark:border-zinc-800">
             <div class="flex-1 min-w-64">
-                <x-ui.input wire:model.live.debounce.300ms="search" placeholder="Search title or slug…" iconLeading="magnifying-glass" />
+                <x-ui.input wire:model.live.debounce.300ms="search" placeholder="Search title or slug…" />
             </div>
             <select wire:model.live="statusFilter"
                     class="rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-hk-primary-500 focus:outline-none focus:ring-2 focus:ring-hk-primary-500/30 dark:border-zinc-700 dark:bg-zinc-900">

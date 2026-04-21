@@ -62,7 +62,7 @@
     <div class="relative">
         @if ($iconLeading)
             <span class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-zinc-400">
-                <x-dynamic-component :component="'heroicon-'.$iconLeading" class="size-4" />
+                <x-ui.icon :name="$iconLeading" class="size-4" />
             </span>
         @endif
 
@@ -104,7 +104,7 @@
             </button>
         @elseif ($iconTrailing)
             <span class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3 text-zinc-400">
-                <x-dynamic-component :component="'heroicon-'.$iconTrailing" class="size-4" />
+                <x-ui.icon :name="$iconTrailing" class="size-4" />
             </span>
         @endif
     </div>

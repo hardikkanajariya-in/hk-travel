@@ -1,24 +1,12 @@
 <?php
 
 use App\Concerns\SettingsForm;
-use Illuminate\Support\Facades\Storage;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
-use Livewire\Attributes\Validate;
 use Livewire\Component;
-use Livewire\WithFileUploads;
 
 new #[Title('Branding')] #[Layout('components.layouts.admin')] class extends Component {
-    use SettingsForm, WithFileUploads;
-
-    #[Validate('nullable|image|max:2048|mimes:png,jpg,jpeg,svg,webp')]
-    public $logoUpload = null;
-
-    #[Validate('nullable|image|max:2048|mimes:png,jpg,jpeg,svg,webp')]
-    public $logoDarkUpload = null;
-
-    #[Validate('nullable|image|max:512|mimes:png,ico,svg')]
-    public $faviconUpload = null;
+    use SettingsForm;
 
     public function mount(): void
     {
@@ -40,32 +28,13 @@ new #[Title('Branding')] #[Layout('components.layouts.admin')] class extends Com
 
     public function save(): void
     {
-        $this->validate();
-
-        if ($this->logoUpload) {
-            $this->state['logo'] = '/storage/'.$this->logoUpload->store('branding', 'public');
-        }
-        if ($this->logoDarkUpload) {
-            $this->state['logo_dark'] = '/storage/'.$this->logoDarkUpload->store('branding', 'public');
-        }
-        if ($this->faviconUpload) {
-            $this->state['favicon'] = '/storage/'.$this->faviconUpload->store('branding', 'public');
-        }
-
         $this->saveSettings();
-
-        $this->reset(['logoUpload', 'logoDarkUpload', 'faviconUpload']);
     }
 
     public function clearImage(string $key): void
     {
         if (! in_array($key, ['logo', 'logo_dark', 'favicon'], true)) {
             return;
-        }
-
-        $current = $this->state[$key] ?? null;
-        if ($current && str_starts_with($current, '/storage/')) {
-            Storage::disk('public')->delete(substr($current, strlen('/storage/')));
         }
 
         $this->state[$key] = null;
@@ -95,6 +64,9 @@ new #[Title('Branding')] #[Layout('components.layouts.admin')] class extends Com
         return [
             'state.name' => 'required|string|max:120',
             'state.tagline' => 'nullable|string|max:255',
+            'state.logo' => 'nullable|string|max:500',
+            'state.logo_dark' => 'nullable|string|max:500',
+            'state.favicon' => 'nullable|string|max:500',
             'state.primary_color' => ['required', 'string', 'regex:/^#[0-9a-fA-F]{6}$/'],
             'state.accent_color' => ['required', 'string', 'regex:/^#[0-9a-fA-F]{6}$/'],
             'state.font_family' => 'required|string|max:64',
@@ -124,39 +96,21 @@ new #[Title('Branding')] #[Layout('components.layouts.admin')] class extends Com
 
         <x-ui.tab-panel name="images">
             <x-ui.card>
-                <h2 class="text-base font-semibold mb-4">Logo (light)</h2>
-                @if ($state['logo'] ?? null)
-                    <div class="mb-3 flex items-center gap-3 rounded-md bg-zinc-100 dark:bg-zinc-800 p-3">
-                        <img src="{{ $state['logo'] }}" alt="Logo" class="h-12">
-                        <button type="button" wire:click="clearImage('logo')" class="text-xs text-red-600 hover:underline">Remove</button>
-                    </div>
-                @endif
-                <input type="file" wire:model="logoUpload" accept="image/*" class="block w-full text-sm">
-                @error('logoUpload') <p class="text-xs text-red-600 mt-1">{{ $message }}</p> @enderror
+                <h2 class="text-base font-semibold mb-1">Logo (light)</h2>
+                <p class="text-xs text-zinc-500 mb-3">Shown on the public site header in light mode. Use a transparent PNG or SVG for best results.</p>
+                <x-ui.image-picker wire:model="state.logo" folder="branding" aspect="aspect-[3/1]" />
             </x-ui.card>
 
             <x-ui.card>
-                <h2 class="text-base font-semibold mb-4">Logo (dark mode, optional)</h2>
-                @if ($state['logo_dark'] ?? null)
-                    <div class="mb-3 flex items-center gap-3 rounded-md bg-zinc-900 p-3">
-                        <img src="{{ $state['logo_dark'] }}" alt="Dark logo" class="h-12">
-                        <button type="button" wire:click="clearImage('logo_dark')" class="text-xs text-red-400 hover:underline">Remove</button>
-                    </div>
-                @endif
-                <input type="file" wire:model="logoDarkUpload" accept="image/*" class="block w-full text-sm">
-                @error('logoDarkUpload') <p class="text-xs text-red-600 mt-1">{{ $message }}</p> @enderror
+                <h2 class="text-base font-semibold mb-1">Logo (dark mode, optional)</h2>
+                <p class="text-xs text-zinc-500 mb-3">Used when visitors switch to dark mode. Pick a version with light-coloured artwork so it stays readable.</p>
+                <x-ui.image-picker wire:model="state.logo_dark" folder="branding" aspect="aspect-[3/1]" />
             </x-ui.card>
 
             <x-ui.card>
-                <h2 class="text-base font-semibold mb-4">Favicon</h2>
-                @if ($state['favicon'] ?? null)
-                    <div class="mb-3 flex items-center gap-3 rounded-md bg-zinc-100 dark:bg-zinc-800 p-3">
-                        <img src="{{ $state['favicon'] }}" alt="Favicon" class="h-8 w-8">
-                        <button type="button" wire:click="clearImage('favicon')" class="text-xs text-red-600 hover:underline">Remove</button>
-                    </div>
-                @endif
-                <input type="file" wire:model="faviconUpload" accept="image/png,image/svg+xml,image/x-icon" class="block w-full text-sm">
-                @error('faviconUpload') <p class="text-xs text-red-600 mt-1">{{ $message }}</p> @enderror
+                <h2 class="text-base font-semibold mb-1">Favicon</h2>
+                <p class="text-xs text-zinc-500 mb-3">The small icon shown in the browser tab. A square PNG or SVG of at least 64×64 pixels works best.</p>
+                <x-ui.image-picker wire:model="state.favicon" folder="branding" aspect="aspect-square" />
             </x-ui.card>
         </x-ui.tab-panel>
 
