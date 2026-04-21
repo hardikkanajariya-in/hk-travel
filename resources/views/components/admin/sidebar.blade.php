@@ -30,6 +30,17 @@
         'rectangle-group' => '<path stroke-linecap="round" stroke-linejoin="round" d="M2.25 7.125C2.25 6.504 2.754 6 3.375 6h6c.621 0 1.125.504 1.125 1.125v3.75c0 .621-.504 1.125-1.125 1.125h-6a1.125 1.125 0 0 1-1.125-1.125v-3.75ZM14.25 8.625c0-.621.504-1.125 1.125-1.125h5.25c.621 0 1.125.504 1.125 1.125v8.25c0 .621-.504 1.125-1.125 1.125h-5.25a1.125 1.125 0 0 1-1.125-1.125v-8.25ZM2.25 16.125c0-.621.504-1.125 1.125-1.125h5.25c.621 0 1.125.504 1.125 1.125v2.25c0 .621-.504 1.125-1.125 1.125h-5.25a1.125 1.125 0 0 1-1.125-1.125v-2.25Z"/>',
         'swatch' => '<path stroke-linecap="round" stroke-linejoin="round" d="M4.098 19.902a3.75 3.75 0 0 0 5.304 0l6.401-6.402M6.75 21A3.75 3.75 0 0 1 3 17.25V4.125C3 3.504 3.504 3 4.125 3h5.25c.621 0 1.125.504 1.125 1.125v4.072M6.75 21a3.75 3.75 0 0 0 3.75-3.75V8.197M6.75 21h13.125c.621 0 1.125-.504 1.125-1.125v-5.25c0-.621-.504-1.125-1.125-1.125h-4.072M10.5 8.197l2.88-2.88c.438-.439 1.15-.439 1.59 0l3.712 3.713c.44.44.44 1.152 0 1.59l-2.879 2.88M6.75 17.25h.008v.008H6.75v-.008Z"/>',
         'inbox-arrow-down' => '<path stroke-linecap="round" stroke-linejoin="round" d="M9 8.25 12 5.25m0 0 3 3m-3-3v9M21.75 13.5h-3.86a2.25 2.25 0 0 0-2.012 1.244l-.256.512a2.25 2.25 0 0 1-2.013 1.244h-3.218a2.25 2.25 0 0 1-2.013-1.244l-.256-.512a2.25 2.25 0 0 0-2.013-1.244H2.25m19.5 0V18a2.25 2.25 0 0 1-2.25 2.25h-15A2.25 2.25 0 0 1 2.25 18v-4.5m19.5 0-2.51-7.533A2.25 2.25 0 0 0 17.09 4.5H6.911a2.25 2.25 0 0 0-2.15 1.588L2.25 13.5"/>',
+        'map' => '<path stroke-linecap="round" stroke-linejoin="round" d="M9 6.75V15m0-8.25L3.205 4.91a.75.75 0 0 0-.955.722v12.443a.75.75 0 0 0 .495.704L9 21m0-14.25L15 4.5m0 0 5.795-1.84a.75.75 0 0 1 .955.722v12.443a.75.75 0 0 1-.495.704L15 19.5m0-15v15M9 21l6-1.5"/>',
+        'building-office' => '<path stroke-linecap="round" stroke-linejoin="round" d="M3.75 21h16.5M4.5 3h15M5.25 3v18m13.5-18v18M9 6.75h1.5M9 9.75h1.5M9 12.75h1.5M9 15.75h1.5M13.5 6.75H15M13.5 9.75H15M13.5 12.75H15M13.5 15.75H15M9 21v-3.375c0-.621.504-1.125 1.125-1.125h3.75c.621 0 1.125.504 1.125 1.125V21"/>',
+        'paper-airplane' => '<path stroke-linecap="round" stroke-linejoin="round" d="M6 12 3.269 3.125A59.769 59.769 0 0 1 21.485 12 59.768 59.768 0 0 1 3.27 20.875L5.999 12Zm0 0h7.5"/>',
+        'train' => '<path stroke-linecap="round" stroke-linejoin="round" d="M9 6.75V15m0-8.25L3.205 4.91a.75.75 0 0 0-.955.722v12.443a.75.75 0 0 0 .495.704L9 21M9 6.75L15 4.5m0 0L20.795 2.66a.75.75 0 0 1 .955.722v12.443a.75.75 0 0 1-.495.704L15 19.5m0-15v15"/>',
+        'truck' => '<path stroke-linecap="round" stroke-linejoin="round" d="M8.25 18.75a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 0 1-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m3 0h1.125c.621 0 1.129-.504 1.09-1.124a17.902 17.902 0 0 0-3.213-9.193 2.056 2.056 0 0 0-1.58-.86H14.25M16.5 18.75h-2.25m0-11.177v-.958c0-.568-.422-1.048-.987-1.106a48.554 48.554 0 0 0-10.026 0 1.106 1.106 0 0 0-.987 1.106v7.635m12-6.677v6.677m0 4.5v-4.5m0 0h-12"/>',
+        'globe-asia' => '<path stroke-linecap="round" stroke-linejoin="round" d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18Zm0 0c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9h18"/>',
+        'identification' => '<path stroke-linecap="round" stroke-linejoin="round" d="M15 9h3.75M15 12h3.75M15 15h3.75M4.5 19.5h15a2.25 2.25 0 0 0 2.25-2.25V6.75A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25v10.5A2.25 2.25 0 0 0 4.5 19.5Zm6-10.125a1.875 1.875 0 1 1-3.75 0 1.875 1.875 0 0 1 3.75 0Zm1.294 6.336a6.721 6.721 0 0 1-3.17.789 6.721 6.721 0 0 1-3.168-.789 3.376 3.376 0 0 1 6.338 0Z"/>',
+        'photo' => '<path stroke-linecap="round" stroke-linejoin="round" d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 0 0 1.5-1.5V6a1.5 1.5 0 0 0-1.5-1.5H3.75A1.5 1.5 0 0 0 2.25 6v12a1.5 1.5 0 0 0 1.5 1.5Zm10.5-11.25h.008v.008h-.008V8.25Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z"/>',
+        'sparkles' => '<path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09ZM18.259 8.715 18 9.75l-.259-1.035a3.375 3.375 0 0 0-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 0 0 2.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 0 0 2.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 0 0-2.456 2.456Z"/>',
+        'tag' => '<path stroke-linecap="round" stroke-linejoin="round" d="M9.568 3H5.25A2.25 2.25 0 0 0 3 5.25v4.318c0 .597.237 1.17.659 1.591l9.581 9.581c.699.699 1.78.872 2.607.33a18.095 18.095 0 0 0 5.223-5.223c.542-.827.369-1.908-.33-2.607L11.16 3.66A2.25 2.25 0 0 0 9.568 3Z M6 6h.008v.008H6V6Z"/>',
+        'newspaper' => '<path stroke-linecap="round" stroke-linejoin="round" d="M12 7.5h1.5m-1.5 3h1.5m-7.5 3h7.5m-7.5 3h7.5m3-9h3.375c.621 0 1.125.504 1.125 1.125V18a2.25 2.25 0 0 1-2.25 2.25H5.625a2.25 2.25 0 0 1-2.25-2.25V6.375c0-.621.504-1.125 1.125-1.125H7.5M9 6.75A1.5 1.5 0 0 0 7.5 5.25H6.75M9 6.75v8.25M15 6.75A1.5 1.5 0 0 1 16.5 5.25h.75M15 6.75v8.25"/>',
     ];
 
     $renderIcon = function (string $name) use ($iconPaths): string {
@@ -93,11 +104,28 @@
     ];
 
     $moduleItems = app(\App\Core\Modules\ModuleManager::class)->adminMenuItems();
-    if (! empty($moduleItems)) {
-        $groups[] = [
-            'type' => 'group', 'key' => 'modules', 'label' => 'Modules', 'icon' => 'squares-2x2',
-            'items' => $moduleItems,
+
+    // Promote each module's primary admin entry to a top-level sidebar item
+    // (instead of nesting them under a generic "Modules" group). Skip any
+    // whose route hasn't been registered for this request — avoids dead
+    // `href="#"` links if a module is half-installed.
+    $moduleTopLevel = [];
+    foreach ($moduleItems as $item) {
+        if (! \Illuminate\Support\Facades\Route::has($item['route'] ?? '')) {
+            continue;
+        }
+        $moduleTopLevel[] = [
+            'type' => 'item',
+            'label' => $item['label'],
+            'route' => $item['route'],
+            'icon' => $item['icon'] ?? 'squares-2x2',
         ];
+    }
+
+    if (! empty($moduleTopLevel)) {
+        // Insert module entries right after Dashboard (index 0) so they are
+        // the first thing the user sees in the sidebar.
+        array_splice($groups, 1, 0, $moduleTopLevel);
     }
 
     $isRouteActive = fn (string $routeName): bool => request()->routeIs($routeName) || request()->routeIs($routeName.'.*');

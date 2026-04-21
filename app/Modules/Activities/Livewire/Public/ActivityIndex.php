@@ -39,17 +39,19 @@ class ActivityIndex extends Component
 
     public function render(): View
     {
-        $activities = Activity::query()
-            ->with('destination')
-            ->where('is_published', true)
-            ->when($this->search, fn ($q) => $q->where('name', 'like', "%{$this->search}%"))
-            ->when($this->destinationId, fn ($q) => $q->where('destination_id', $this->destinationId))
-            ->when($this->category, fn ($q) => $q->where('category', $this->category))
-            ->when($this->sort === 'price_asc', fn ($q) => $q->orderBy('price'))
-            ->when($this->sort === 'price_desc', fn ($q) => $q->orderByDesc('price'))
-            ->when($this->sort === 'duration', fn ($q) => $q->orderBy('duration_hours'))
-            ->when($this->sort === 'featured', fn ($q) => $q->orderByDesc('is_featured')->orderByDesc('rating_avg'))
-            ->paginate(12);
+        $activities = Schema::hasTable('activities')
+            ? Activity::query()
+                ->with('destination')
+                ->where('is_published', true)
+                ->when($this->search, fn ($q) => $q->where('name', 'like', "%{$this->search}%"))
+                ->when($this->destinationId, fn ($q) => $q->where('destination_id', $this->destinationId))
+                ->when($this->category, fn ($q) => $q->where('category', $this->category))
+                ->when($this->sort === 'price_asc', fn ($q) => $q->orderBy('price'))
+                ->when($this->sort === 'price_desc', fn ($q) => $q->orderByDesc('price'))
+                ->when($this->sort === 'duration', fn ($q) => $q->orderBy('duration_hours'))
+                ->when($this->sort === 'featured', fn ($q) => $q->orderByDesc('is_featured')->orderByDesc('rating_avg'))
+                ->paginate(12)
+            : new \Illuminate\Pagination\LengthAwarePaginator([], 0, 12);
 
         return view('activities::public.index', [
             'activities' => $activities,

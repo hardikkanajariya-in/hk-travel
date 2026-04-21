@@ -4,6 +4,7 @@ namespace App\Modules\Taxi\Livewire\Public;
 
 use App\Modules\Taxi\Models\TaxiService;
 use Illuminate\Contracts\View\View;
+use Illuminate\Support\Facades\Schema;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Attributes\Url;
@@ -31,12 +32,14 @@ class TaxiIndex extends Component
 
     public function render(): View
     {
-        $services = TaxiService::query()
-            ->where('is_published', true)
-            ->when($this->type, fn ($q) => $q->where('service_type', $this->type))
-            ->when($this->vehicle, fn ($q) => $q->where('vehicle_type', $this->vehicle))
-            ->orderBy('flat_rate')
-            ->paginate(12);
+        $services = Schema::hasTable('taxi_services')
+            ? TaxiService::query()
+                ->where('is_published', true)
+                ->when($this->type, fn ($q) => $q->where('service_type', $this->type))
+                ->when($this->vehicle, fn ($q) => $q->where('vehicle_type', $this->vehicle))
+                ->orderBy('flat_rate')
+                ->paginate(12)
+            : new \Illuminate\Pagination\LengthAwarePaginator([], 0, 12);
 
         return view('taxi::public.index', compact('services'));
     }

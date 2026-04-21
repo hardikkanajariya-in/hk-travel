@@ -4,6 +4,7 @@ namespace App\Modules\Visa\Livewire\Public;
 
 use App\Modules\Visa\Models\VisaService;
 use Illuminate\Contracts\View\View;
+use Illuminate\Support\Facades\Schema;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Attributes\Url;
@@ -34,6 +35,14 @@ class VisaIndex extends Component
 
     public function render(): View
     {
+        if (! Schema::hasTable('visa_services')) {
+            return view('visa::public.index', [
+                'services' => new \Illuminate\Pagination\LengthAwarePaginator([], 0, 20),
+                'countries' => collect(),
+                'types' => collect(),
+            ]);
+        }
+
         $services = VisaService::query()
             ->where('is_published', true)
             ->when($this->search, fn ($q) => $q->where(fn ($qq) => $qq->where('title', 'like', "%{$this->search}%")->orWhere('country', 'like', "%{$this->search}%")))

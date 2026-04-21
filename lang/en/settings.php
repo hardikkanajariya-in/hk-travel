@@ -1,6 +1,15 @@
 <?php
 
 return [
+    'shell' => [
+        'title' => 'Settings',
+        'subtitle' => 'Manage your profile and account settings',
+        'nav' => [
+            'profile' => 'Profile',
+            'security' => 'Security',
+            'appearance' => 'Appearance',
+        ],
+    ],
     'profile' => [
         'title' => 'Profile',
         'edit' => 'Edit profile',

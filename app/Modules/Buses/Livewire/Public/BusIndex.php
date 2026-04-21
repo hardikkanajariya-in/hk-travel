@@ -4,6 +4,7 @@ namespace App\Modules\Buses\Livewire\Public;
 
 use App\Modules\Buses\Models\BusRoute;
 use Illuminate\Contracts\View\View;
+use Illuminate\Support\Facades\Schema;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Attributes\Url;
@@ -34,13 +35,15 @@ class BusIndex extends Component
 
     public function render(): View
     {
-        $routes = BusRoute::query()
-            ->where('is_published', true)
-            ->when($this->origin, fn ($q) => $q->where('origin', 'like', "%{$this->origin}%"))
-            ->when($this->destination, fn ($q) => $q->where('destination', 'like', "%{$this->destination}%"))
-            ->when($this->type, fn ($q) => $q->where('bus_type', $this->type))
-            ->orderBy('departure_time')
-            ->paginate(15);
+        $routes = Schema::hasTable('bus_routes')
+            ? BusRoute::query()
+                ->where('is_published', true)
+                ->when($this->origin, fn ($q) => $q->where('origin', 'like', "%{$this->origin}%"))
+                ->when($this->destination, fn ($q) => $q->where('destination', 'like', "%{$this->destination}%"))
+                ->when($this->type, fn ($q) => $q->where('bus_type', $this->type))
+                ->orderBy('departure_time')
+                ->paginate(15)
+            : new \Illuminate\Pagination\LengthAwarePaginator([], 0, 15);
 
         return view('buses::public.index', compact('routes'));
     }

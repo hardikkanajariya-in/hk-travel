@@ -4,6 +4,7 @@ namespace App\Modules\Cruises\Livewire\Public;
 
 use App\Modules\Cruises\Models\Cruise;
 use Illuminate\Contracts\View\View;
+use Illuminate\Support\Facades\Schema;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Attributes\Url;
@@ -34,6 +35,13 @@ class CruiseIndex extends Component
 
     public function render(): View
     {
+        if (! Schema::hasTable('cruises')) {
+            return view('cruises::public.index', [
+                'cruises' => new \Illuminate\Pagination\LengthAwarePaginator([], 0, 12),
+                'lines' => collect(),
+            ]);
+        }
+
         $query = Cruise::query()->where('is_published', true)
             ->when($this->line, fn ($q) => $q->where('cruise_line', $this->line))
             ->when($this->nights, function ($q): void {

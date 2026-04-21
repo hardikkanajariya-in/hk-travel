@@ -4,6 +4,7 @@ namespace App\Modules\Destinations\Livewire\Public;
 
 use App\Modules\Destinations\Models\Destination;
 use Illuminate\Contracts\View\View;
+use Illuminate\Support\Facades\Schema;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Attributes\Url;
@@ -34,14 +35,16 @@ class DestinationIndex extends Component
 
     public function render(): View
     {
-        $destinations = Destination::query()
-            ->where('is_published', true)
-            ->when($this->search, fn ($q) => $q->where('name', 'like', "%{$this->search}%"))
-            ->when($this->type, fn ($q) => $q->where('type', $this->type))
-            ->when($this->country, fn ($q) => $q->where('country_code', strtoupper($this->country)))
-            ->orderByDesc('is_featured')
-            ->orderBy('name')
-            ->paginate(12);
+        $destinations = Schema::hasTable('destinations')
+            ? Destination::query()
+                ->where('is_published', true)
+                ->when($this->search, fn ($q) => $q->where('name', 'like', "%{$this->search}%"))
+                ->when($this->type, fn ($q) => $q->where('type', $this->type))
+                ->when($this->country, fn ($q) => $q->where('country_code', strtoupper($this->country)))
+                ->orderByDesc('is_featured')
+                ->orderBy('name')
+                ->paginate(12)
+            : new \Illuminate\Pagination\LengthAwarePaginator([], 0, 12);
 
         return view('destinations::public.index', compact('destinations'));
     }

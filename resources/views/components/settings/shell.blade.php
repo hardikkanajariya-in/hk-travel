@@ -2,22 +2,50 @@
 
 @php
     $items = [
-        ['route' => 'profile.edit', 'label' => __('Profile')],
-        ['route' => 'security.edit', 'label' => __('Security')],
-        ['route' => 'appearance.edit', 'label' => __('Appearance')],
+        ['route' => 'profile.edit', 'label' => __('settings.shell.nav.profile')],
+        ['route' => 'security.edit', 'label' => __('settings.shell.nav.security')],
+        ['route' => 'appearance.edit', 'label' => __('settings.shell.nav.appearance')],
     ];
+
+    // Build a breadcrumb trail for the main container so each settings
+    // page doesn't need to push entries individually.
+    $breadcrumbs = app(\App\Core\Seo\BreadcrumbService::class);
+    $breadcrumbs->clear();
+    $breadcrumbs->push(__('settings.shell.title'), route('profile.edit'));
+    foreach ($items as $i) {
+        if (request()->routeIs($i['route'])) {
+            $breadcrumbs->push($i['label']);
+            break;
+        }
+    }
+    $trail = $breadcrumbs->all();
 @endphp
 
 <div class="space-y-6">
-    <header>
-        <h1 class="text-2xl font-semibold">{{ __('Settings') }}</h1>
-        <p class="mt-1 text-sm text-zinc-500">{{ __('Manage your profile and account settings') }}</p>
-    </header>
-
-    <hr class="border-zinc-200 dark:border-zinc-800">
+    {{-- Breadcrumb --}}
+    @if (! empty($trail))
+        <nav aria-label="{{ __('Breadcrumb') }}" class="text-sm">
+            <ol class="flex flex-wrap items-center gap-1.5 text-zinc-500 dark:text-zinc-400">
+                @foreach ($trail as $i => $crumb)
+                    <li class="flex items-center gap-1.5">
+                        @if ($i > 0)
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.6" stroke="currentColor" class="size-3.5 text-zinc-400" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5"/>
+                            </svg>
+                        @endif
+                        @if (! empty($crumb['url']) && ! $loop->last)
+                            <a href="{{ $crumb['url'] }}" wire:navigate class="hover:text-hk-primary-600 dark:hover:text-hk-primary-400">{{ $crumb['name'] }}</a>
+                        @else
+                            <span @class(['text-zinc-700 dark:text-zinc-200 font-medium' => $loop->last])>{{ $crumb['name'] }}</span>
+                        @endif
+                    </li>
+                @endforeach
+            </ol>
+        </nav>
+    @endif
 
     <div class="flex items-start gap-10 max-md:flex-col">
-        <nav class="md:w-56 w-full" aria-label="{{ __('Settings') }}">
+        <nav class="md:w-56 w-full" aria-label="{{ __('settings.shell.title') }}">
             <ul class="space-y-1">
                 @foreach ($items as $item)
                     @php $active = request()->routeIs($item['route']); @endphp
@@ -35,7 +63,7 @@
             </ul>
         </nav>
 
-        <div class="flex-1 self-stretch max-md:pt-6 max-w-2xl">
+        <div class="flex-1 self-stretch max-md:pt-2 max-w-2xl">
             @if ($heading)
                 <h2 class="text-lg font-semibold">{{ $heading }}</h2>
             @endif
