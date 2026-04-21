@@ -5,6 +5,7 @@ namespace App\Providers;
 use App\Core\Modules\ModuleContract;
 use App\Core\Modules\ModuleManager;
 use Illuminate\Support\ServiceProvider;
+use Livewire\Livewire;
 
 /**
  * Boots every enabled HK Travel module.
@@ -69,6 +70,12 @@ class ModuleServiceProvider extends ServiceProvider
 
         if (($path = $module->adminRoutesPath()) && file_exists($path)) {
             $this->loadRoutesFrom($path);
+        }
+
+        foreach ($module->livewireComponents() as $alias => $class) {
+            if (class_exists($class)) {
+                Livewire::component($alias, $class);
+            }
         }
     }
 }

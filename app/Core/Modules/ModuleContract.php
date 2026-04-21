@@ -33,4 +33,11 @@ interface ModuleContract
 
     /** Optional service provider class to defer additional bootstrapping. */
     public function provider(): ?string;
+
+    /**
+     * Map of Livewire component alias => fully-qualified class name.
+     *
+     * @return array<string, class-string>
+     */
+    public function livewireComponents(): array;
 }

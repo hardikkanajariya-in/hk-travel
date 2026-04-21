@@ -5,12 +5,14 @@ use App\Modules\Blog\BlogModule;
 use App\Modules\Bookings\BookingModule;
 use App\Modules\Buses\BusModule;
 use App\Modules\Cars\CarModule;
+use App\Modules\Comments\CommentModule;
 use App\Modules\Crm\CrmModule;
 use App\Modules\Cruises\CruiseModule;
 use App\Modules\Destinations\DestinationModule;
 use App\Modules\Flights\FlightModule;
 use App\Modules\Hotels\HotelModule;
 use App\Modules\Packages\PackageModule;
+use App\Modules\Reviews\ReviewModule;
 use App\Modules\Taxi\TaxiModule;
 use App\Modules\Tours\TourModule;
 use App\Modules\Trains\TrainModule;
@@ -121,6 +123,18 @@ return [
             'enabled' => false,
             'manifest' => PackageModule::class,
             'label' => 'Travel Packages',
+        ],
+
+        'reviews' => [
+            'enabled' => false,
+            'manifest' => ReviewModule::class,
+            'label' => 'Reviews & Ratings',
+        ],
+
+        'comments' => [
+            'enabled' => false,
+            'manifest' => CommentModule::class,
+            'label' => 'Comments',
         ],
 
     ],

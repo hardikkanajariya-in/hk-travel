@@ -45,6 +45,21 @@ abstract class Module implements ModuleContract
     }
 
     /**
+     * Livewire component aliases this module exposes.
+     * Map of alias => fully-qualified component class.
+     *
+     * Aliases let views embed components with `<livewire:alias />`
+     * without depending on Livewire auto-discovery, which doesn't
+     * scan `app/Modules/...`.
+     *
+     * @return array<string, class-string>
+     */
+    public function livewireComponents(): array
+    {
+        return [];
+    }
+
+    /**
      * Admin sidebar entries contributed by this module.
      * Each: ['label' => string, 'route' => string, 'icon' => string,
      *        'permission' => string|null, 'group' => string|null].
