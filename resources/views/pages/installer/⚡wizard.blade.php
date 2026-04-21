@@ -77,6 +77,36 @@ new #[Title('HK Travel — Install')] #[Layout('components.layouts.installer')] 
         return config('hk-modules.modules', []);
     }
 
+    /**
+     * All IANA timezone identifiers, formatted for display in the select.
+     * Returns a [identifier => "Region/City (UTC±hh:mm)"] map so the user
+     * can scan offsets quickly.
+     */
+    #[Computed]
+    public function timezones(): array
+    {
+        $now = new \DateTimeImmutable('now');
+        $list = [];
+
+        foreach (\DateTimeZone::listIdentifiers() as $identifier) {
+            try {
+                $offsetSeconds = (new \DateTimeZone($identifier))->getOffset($now);
+            } catch (\Throwable) {
+                continue;
+            }
+
+            $sign = $offsetSeconds >= 0 ? '+' : '-';
+            $abs = abs($offsetSeconds);
+            $hours = intdiv($abs, 3600);
+            $minutes = intdiv($abs % 3600, 60);
+            $offset = sprintf('UTC%s%02d:%02d', $sign, $hours, $minutes);
+
+            $list[$identifier] = $identifier.' ('.$offset.')';
+        }
+
+        return $list;
+    }
+
     public function next(): void
     {
         $this->error = null;
@@ -98,13 +128,13 @@ new #[Title('HK Travel — Install')] #[Layout('components.layouts.installer')] 
                 'appName' => 'required|string|max:120',
                 'appUrl' => 'required|url',
                 'locale' => 'required|string|max:8',
-                'timezone' => 'required|string|max:64',
+                'timezone' => 'required|string|max:128|timezone',
             ]),
             3 => $this->validateDatabase(),
             4 => $this->validate([
                 'adminName' => 'required|string|max:120',
                 'adminEmail' => 'required|email|max:255',
-                'adminPassword' => 'required|string|min:8|confirmed',
+                'adminPassword' => 'required|string|min:8|confirmed:adminPasswordConfirmation',
             ]),
             default => null,
         };
@@ -336,7 +366,13 @@ new #[Title('HK Travel — Install')] #[Layout('components.layouts.installer')] 
                             'gu' => __('installer.app.locales.gu'),
                         ]"
                     />
-                    <x-ui.input wire:model="timezone" :label="__('installer.app.fields.timezone')" required />
+                    <x-ui.select
+                        wire:model="timezone"
+                        :label="__('installer.app.fields.timezone')"
+                        required
+                        searchable
+                        :options="$this->timezones"
+                    />
                 </div>
             </div>
         @endif
