@@ -81,8 +81,8 @@ new #[Title('SEO & Sitemaps')] #[Layout('components.layouts.admin')] class exten
         <x-ui.card>
             <h3 class="text-sm font-semibold mb-3">Default meta</h3>
             <div class="space-y-3">
-                <x-ui.input wire:model="defaultTitle" label="Default title" hint="Used as fallback when a page has no meta_title." />
-                <x-ui.input wire:model="defaultTagline" label="Tagline" hint="Appears next to the site name on the homepage." />
+                <x-ui.input wire:model="defaultTitle" label="Default title" hint="Shown when a page hasn't set its own title." />
+                <x-ui.input wire:model="defaultTagline" label="Tagline" hint="Appears next to the site name on the home page." />
                 <x-ui.textarea wire:model="defaultDescription" label="Default description" rows="3" hint="Recommended length: 140–160 characters." />
                 <x-ui.input wire:model="defaultImage" label="Default OG image URL" />
             </div>

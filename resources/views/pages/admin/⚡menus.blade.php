@@ -417,7 +417,7 @@ new #[Title('Menus')] #[Layout('components.layouts.admin')] class extends Compon
                             </select>
                         </div>
                     @elseif ($itemLinkType === 'route')
-                        <x-ui.input wire:model="itemRouteName" label="Route name" placeholder="admin.dashboard" />
+                        <x-ui.input wire:model="itemRouteName" label="Internal page reference (advanced)" placeholder="admin.dashboard" hint="Optional. Lets the menu link to a built-in page even if its address changes later." />
                     @endif
 
                     <div>

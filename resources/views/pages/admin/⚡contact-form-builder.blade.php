@@ -270,8 +270,8 @@ new #[Title('Edit form')] #[Layout('components.layouts.admin')] class extends Co
                         <button wire:click="$set('editingField', null)" class="text-xs text-zinc-500 hover:underline">Done</button>
                     </div>
                     <div class="space-y-3">
-                        <x-ui.input wire:model="fields.{{ $editingField }}.label" label="Label" />
-                        <x-ui.input wire:model="fields.{{ $editingField }}.key" label="Key" hint="snake_case identifier (used in submissions)." />
+                        <x-ui.input wire:model="fields.{{ $editingField }}.label" label="Label" hint="What visitors will see above the field." />
+                        <x-ui.input wire:model="fields.{{ $editingField }}.key" label="Internal name" hint="Used inside the system and in submission exports. Letters, numbers and underscores only — no spaces." />
                         <x-ui.input wire:model="fields.{{ $editingField }}.placeholder" label="Placeholder" />
                         <div>
                             <label class="block text-sm font-medium mb-1">Type</label>

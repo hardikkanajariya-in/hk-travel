@@ -111,14 +111,17 @@ new #[Title('Security')] #[Layout('components.layouts.admin')] class extends Com
                 </label>
 
                 <div class="grid gap-4 sm:grid-cols-3">
-                    <x-ui.input wire:model="state.hsts_max_age" name="hsts_max_age" type="number" label="HSTS max-age (seconds)" hint="31536000 = 1 year" />
+                    <x-ui.select wire:model="state.hsts_max_age" name="hsts_max_age"
+                                  label="How long browsers should remember HTTPS"
+                                  :options="\App\Core\Support\Choices::hstsDurations()"
+                                  hint="Start short while testing, then move to 1 year." />
                     <label class="flex items-center gap-2 self-end pb-2 text-sm">
                         <input type="checkbox" wire:model="state.hsts_include_subdomains" class="size-4 rounded border-zinc-300 text-hk-primary-600 focus:ring-hk-primary-500" />
-                        Include subdomains
+                        Apply to subdomains too
                     </label>
                     <label class="flex items-center gap-2 self-end pb-2 text-sm">
                         <input type="checkbox" wire:model="state.hsts_preload" class="size-4 rounded border-zinc-300 text-hk-primary-600 focus:ring-hk-primary-500" />
-                        Preload list eligible
+                        Eligible for browser preload list
                     </label>
                 </div>
             </div>
@@ -158,19 +161,23 @@ new #[Title('Security')] #[Layout('components.layouts.admin')] class extends Com
             </div>
 
             <div class="mt-4 grid gap-4 md:grid-cols-2">
-                <x-ui.input wire:model="state.referrer_policy" name="referrer_policy" label="Referrer-Policy" />
-                <x-ui.input wire:model="state.permissions_policy" name="permissions_policy" label="Permissions-Policy" />
+                <x-ui.select wire:model="state.referrer_policy" name="referrer_policy"
+                              label="What to share with other websites when visitors click a link"
+                              :options="\App\Core\Support\Choices::referrerPolicies()" />
+                <x-ui.select wire:model="state.permissions_policy" name="permissions_policy"
+                              label="Browser features allowed on this site"
+                              :options="\App\Core\Support\Choices::permissionsPolicies()" />
             </div>
         </x-ui.card>
 
         <x-ui.card>
             <h2 class="text-base font-semibold mb-1">Rate limits</h2>
-            <p class="text-xs text-zinc-500 dark:text-zinc-400 mb-4">Format: <code>requests,minutes</code> &mdash; e.g. <code>5,1</code> = 5 requests per minute.</p>
+            <p class="text-xs text-zinc-500 dark:text-zinc-400 mb-4">Stops abuse by limiting how often a single visitor can hit a form or endpoint. Use the format <code>requests,minutes</code> &mdash; for example <code>5,1</code> means “up to 5 attempts per minute”.</p>
 
             <div class="grid gap-4 md:grid-cols-3">
-                <x-ui.input wire:model="state.rate_auth" name="rate_auth" label="Auth (login, register, reset)" />
-                <x-ui.input wire:model="state.rate_api" name="rate_api" label="API endpoints" />
-                <x-ui.input wire:model="state.rate_public_forms" name="rate_public_forms" label="Public forms" />
+                <x-ui.input wire:model="state.rate_auth" name="rate_auth" label="Login, signup &amp; password reset" placeholder="5,1" hint="Recommended: 5,1" />
+                <x-ui.input wire:model="state.rate_api" name="rate_api" label="API endpoints" placeholder="60,1" hint="Recommended: 60,1" />
+                <x-ui.input wire:model="state.rate_public_forms" name="rate_public_forms" label="Contact &amp; public forms" placeholder="10,1" hint="Recommended: 10,1" />
             </div>
         </x-ui.card>
 

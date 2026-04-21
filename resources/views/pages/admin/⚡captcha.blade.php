@@ -168,7 +168,9 @@ new #[Title('Captcha')] #[Layout('components.layouts.admin')] class extends Comp
                 <div x-show="driver === 'recaptcha'" x-cloak class="grid gap-4 md:grid-cols-3">
                     <x-ui.input wire:model="state.recaptcha_site" name="recaptcha_site" label="reCAPTCHA site key" />
                     <x-ui.input wire:model="state.recaptcha_secret" name="recaptcha_secret" label="reCAPTCHA secret key" type="password" />
-                    <x-ui.input wire:model="state.recaptcha_threshold" name="recaptcha_threshold" label="Score threshold" type="number" hint="0.0 – 1.0 (default 0.5)" />
+                    <x-ui.select wire:model="state.recaptcha_threshold" name="recaptcha_threshold"
+                                  label="How strict should bot detection be?"
+                                  :options="\App\Core\Support\Choices::recaptchaSensitivities()" />
                 </div>
             </div>
         </x-ui.card>

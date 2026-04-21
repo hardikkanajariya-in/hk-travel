@@ -1,6 +1,7 @@
 <?php
 
 use App\Concerns\SettingsForm;
+use App\Core\Support\Choices;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Component;
@@ -192,11 +193,21 @@ new #[Title('Settings')] #[Layout('components.layouts.admin')] class extends Com
             <x-ui.card>
                 <h2 class="text-base font-semibold mb-4">Locale & formats</h2>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <x-ui.input wire:model="state.default_locale" label="Default locale" required hint="e.g. en, fr, ar" />
-                    <x-ui.input wire:model="state.default_currency" label="Default currency" required hint="ISO 4217, e.g. USD" />
-                    <x-ui.input wire:model="state.timezone" label="Timezone" required hint="e.g. UTC, Asia/Kolkata" />
-                    <x-ui.input wire:model="state.date_format" label="Date format" required hint="PHP date()" />
-                    <x-ui.input wire:model="state.time_format" label="Time format" required hint="PHP date()" />
+                    <x-ui.select wire:model="state.default_locale" label="Default language" required searchable
+                                  :options="\App\Core\Support\Choices::locales()"
+                                  hint="The language new visitors see by default." />
+                    <x-ui.select wire:model="state.default_currency" label="Default currency" required searchable
+                                  :options="\App\Core\Support\Choices::currencies()"
+                                  hint="Used to display prices across the site." />
+                    <x-ui.select wire:model="state.timezone" label="Timezone" required searchable
+                                  :options="\App\Core\Support\Choices::timezones()"
+                                  hint="All times shown on the site use this zone." />
+                    <x-ui.select wire:model="state.date_format" label="Date format" required
+                                  :options="\App\Core\Support\Choices::dateFormats()"
+                                  hint="How dates appear to your visitors." />
+                    <x-ui.select wire:model="state.time_format" label="Time format" required
+                                  :options="\App\Core\Support\Choices::timeFormats()"
+                                  hint="How clock times appear to your visitors." />
                 </div>
             </x-ui.card>
         </x-ui.tab-panel>
@@ -234,13 +245,21 @@ new #[Title('Settings')] #[Layout('components.layouts.admin')] class extends Com
             <x-ui.card>
                 <h2 class="text-base font-semibold mb-4">SEO defaults</h2>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <x-ui.input wire:model="state.seo_title_separator" label="Title separator" required />
-                    <x-ui.input wire:model="state.seo_robots_default" label="Default robots" required hint="e.g. index, follow" />
-                    <x-ui.input wire:model="state.seo_canonical_host" label="Canonical host" hint="https://www.example.com (optional)" />
-                    <x-ui.input wire:model="state.seo_og_image" label="Default OG image URL" />
+                    <x-ui.select wire:model="state.seo_title_separator" label="Title separator" required
+                                  :options="\App\Core\Support\Choices::titleSeparators()"
+                                  hint="Character between the page title and your site name in browser tabs." />
+                    <x-ui.select wire:model="state.seo_robots_default" label="Search engine visibility" required
+                                  :options="\App\Core\Support\Choices::robotsDirectives()"
+                                  hint="Controls whether search engines like Google can list your pages." />
+                    <x-ui.input wire:model="state.seo_canonical_host" label="Preferred website address"
+                                  placeholder="https://www.example.com"
+                                  hint="Optional. Helps avoid duplicate-content issues if your site is reachable on multiple addresses." />
+                    <x-ui.input wire:model="state.seo_og_image" label="Default share image (URL)"
+                                  hint="Shown when someone shares any page of your site on social media." />
                 </div>
                 <div class="mt-4">
-                    <x-ui.textarea wire:model="state.seo_meta_description" label="Default meta description" rows="3" />
+                    <x-ui.textarea wire:model="state.seo_meta_description" label="Default page description" rows="3"
+                                    hint="Shown in search results and social media when a page has no description of its own." />
                 </div>
             </x-ui.card>
         </x-ui.tab-panel>
@@ -282,16 +301,10 @@ new #[Title('Settings')] #[Layout('components.layouts.admin')] class extends Com
                         <x-ui.input wire:model="state.cookie_settings_label" label="Preferences label" />
                     </div>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <x-ui.input wire:model="state.cookie_policy_url" label="Policy URL" />
-                        <div>
-                            <label class="block text-sm font-medium mb-1">Position</label>
-                            <select wire:model="state.cookie_position" class="block w-full rounded-md border-zinc-300 dark:border-zinc-700 dark:bg-zinc-900 text-sm">
-                                <option value="bottom">Bottom (full width)</option>
-                                <option value="top">Top (full width)</option>
-                                <option value="bottom-left">Bottom left card</option>
-                                <option value="bottom-right">Bottom right card</option>
-                            </select>
-                        </div>
+                        <x-ui.input wire:model="state.cookie_policy_url" label="Privacy / cookie policy page"
+                                      placeholder="/privacy" hint="Visitors can click through to read your full policy." />
+                        <x-ui.select wire:model="state.cookie_position" label="Banner position"
+                                      :options="\App\Core\Support\Choices::cookiePositions()" />
                     </div>
                 </div>
             </x-ui.card>

@@ -173,14 +173,18 @@ new #[Title('Languages')] #[Layout('components.layouts.admin')] class extends Co
         <x-ui.card>
             <h2 class="text-base font-semibold mb-4">{{ $editingId ? 'Edit language' : 'Add language' }}</h2>
             <div class="space-y-3">
-                <x-ui.input wire:model="code" label="Code" required hint="ISO 639-1 (en, fr) or with region (en-GB)" />
-                <x-ui.input wire:model="name" label="Name" required />
-                <x-ui.input wire:model="native_name" label="Native name" />
-                <x-ui.input wire:model="flag" label="Flag (ISO 3166-1 alpha-2)" hint="e.g. gb, fr, sa" />
-                <x-ui.input type="number" wire:model="sort_order" label="Sort order" />
-                <label class="flex items-center gap-2"><input type="checkbox" wire:model="is_rtl" class="size-4 rounded"> <span class="text-sm">Right-to-left</span></label>
-                <label class="flex items-center gap-2"><input type="checkbox" wire:model="is_default" class="size-4 rounded"> <span class="text-sm">Default language</span></label>
-                <label class="flex items-center gap-2"><input type="checkbox" wire:model="is_active" class="size-4 rounded"> <span class="text-sm">Active</span></label>
+                <x-ui.select wire:model="code" label="Language" required searchable
+                              :options="\App\Core\Support\Choices::locales()"
+                              hint="Pick the language visitors will see." />
+                <x-ui.input wire:model="name" label="Display name" required hint="Shown in the language switcher (for example: English)." />
+                <x-ui.input wire:model="native_name" label="Name in its own language" hint="Optional. Example: Ínglés, हिन्दी, العربية." />
+                <x-ui.select wire:model="flag" label="Flag" searchable
+                              :options="\App\Core\Support\Choices::countryFlags()"
+                              hint="Country flag shown next to the language name." />
+                <x-ui.input type="number" wire:model="sort_order" label="Position in menu" hint="Lower numbers appear first." />
+                <label class="flex items-center gap-2"><input type="checkbox" wire:model="is_rtl" class="size-4 rounded"> <span class="text-sm">Reads right-to-left (Arabic, Hebrew, …)</span></label>
+                <label class="flex items-center gap-2"><input type="checkbox" wire:model="is_default" class="size-4 rounded"> <span class="text-sm">Use as the site's default language</span></label>
+                <label class="flex items-center gap-2"><input type="checkbox" wire:model="is_active" class="size-4 rounded"> <span class="text-sm">Visible to visitors</span></label>
             </div>
             <div class="mt-4 flex justify-end gap-2">
                 @if ($editingId)

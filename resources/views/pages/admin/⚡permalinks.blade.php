@@ -209,8 +209,8 @@ new #[Title('Permalinks & redirects')] #[Layout('components.layouts.admin')] cla
                 <x-ui.card>
                     <h2 class="text-base font-semibold mb-4">{{ $editingRedirectId ? 'Edit redirect' : 'Add redirect' }}</h2>
                     <div class="space-y-3">
-                        <x-ui.input wire:model="from_path" label="From path" required hint="e.g. /old-tour-name" />
-                        <x-ui.input wire:model="to_path" label="To path / URL" required />
+                        <x-ui.input wire:model="from_path" label="From path" required hint="The old web address (the part after your domain). Example: /old-tour-name" />
+                        <x-ui.input wire:model="to_path" label="Redirect to" required hint="The new path or full website address." />
                         <div>
                             <label class="block text-sm font-medium mb-1">Status code</label>
                             <select wire:model="status_code" class="block w-full rounded-md border-zinc-300 dark:border-zinc-700 dark:bg-zinc-900 text-sm">

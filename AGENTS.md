@@ -117,6 +117,53 @@ This project has domain-specific skills available. You MUST activate the relevan
 
 - Laravel can be deployed using [Laravel Cloud](https://cloud.laravel.com/), which is the fastest way to deploy and scale production Laravel applications.
 
+=== ux/non-tech-user rules ===
+
+# UX for Non-Technical Users (HARD RULES)
+
+This product is used by travel agents, owners and content editors who have **zero** technical background. Every screen, label, hint, error message and toast must be written for that audience. Treat any leak of jargon as a bug.
+
+## Form inputs
+
+- **Never** ship a raw `<input type="text">` for a value that comes from a finite, known set. Use `<x-ui.select :options="...">` (auto-search kicks in past 12 items).
+- Centralise option lists in `App\Core\Support\Choices`. Add a new method there before adding new dropdowns; do not hard-code option arrays in views.
+- Labels are written for humans, not databases. Prefer "Default language" over "Default locale", "Banner position" over "cookie_position".
+- Hints are short plain English with concrete examples ("Like 21/04/2026"), never the underlying syntax ("d/m/Y").
+- For format-style fields (date, time, currency), surface a **live preview** in the option label itself.
+- Auto-generate technical fields (slugs, keys, snake_case identifiers) from the user-friendly label whenever possible. If they must remain editable, keep them under an "Advanced" disclosure and re-label them ("Internal name", not "Key").
+- Provide sensible defaults so the form works end-to-end without the user touching it.
+- Group related options with friendly suffixes such as " (recommended)" or " (advanced)".
+
+## Forbidden hint / placeholder patterns
+
+The following must **never** appear in user-facing UI text:
+
+- `PHP date()`, `PHP DateTime`, `Carbon`
+- `ISO 4217`, `ISO 639-1`, `ISO 3166`
+- `snake_case`, `kebab-case`, `camelCase`, `PascalCase`
+- `regex`, `regular expression`
+- Raw HTTP header names (`Referrer-Policy`, `Permissions-Policy`, `HSTS max-age`, `X-Frame-Options`, …) — describe what they DO instead.
+- Raw locale/timezone identifiers without a friendly translation (`en-GB`, `Asia/Kolkata` alone is fine **only** when paired with the country name and UTC offset, which `Choices::timezones()` already handles).
+- Raw route names (`admin.dashboard`) outside an explicit "Advanced" section.
+- File-system paths, dotted config keys (`security.hsts.max_age`), DB column names.
+
+## Error, toast and validation messages
+
+- Explain the problem **and** suggest the fix. ✅ "That email is already in use — please pick another." ❌ "validation.unique"
+- Never surface stack traces, exception class names, SQL errors or HTTP status codes to end users.
+- Common Laravel validation messages live in `lang/en/validation.php` (and the `gu`/`hi` mirrors). Keep them in plain language; mirror any change to the other locales.
+- Toast / flash messages should describe what happened from the user's point of view ("Settings updated.", "Reminder sent."), not the internal action ("dispatchSettingsUpdatedJob succeeded").
+
+## Review checklist before merging an admin form
+
+1. Could a non-technical user complete this form without Googling a single word? If no, fix it.
+2. Does every value from a finite set use `<x-ui.select>`?
+3. Are all hints/placeholders free of the forbidden patterns above?
+4. Does every error message tell the user how to fix the problem?
+5. Are sensible defaults pre-filled?
+
+If you add a new finite-set field anywhere in the codebase, **always** extend `App\Core\Support\Choices` rather than hard-coding the list at the call site.
+
 === tests rules ===
 
 # Test Enforcement
