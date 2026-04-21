@@ -30,9 +30,14 @@
             'active:shadow-sm',
         ]),
         'secondary' => implode(' ', [
-            'bg-white text-zinc-900 ring-1 ring-zinc-200 shadow-sm',
-            'hover:bg-zinc-50 hover:ring-zinc-300 hover:shadow-md',
-            'dark:bg-zinc-800 dark:text-zinc-100 dark:ring-zinc-700 dark:hover:bg-zinc-700 dark:hover:ring-zinc-600',
+            'text-zinc-900 ring-1 ring-zinc-200/80 shadow-sm shadow-zinc-900/5',
+            'bg-[linear-gradient(180deg,#ffffff_0%,#f4f4f5_100%)]',
+            'hover:bg-[linear-gradient(180deg,#fafafa_0%,#e4e4e7_100%)]',
+            'hover:ring-zinc-300 hover:shadow-md hover:shadow-zinc-900/10 hover:text-hk-primary-700',
+            'dark:text-zinc-100 dark:ring-zinc-700/80 dark:shadow-black/30',
+            'dark:bg-[linear-gradient(180deg,#27272a_0%,#18181b_100%)]',
+            'dark:hover:bg-[linear-gradient(180deg,#3f3f46_0%,#27272a_100%)]',
+            'dark:hover:ring-zinc-600 dark:hover:text-hk-primary-300',
         ]),
         'outline' => implode(' ', [
             'bg-transparent text-zinc-900 ring-1 ring-zinc-300',
@@ -40,9 +45,9 @@
             'dark:text-zinc-100 dark:ring-zinc-700 dark:hover:bg-zinc-800/60 dark:hover:text-hk-primary-300',
         ]),
         'ghost' => implode(' ', [
-            'bg-transparent text-zinc-700',
-            'hover:bg-zinc-100 hover:text-zinc-900',
-            'dark:text-zinc-300 dark:hover:bg-zinc-800 dark:hover:text-zinc-100',
+            'bg-transparent text-zinc-700 ring-1 ring-transparent',
+            'hover:bg-zinc-100 hover:text-zinc-900 hover:ring-zinc-200 hover:shadow-sm',
+            'dark:text-zinc-300 dark:hover:bg-zinc-800 dark:hover:text-zinc-100 dark:hover:ring-zinc-700',
         ]),
         'danger' => implode(' ', [
             'text-white shadow-md shadow-red-600/25',

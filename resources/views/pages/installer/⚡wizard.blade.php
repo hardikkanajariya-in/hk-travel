@@ -149,6 +149,14 @@ new #[Title('HK Travel — Install')] #[Layout('components.layouts.installer')] 
 
             Artisan::call('migrate', ['--force' => true, '--seed' => true]);
 
+            // Promote the locale chosen during install to "default" and ensure
+            // it's active. The seeder activates en/hi/gu by default; this just
+            // honours the user's pick from step 2 even if they chose a code
+            // outside that trio.
+            \App\Models\Language::query()->update(['is_default' => false]);
+            \App\Models\Language::where('code', $this->locale)
+                ->update(['is_default' => true, 'is_active' => true]);
+
             User::query()->create([
                 'name' => $this->adminName,
                 'email' => $this->adminEmail,
@@ -318,8 +326,17 @@ new #[Title('HK Travel — Install')] #[Layout('components.layouts.installer')] 
             <div class="space-y-4">
                 <x-ui.input wire:model="appName" label="Site name" required />
                 <x-ui.input wire:model="appUrl" label="Site URL" type="url" required hint="e.g. https://example.com" />
-                <div class="grid grid-cols-2 gap-4">
-                    <x-ui.input wire:model="locale" label="Default locale" required />
+                <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    <x-ui.select
+                        wire:model="locale"
+                        label="Default locale"
+                        required
+                        :options="[
+                            'en' => 'English',
+                            'hi' => 'हिन्दी (Hindi)',
+                            'gu' => 'ગુજરાતી (Gujarati)',
+                        ]"
+                    />
                     <x-ui.input wire:model="timezone" label="Timezone" required />
                 </div>
             </div>
@@ -328,16 +345,16 @@ new #[Title('HK Travel — Install')] #[Layout('components.layouts.installer')] 
         @if ($step === 3)
             <h2 class="mb-4 text-lg font-medium">Database connection</h2>
             <div class="space-y-4">
-                <label class="block">
-                    <span class="mb-1 block text-sm font-medium text-zinc-700 dark:text-zinc-300">Driver</span>
-                    <select wire:model.live="dbConnection"
-                            class="block w-full rounded-md border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-3 py-2 text-sm">
-                        <option value="sqlite">SQLite (recommended for small deployments)</option>
-                        <option value="mysql">MySQL</option>
-                        <option value="mariadb">MariaDB</option>
-                        <option value="pgsql">PostgreSQL</option>
-                    </select>
-                </label>
+                <x-ui.select
+                    wire:model.live="dbConnection"
+                    label="Driver"
+                    :options="[
+                        'sqlite' => 'SQLite (recommended for small deployments)',
+                        'mysql' => 'MySQL',
+                        // 'mariadb' => 'MariaDB',
+                        // 'pgsql' => 'PostgreSQL',
+                    ]"
+                />
 
                 @if ($dbConnection !== 'sqlite')
                     <div class="grid grid-cols-2 gap-4">
@@ -389,7 +406,7 @@ new #[Title('HK Travel — Install')] #[Layout('components.layouts.installer')] 
 
         <div class="mt-8 flex items-center justify-between">
             @if ($step > 1)
-                <x-ui.button variant="ghost" wire:click="back" wire:loading.attr="disabled">Back</x-ui.button>
+                <x-ui.button variant="secondary" wire:click="back" wire:loading.attr="disabled">Back</x-ui.button>
             @else
                 <span></span>
             @endif

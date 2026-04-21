@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Core\Localization\LocaleManager;
 use Database\Factories\LanguageFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -23,6 +24,18 @@ class Language extends Model
     use HasFactory;
 
     protected $guarded = ['id'];
+
+    protected static function booted(): void
+    {
+        $flush = static function (): void {
+            if (app()->bound(LocaleManager::class)) {
+                app(LocaleManager::class)->flush();
+            }
+        };
+
+        static::saved($flush);
+        static::deleted($flush);
+    }
 
     protected function casts(): array
     {

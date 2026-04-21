@@ -28,7 +28,7 @@ return [
     'localization' => [
         'default' => env('HK_LOCALE', 'en'),
         'fallback' => env('HK_FALLBACK_LOCALE', 'en'),
-        'supported' => ['en'],
+        'supported' => ['en', 'hi', 'gu'],
         'rtl_locales' => ['ar', 'he', 'fa', 'ur'],
         'auto_detect' => true,
     ],
