@@ -92,6 +92,11 @@
         <div class="mx-auto max-w-7xl px-6 py-10 text-sm text-zinc-500 flex flex-col md:flex-row gap-4 items-center justify-between">
             <span>&copy; {{ date('Y') }} {{ config('hk.brand.name') }}. {{ __('All rights reserved.') }}</span>
             @zone('footer-1')
+            <span>
+                {{ __('Powered by') }}
+                <a href="https://hardikkanajariya.in" target="_blank" rel="noopener"
+                   class="font-semibold text-zinc-700 hover:text-hk-primary-600 dark:text-zinc-300">hardikkanajariya.in</a>
+            </span>
         </div>
     </footer>
 

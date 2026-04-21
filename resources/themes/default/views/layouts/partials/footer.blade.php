@@ -14,6 +14,11 @@
         <div class="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-3 px-4 py-5 text-xs text-zinc-500 sm:px-6 lg:px-8">
             <span>© {{ $year }} {{ $branding->siteName() }}. {{ __('All rights reserved.') }}</span>
             <x-theme.menu location="footer" class="text-xs" />
+            <span>
+                {{ __('Powered by') }}
+                <a href="https://hardikkanajariya.in" target="_blank" rel="noopener"
+                   class="font-semibold text-zinc-700 hover:text-hk-primary-600 dark:text-zinc-300">hardikkanajariya.in</a>
+            </span>
         </div>
     </div>
 </footer>

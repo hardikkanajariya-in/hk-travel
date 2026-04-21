@@ -315,7 +315,48 @@ new #[Title('HK Travel — Install')] #[Layout('components.layouts.installer')] 
         $this->writeEnv();
         Artisan::call('config:clear');
 
+        // config:clear only removes the compiled cache file — the running
+        // process still has the old values in memory. Re-read the .env file
+        // and push the new DB settings into the live config + reconnect, so
+        // stepMigrate() uses the connection the user just entered instead of
+        // whatever was configured when the page first loaded.
+        $this->refreshRuntimeConfig();
+
         return ['message' => __('installer.progress.detail.env', ['driver' => $this->dbConnection])];
+    }
+
+    /**
+     * Re-read the written .env values and apply them to the in-memory config
+     * and DB manager so subsequent steps don't use stale connections.
+     */
+    protected function refreshRuntimeConfig(): void
+    {
+        // Reload .env into $_ENV / putenv so config() reads fresh values.
+        if (file_exists(base_path('.env'))) {
+            $dotenv = \Dotenv\Dotenv::createMutable(base_path());
+            try {
+                $dotenv->load();
+            } catch (\Throwable) {
+                // Immutable env — override manually below instead.
+            }
+        }
+
+        // Push the user-chosen values directly into the running config.
+        config([
+            'database.default' => $this->dbConnection,
+            'database.connections.'.$this->dbConnection.'.host' => $this->dbHost,
+            'database.connections.'.$this->dbConnection.'.port' => $this->dbPort,
+            'database.connections.'.$this->dbConnection.'.database' => $this->dbConnection === 'sqlite'
+                ? database_path('database.sqlite')
+                : $this->dbDatabase,
+            'database.connections.'.$this->dbConnection.'.username' => $this->dbUsername,
+            'database.connections.'.$this->dbConnection.'.password' => $this->dbPassword,
+        ]);
+
+        // Purge all cached connections so the next DB call opens a fresh one
+        // using the values we just set.
+        \Illuminate\Support\Facades\DB::purge($this->dbConnection);
+        \Illuminate\Support\Facades\DB::reconnect($this->dbConnection);
     }
 
     protected function stepMigrate(): array
