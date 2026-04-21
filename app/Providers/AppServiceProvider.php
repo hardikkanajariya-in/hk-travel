@@ -75,8 +75,13 @@ class AppServiceProvider extends ServiceProvider
     {
         Date::use(CarbonImmutable::class);
 
-        // Older MySQL/MariaDB versions limit utf8mb4 indexes to 191 chars.
-        Schema::defaultStringLength(191);
+        // MySQL/MariaDB cap utf8mb4 index keys (4 bytes/char) at 767, 1000
+        // or 3072 bytes depending on version & innodb_large_prefix. Composite
+        // indexes like spatie/permission's (name, guard_name) need to fit in
+        // that budget — two 125-char columns take 1000 bytes, which works on
+        // even the most restrictive setups. Override via DB_STRING_LENGTH for
+        // modern installs that can afford 191 or higher.
+        Schema::defaultStringLength((int) env('DB_STRING_LENGTH', 125));
 
         DB::prohibitDestructiveCommands(
             app()->isProduction(),

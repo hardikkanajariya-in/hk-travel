@@ -70,6 +70,8 @@ return [
     'modules' => [
         'heading' => 'Enable travel modules',
         'subtitle' => 'Pick the features to activate now. You can toggle these any time from the admin panel.',
+        'select_all' => 'Select all',
+        'deselect_all' => 'Deselect all',
     ],
 
     'buttons' => [
@@ -92,5 +94,21 @@ return [
             'cache' => 'Clearing caches…',
             'finalize' => 'Finalising installation…',
         ],
+        'detail' => [
+            'env' => '.env saved (driver: :driver)',
+            'migrate' => ':count migrations applied',
+            'seed' => 'Default records inserted',
+            'locale' => 'Default language set to :code',
+            'locale_missing' => 'Locale :code not present in languages table — left default unchanged',
+            'admin' => 'Administrator :email created',
+            'modules' => ':count module(s) enabled',
+            'cache' => 'Config, view and application caches cleared',
+            'finalize' => 'Installation lock written — redirecting to login',
+        ],
+        'failed_title' => 'Installation failed',
+        'failed_hint' => 'Fix the issue below and click Retry to run the install again.',
+        'retry' => 'Retry installation',
+        'success_title' => 'Installation complete',
+        'success_hint' => 'Redirecting you to the login page…',
     ],
 ];

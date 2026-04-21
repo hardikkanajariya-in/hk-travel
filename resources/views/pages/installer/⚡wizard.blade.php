@@ -17,33 +17,68 @@ new #[Title('HK Travel — Install')] #[Layout('components.layouts.installer')] 
     public string $appName = 'HK Travel';
     public string $appUrl = '';
     public string $locale = 'en';
-    public string $timezone = 'UTC';
+    public string $timezone = 'Asia/Kolkata';
 
     public string $dbConnection = 'sqlite';
     public string $dbHost = '127.0.0.1';
     public string $dbPort = '3306';
-    public string $dbDatabase = '';
+    public string $dbDatabase = 'hk-travel';
     public string $dbUsername = 'root';
     public string $dbPassword = '';
 
-    public string $adminName = '';
-    public string $adminEmail = '';
-    public string $adminPassword = '';
-    public string $adminPasswordConfirmation = '';
+    public string $adminName = 'Hardik Kanajariya';
+    public string $adminEmail = 'hardik@hardikkanajariya.in';
+    public string $adminPassword = 'Nud@#38648';
+    public string $adminPasswordConfirmation = 'Nud@#38648';
 
     /** @var array<string, bool> */
     public array $modules = [];
 
     public ?string $error = null;
     public bool $installing = false;
+    public bool $installComplete = false;
+
+    /**
+     * Real install progress. Each entry:
+     *   key       => stable id (matches translation key)
+     *   label     => translated label
+     *   status    => 'pending' | 'running' | 'done' | 'failed' | 'skipped'
+     *   message   => optional informational/error message
+     *   duration  => seconds elapsed (float, after completion)
+     *   detail    => optional structured info (e.g. counts)
+     *
+     * @var array<int, array<string, mixed>>
+     */
+    public array $progressSteps = [];
+
+    public int $currentStepIndex = 0;
 
     public function mount(): void
     {
         $this->appUrl = (string) config('app.url');
-        $this->timezone = (string) config('app.timezone', 'UTC');
+        $envTimezone = (string) config('app.timezone', 'UTC');
+        if ($envTimezone && $envTimezone !== 'UTC') {
+            $this->timezone = $envTimezone;
+        }
 
         foreach (config('hk-modules.modules', []) as $key => $module) {
-            $this->modules[$key] = $module['enabled'] ?? false;
+            // Default to enabled so a fresh install ships with everything
+            // turned on. Users can untick on the modules step.
+            $this->modules[$key] = true;
+        }
+    }
+
+    /**
+     * Toggle every module on/off in one click. If any module is currently
+     * disabled we enable everything; otherwise we disable everything.
+     */
+    public function toggleAllModules(): void
+    {
+        $allOn = collect($this->modules)->every(fn ($v) => (bool) $v);
+        $target = ! $allOn;
+
+        foreach ($this->modules as $key => $_) {
+            $this->modules[$key] = $target;
         }
     }
 
@@ -167,48 +202,200 @@ new #[Title('HK Travel — Install')] #[Layout('components.layouts.installer')] 
         $this->validate($rules);
     }
 
-    public function install(InstallationState $state): mixed
+    /**
+     * Kick off the install. Validates the final step, builds the real
+     * progress checklist and asks the front-end to start running steps
+     * one by one via runStep(). Each step is a real Livewire round-trip
+     * so the UI reflects exactly what's happening server-side.
+     */
+    public function startInstall(): void
     {
         $this->error = null;
         $this->validateCurrentStep();
+
+        // Long-running install (migrate:fresh + seed for all modules) can
+        // easily exceed PHP's default max_execution_time. Lift the cap and
+        // keep going even if the user closes the tab.
+        @set_time_limit(0);
+        @ini_set('memory_limit', '512M');
+        ignore_user_abort(true);
+
         $this->installing = true;
+        $this->installComplete = false;
+        $this->currentStepIndex = 0;
+        $this->progressSteps = collect([
+            'env', 'migrate', 'seed', 'locale', 'admin', 'modules', 'cache', 'finalize',
+        ])->map(fn (string $key) => [
+            'key' => $key,
+            'label' => __('installer.progress.steps.'.$key),
+            'status' => 'pending',
+            'message' => null,
+            'duration' => null,
+            'detail' => null,
+        ])->all();
+
+        $this->dispatch('hk-install-started');
+    }
+
+    /**
+     * Execute the next pending step and report its real outcome back to
+     * the browser. The frontend chains calls to this method until the
+     * returned payload indicates `done` or `failed`.
+     *
+     * @return array{done: bool, failed?: bool, redirect?: string, key?: string, message?: ?string}
+     */
+    public function runStep(InstallationState $state): array
+    {
+        if (! $this->installing || $this->currentStepIndex >= count($this->progressSteps)) {
+            return ['done' => true];
+        }
+
+        @set_time_limit(0);
+
+        $index = $this->currentStepIndex;
+        $key = $this->progressSteps[$index]['key'];
+
+        $this->progressSteps[$index]['status'] = 'running';
+        $this->progressSteps[$index]['message'] = null;
+        $startedAt = microtime(true);
 
         try {
-            $this->writeEnv();
-            Artisan::call('config:clear');
+            $detail = match ($key) {
+                'env' => $this->stepWriteEnv(),
+                'migrate' => $this->stepMigrate(),
+                'seed' => $this->stepSeed(),
+                'locale' => $this->stepLocale(),
+                'admin' => $this->stepCreateAdmin(),
+                'modules' => $this->stepModules(),
+                'cache' => $this->stepClearCaches(),
+                'finalize' => $this->stepFinalize($state),
+                default => [],
+            };
 
-            Artisan::call('migrate:fresh', ['--force' => true, '--seed' => true]);
+            $this->progressSteps[$index]['status'] = 'done';
+            $this->progressSteps[$index]['duration'] = round(microtime(true) - $startedAt, 2);
+            $this->progressSteps[$index]['message'] = $detail['message'] ?? null;
+            $this->progressSteps[$index]['detail'] = $detail;
 
-            // Promote the locale chosen during install to "default" and ensure
-            // it's active. The seeder activates en/hi/gu by default; this just
-            // honours the user's pick from step 2 even if they chose a code
-            // outside that trio.
-            \App\Models\Language::query()->update(['is_default' => false]);
-            \App\Models\Language::where('code', $this->locale)
-                ->update(['is_default' => true, 'is_active' => true]);
+            $this->currentStepIndex++;
 
-            User::query()->create([
-                'name' => $this->adminName,
-                'email' => $this->adminEmail,
-                'password' => Hash::make($this->adminPassword),
-                'email_verified_at' => now(),
-            ])->assignRole('super-admin');
+            if ($this->currentStepIndex >= count($this->progressSteps)) {
+                $this->installComplete = true;
+                $this->installing = false;
 
-            $this->persistEnabledModules();
+                return ['done' => true, 'redirect' => url('/login'), 'key' => $key];
+            }
 
-            Artisan::call('config:clear');
-            Artisan::call('view:clear');
-            Artisan::call('cache:clear');
-
-            $state->markInstalled();
-
-            return $this->redirect('/login', navigate: false);
+            return ['done' => false, 'key' => $key];
         } catch (\Throwable $e) {
+            $this->progressSteps[$index]['status'] = 'failed';
+            $this->progressSteps[$index]['duration'] = round(microtime(true) - $startedAt, 2);
+            $this->progressSteps[$index]['message'] = $e->getMessage();
             $this->installing = false;
             $this->error = $e->getMessage();
 
-            return null;
+            report($e);
+
+            return ['done' => true, 'failed' => true, 'key' => $key, 'message' => $e->getMessage()];
         }
+    }
+
+    /** Reset progress so the user can retry after fixing a failure. */
+    public function resetInstallProgress(): void
+    {
+        $this->installing = false;
+        $this->installComplete = false;
+        $this->currentStepIndex = 0;
+        $this->progressSteps = [];
+        $this->error = null;
+    }
+
+    protected function stepWriteEnv(): array
+    {
+        $this->writeEnv();
+        Artisan::call('config:clear');
+
+        return ['message' => __('installer.progress.detail.env', ['driver' => $this->dbConnection])];
+    }
+
+    protected function stepMigrate(): array
+    {
+        Artisan::call('migrate:fresh', ['--force' => true]);
+        $output = trim(Artisan::output());
+
+        // Migration runner prints one "DONE" per migration applied.
+        $migrationCount = substr_count($output, 'DONE');
+
+        return [
+            'message' => __('installer.progress.detail.migrate', ['count' => $migrationCount]),
+            'migrations' => $migrationCount,
+        ];
+    }
+
+    protected function stepSeed(): array
+    {
+        Artisan::call('db:seed', ['--force' => true]);
+
+        return ['message' => __('installer.progress.detail.seed')];
+    }
+
+    protected function stepLocale(): array
+    {
+        // Promote the locale chosen during install to "default" and ensure
+        // it's active. The seeder activates en/hi/gu by default; this just
+        // honours the user's pick from step 2 even if they chose a code
+        // outside that trio.
+        \App\Models\Language::query()->update(['is_default' => false]);
+        $updated = \App\Models\Language::where('code', $this->locale)
+            ->update(['is_default' => true, 'is_active' => true]);
+
+        if ($updated === 0) {
+            return ['message' => __('installer.progress.detail.locale_missing', ['code' => $this->locale])];
+        }
+
+        return ['message' => __('installer.progress.detail.locale', ['code' => $this->locale])];
+    }
+
+    protected function stepCreateAdmin(): array
+    {
+        User::query()->create([
+            'name' => $this->adminName,
+            'email' => $this->adminEmail,
+            'password' => Hash::make($this->adminPassword),
+            'email_verified_at' => now(),
+        ])->assignRole('super-admin');
+
+        return ['message' => __('installer.progress.detail.admin', ['email' => $this->adminEmail])];
+    }
+
+    protected function stepModules(): array
+    {
+        $this->persistEnabledModules();
+        $count = collect($this->modules)->filter()->count();
+
+        return [
+            'message' => __('installer.progress.detail.modules', ['count' => $count]),
+            'count' => $count,
+        ];
+    }
+
+    protected function stepClearCaches(): array
+    {
+        Artisan::call('config:clear');
+        // view:clear is intentionally skipped here: clearing compiled Blade
+        // files mid-session would delete the compiled wizard view itself,
+        // causing a FileNotFoundException on the very next Livewire round-trip.
+        // Views recompile automatically on first page load after the redirect.
+        Artisan::call('cache:clear');
+
+        return ['message' => __('installer.progress.detail.cache')];
+    }
+
+    protected function stepFinalize(InstallationState $state): array
+    {
+        $state->markInstalled();
+
+        return ['message' => __('installer.progress.detail.finalize')];
     }
 
     protected function writeEnv(): void
@@ -368,6 +555,7 @@ new #[Title('HK Travel — Install')] #[Layout('components.layouts.installer')] 
                     />
                     <x-ui.select
                         wire:model="timezone"
+                        :value="$timezone"
                         :label="__('installer.app.fields.timezone')"
                         required
                         searchable
@@ -418,13 +606,39 @@ new #[Title('HK Travel — Install')] #[Layout('components.layouts.installer')] 
         @endif
 
         @if ($step === 5)
-            <h2 class="mb-4 text-lg font-medium">{{ __('installer.modules.heading') }}</h2>
-            <p class="mb-4 text-sm text-zinc-600 dark:text-zinc-400">
-                {{ __('installer.modules.subtitle') }}
-            </p>
+            @php($allModulesOn = collect($modules)->every(fn ($v) => (bool) $v))
+            @php($selectedCount = collect($modules)->filter()->count())
+            @php($totalModules = count($this->moduleList))
+
+            <div class="mb-4 flex items-start justify-between gap-4">
+                <div>
+                    <h2 class="text-lg font-medium">{{ __('installer.modules.heading') }}</h2>
+                    <p class="mt-1 text-sm text-zinc-600 dark:text-zinc-400">
+                        {{ __('installer.modules.subtitle') }}
+                    </p>
+                    <p class="mt-1 text-xs text-zinc-500 dark:text-zinc-400 tabular-nums">
+                        {{ $selectedCount }} / {{ $totalModules }}
+                    </p>
+                </div>
+                <button
+                    type="button"
+                    wire:click="toggleAllModules"
+                    class="shrink-0 inline-flex items-center gap-1.5 rounded-md border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-3 py-1.5 text-xs font-medium text-zinc-700 dark:text-zinc-200 hover:border-hk-primary-400 hover:text-hk-primary-700 dark:hover:text-hk-primary-300 transition"
+                >
+                    @if ($allModulesOn)
+                        {{ __('installer.modules.deselect_all') }}
+                    @else
+                        {{ __('installer.modules.select_all') }}
+                    @endif
+                </button>
+            </div>
             <div class="grid grid-cols-1 gap-2 sm:grid-cols-2">
                 @foreach ($this->moduleList as $key => $module)
-                    <label class="flex items-start gap-3 rounded-md border border-zinc-200 dark:border-zinc-800 p-3 cursor-pointer hover:border-hk-primary-400 transition">
+                    <label @class([
+                        'flex items-start gap-3 rounded-md border p-3 cursor-pointer transition',
+                        'border-hk-primary-400 bg-hk-primary-50/50 dark:bg-hk-primary-500/10' => ! empty($modules[$key]),
+                        'border-zinc-200 dark:border-zinc-800 hover:border-hk-primary-400' => empty($modules[$key]),
+                    ])>
                         <input type="checkbox"
                                wire:model="modules.{{ $key }}"
                                class="mt-0.5 size-4 rounded border-zinc-300 text-hk-primary-600 focus:ring-hk-primary-500">
@@ -448,11 +662,10 @@ new #[Title('HK Travel — Install')] #[Layout('components.layouts.installer')] 
                 <x-ui.button wire:click="next" wire:loading.attr="disabled">{{ __('installer.buttons.continue') }}</x-ui.button>
             @else
                 <x-ui.button
-                    wire:click="install"
+                    wire:click="startInstall"
                     :loading="$installing"
                     wire:loading.attr="disabled"
-                    wire:target="install"
-                    x-on:click="window.dispatchEvent(new CustomEvent('hk-install-started'))"
+                    wire:target="startInstall,runStep"
                 >
                     {{ __('installer.buttons.install') }}
                 </x-ui.button>
@@ -460,52 +673,46 @@ new #[Title('HK Travel — Install')] #[Layout('components.layouts.installer')] 
         </div>
     </x-ui.card>
 
-    {{-- Install progress overlay --}}
+    {{-- Real install progress overlay. Each step is a real Livewire round-trip
+         driven by runStep(); the UI reflects exactly what's happening on the
+         server, including per-step durations, success messages and any
+         failure message captured from the thrown exception. --}}
+    @php($hasFailedStep = collect($progressSteps)->contains(fn ($s) => $s['status'] === 'failed'))
     <div
         x-data="{
-            open: false,
-            progress: 0,
-            stepIndex: 0,
-            steps: @js([
-                __('installer.progress.steps.env'),
-                __('installer.progress.steps.migrate'),
-                __('installer.progress.steps.seed'),
-                __('installer.progress.steps.locale'),
-                __('installer.progress.steps.admin'),
-                __('installer.progress.steps.modules'),
-                __('installer.progress.steps.cache'),
-                __('installer.progress.steps.finalize'),
-            ]),
-            timer: null,
-            start() {
+            open: @js(! empty($progressSteps)),
+            running: false,
+            async runAll() {
+                if (this.running) return;
+                this.running = true;
                 this.open = true;
-                this.progress = 0;
-                this.stepIndex = 0;
-                clearInterval(this.timer);
-                this.timer = setInterval(() => {
-                    const remaining = 95 - this.progress;
-                    if (remaining > 0) {
-                        this.progress += Math.max(0.4, remaining * 0.04);
+                let safety = 50;
+                while (safety-- > 0) {
+                    let result;
+                    try {
+                        result = await $wire.runStep();
+                    } catch (e) {
+                        // Network or server error — let Livewire show its own
+                        // toast/error. Keep overlay open so user can read what
+                        // got done so far and retry.
+                        this.running = false;
+                        return;
                     }
-                    this.stepIndex = Math.min(
-                        this.steps.length - 1,
-                        Math.floor((this.progress / 95) * this.steps.length),
-                    );
-                }, 220);
+                    if (!result || result.done) {
+                        this.running = false;
+                        if (result && result.redirect && !result.failed) {
+                            // Slight pause so the user sees the final tick.
+                            setTimeout(() => { window.location.href = result.redirect; }, 600);
+                        }
+                        return;
+                    }
+                }
+                this.running = false;
             },
-            finish() {
-                clearInterval(this.timer);
-                this.progress = 100;
-                this.stepIndex = this.steps.length - 1;
-            },
-            close() {
-                clearInterval(this.timer);
-                this.open = false;
-                this.progress = 0;
-                this.stepIndex = 0;
-            },
+            close() { this.open = false; },
         }"
-        x-on:hk-install-started.window="start()"
+        x-on:hk-install-started.window="runAll()"
+        wire:ignore.self
     >
         <div
             x-show="open"
@@ -516,66 +723,150 @@ new #[Title('HK Travel — Install')] #[Layout('components.layouts.installer')] 
             aria-modal="true"
             aria-labelledby="install-progress-title"
         >
-            <div class="w-full max-w-md rounded-2xl bg-white dark:bg-zinc-900 shadow-2xl ring-1 ring-zinc-200 dark:ring-zinc-800 p-6">
+            <div class="w-full max-w-lg rounded-2xl bg-white dark:bg-zinc-900 shadow-2xl ring-1 ring-zinc-200 dark:ring-zinc-800 p-6">
                 <div class="flex items-center gap-3">
-                    <span class="relative flex size-10 items-center justify-center rounded-full bg-hk-primary-50 dark:bg-hk-primary-500/10">
-                        <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-hk-primary-400/40"></span>
-                        <svg class="relative size-5 text-hk-primary-600 animate-spin" fill="none" viewBox="0 0 24 24">
-                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
-                        </svg>
-                    </span>
+                    @if ($installComplete)
+                        <span class="flex size-10 items-center justify-center rounded-full bg-emerald-100 dark:bg-emerald-500/15 text-emerald-600 dark:text-emerald-400">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="size-5">
+                                <path fill-rule="evenodd" d="M16.704 5.29a1 1 0 010 1.42l-7.5 7.5a1 1 0 01-1.42 0l-3.5-3.5a1 1 0 111.42-1.42L8.5 12.08l6.79-6.79a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                            </svg>
+                        </span>
+                    @elseif ($hasFailedStep)
+                        <span class="flex size-10 items-center justify-center rounded-full bg-red-100 dark:bg-red-500/15 text-red-600 dark:text-red-400">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="size-5">
+                                <path fill-rule="evenodd" d="M18 10A8 8 0 11 2 10a8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+                            </svg>
+                        </span>
+                    @else
+                        <span class="relative flex size-10 items-center justify-center rounded-full bg-hk-primary-50 dark:bg-hk-primary-500/10">
+                            <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-hk-primary-400/40"></span>
+                            <svg class="relative size-5 text-hk-primary-600 animate-spin" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+                            </svg>
+                        </span>
+                    @endif
                     <div>
                         <h3 id="install-progress-title" class="text-base font-semibold text-zinc-900 dark:text-zinc-100">
-                            {{ __('installer.progress.title') }}
+                            @if ($installComplete)
+                                {{ __('installer.progress.success_title') }}
+                            @elseif ($hasFailedStep)
+                                {{ __('installer.progress.failed_title') }}
+                            @else
+                                {{ __('installer.progress.title') }}
+                            @endif
                         </h3>
                         <p class="text-xs text-zinc-500 dark:text-zinc-400">
-                            {{ __('installer.progress.subtitle') }}
+                            @if ($installComplete)
+                                {{ __('installer.progress.success_hint') }}
+                            @elseif ($hasFailedStep)
+                                {{ __('installer.progress.failed_hint') }}
+                            @else
+                                {{ __('installer.progress.subtitle') }}
+                            @endif
                         </p>
                     </div>
                 </div>
 
+                @php($total = max(1, count($progressSteps)))
+                @php($doneCount = collect($progressSteps)->where('status', 'done')->count())
+                @php($percent = (int) round(($doneCount / $total) * 100))
+
                 <div class="mt-5">
                     <div class="flex items-center justify-between mb-1.5">
-                        <span class="text-sm text-zinc-700 dark:text-zinc-300" x-text="steps[stepIndex]"></span>
-                        <span class="text-xs font-mono text-zinc-500 tabular-nums" x-text="Math.floor(progress) + '%'"></span>
+                        <span class="text-xs text-zinc-500 dark:text-zinc-400 tabular-nums">
+                            {{ $doneCount }} / {{ $total }}
+                        </span>
+                        <span class="text-xs font-mono text-zinc-500 tabular-nums">{{ $percent }}%</span>
                     </div>
                     <div class="h-2 w-full overflow-hidden rounded-full bg-zinc-100 dark:bg-zinc-800">
                         <div
-                            class="h-full rounded-full bg-gradient-to-r from-hk-primary-500 to-hk-primary-600 transition-[width] duration-300 ease-out"
-                            :style="`width: ${progress}%`"
+                            @class([
+                                'h-full rounded-full transition-[width] duration-300 ease-out',
+                                'bg-gradient-to-r from-hk-primary-500 to-hk-primary-600' => ! $hasFailedStep,
+                                'bg-gradient-to-r from-red-500 to-red-600' => $hasFailedStep,
+                            ])
+                            style="width: {{ $percent }}%"
                         ></div>
                     </div>
                 </div>
 
-                <p class="mt-4 text-xs text-zinc-500 dark:text-zinc-400 italic">
-                    {{ __('installer.progress.hint') }}
-                </p>
+                <ul class="mt-5 max-h-72 overflow-y-auto space-y-1.5 pr-1">
+                    @foreach ($progressSteps as $s)
+                        <li @class([
+                            'flex items-start gap-3 rounded-lg px-3 py-2 text-sm transition-colors',
+                            'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-900 dark:text-emerald-200' => $s['status'] === 'done',
+                            'bg-hk-primary-50 dark:bg-hk-primary-500/10 text-hk-primary-900 dark:text-hk-primary-100' => $s['status'] === 'running',
+                            'bg-red-50 dark:bg-red-950/40 text-red-900 dark:text-red-200' => $s['status'] === 'failed',
+                            'text-zinc-500 dark:text-zinc-400' => $s['status'] === 'pending',
+                        ])>
+                            <span class="mt-0.5 flex size-5 shrink-0 items-center justify-center">
+                                @if ($s['status'] === 'done')
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="size-5 text-emerald-500">
+                                        <path fill-rule="evenodd" d="M16.704 5.29a1 1 0 010 1.42l-7.5 7.5a1 1 0 01-1.42 0l-3.5-3.5a1 1 0 111.42-1.42L8.5 12.08l6.79-6.79a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                                    </svg>
+                                @elseif ($s['status'] === 'running')
+                                    <svg class="size-4 animate-spin text-hk-primary-600" fill="none" viewBox="0 0 24 24">
+                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+                                    </svg>
+                                @elseif ($s['status'] === 'failed')
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="size-5 text-red-500">
+                                        <path fill-rule="evenodd" d="M6.28 5.22a.75.75 0 00-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 101.06 1.06L10 11.06l3.72 3.72a.75.75 0 101.06-1.06L11.06 10l3.72-3.72a.75.75 0 00-1.06-1.06L10 8.94 6.28 5.22z" clip-rule="evenodd"/>
+                                    </svg>
+                                @else
+                                    <span class="block size-2 rounded-full bg-zinc-300 dark:bg-zinc-600"></span>
+                                @endif
+                            </span>
+                            <div class="min-w-0 grow">
+                                <div class="flex items-center justify-between gap-2">
+                                    <span class="font-medium truncate">{{ $s['label'] }}</span>
+                                    @if (! is_null($s['duration']))
+                                        <span class="shrink-0 text-[10px] font-mono text-zinc-500 tabular-nums">{{ number_format($s['duration'], 2) }}s</span>
+                                    @endif
+                                </div>
+                                @if (! empty($s['message']))
+                                    <p @class([
+                                        'mt-0.5 text-xs break-words',
+                                        'text-red-700 dark:text-red-300 font-mono whitespace-pre-wrap' => $s['status'] === 'failed',
+                                        'text-zinc-600 dark:text-zinc-400' => $s['status'] !== 'failed',
+                                    ])>{{ $s['message'] }}</p>
+                                @endif
+                            </div>
+                        </li>
+                    @endforeach
+                </ul>
+
+                <div class="mt-5 flex items-center justify-between gap-3">
+                    @if ($hasFailedStep)
+                        <button
+                            type="button"
+                            wire:click="resetInstallProgress"
+                            x-on:click="close()"
+                            class="text-sm font-medium text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100"
+                        >
+                            {{ __('installer.buttons.back') }}
+                        </button>
+                        <x-ui.button
+                            wire:click="startInstall"
+                            wire:loading.attr="disabled"
+                            wire:target="startInstall,runStep"
+                        >
+                            {{ __('installer.progress.retry') }}
+                        </x-ui.button>
+                    @elseif ($installComplete)
+                        <span></span>
+                        <p class="text-xs text-emerald-700 dark:text-emerald-300 font-medium">
+                            {{ __('installer.progress.success_hint') }}
+                        </p>
+                    @else
+                        <p class="text-xs text-zinc-500 dark:text-zinc-400 italic">
+                            {{ __('installer.progress.hint') }}
+                        </p>
+                        <span></span>
+                    @endif
+                </div>
             </div>
         </div>
-
-        {{-- Auto-close on Livewire request completion if no redirect happened
-             (i.e. install failed and the error message will now render). --}}
-        <script>
-            document.addEventListener('livewire:init', () => {
-                Livewire.hook('commit', ({ succeed }) => {
-                    succeed(({ effects }) => {
-                        // If a redirect is queued we leave the overlay up — the
-                        // navigation will tear down the page anyway.
-                        if (effects && effects.redirect) {
-                            const overlay = document.querySelector('[x-data*=hk-install-started]');
-                            overlay && overlay._x_dataStack && overlay._x_dataStack[0].finish();
-                            return;
-                        }
-                        setTimeout(() => {
-                            const overlay = document.querySelector('[x-data*=hk-install-started]');
-                            if (overlay && overlay._x_dataStack && overlay._x_dataStack[0].open) {
-                                overlay._x_dataStack[0].close();
-                            }
-                        }, 250);
-                    });
-                });
-            });
-        </script>
     </div>
 </div>
