@@ -34,7 +34,16 @@ class ModuleServiceProvider extends ServiceProvider
 
             $instance = $this->app->make($class);
 
-            if ($instance instanceof ModuleContract && ($provider = $instance->provider())) {
+            if (! $instance instanceof ModuleContract) {
+                continue;
+            }
+
+            // Let the module bind its own services / contracts (e.g. provider drivers).
+            if (method_exists($instance, 'register')) {
+                $instance->{'register'}();
+            }
+
+            if ($provider = $instance->provider()) {
                 $this->app->register($provider);
             }
         }

@@ -76,7 +76,7 @@
             <div class="flex items-center gap-3">
                 <x-ui.locale-switcher />
                 @auth
-                    <a href="{{ url('/account') }}" wire:navigate class="text-sm font-medium hover:text-hk-primary-600">Account</a>
+                    <a href="{{ route('dashboard') }}" wire:navigate class="text-sm font-medium hover:text-hk-primary-600">Account</a>
                 @else
                     <a href="{{ route('login') }}" wire:navigate class="text-sm font-medium hover:text-hk-primary-600">Sign in</a>
                 @endauth
