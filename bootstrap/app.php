@@ -1,12 +1,16 @@
 <?php
 
 use App\Http\Middleware\EnsureAppInstalled;
+use App\Http\Middleware\ForceHttps;
 use App\Http\Middleware\RedirectIfInstalled;
+use App\Http\Middleware\SecurityHeaders;
 use App\Http\Middleware\SetLocale;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Support\Facades\Route;
+use Spatie\Csp\AddCspHeaders;
+use Spatie\Honeypot\ProtectAgainstSpam;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -26,11 +30,18 @@ return Application::configure(basePath: dirname(__DIR__))
             'installed' => EnsureAppInstalled::class,
             'not-installed' => RedirectIfInstalled::class,
             'locale' => SetLocale::class,
+            'honeypot' => ProtectAgainstSpam::class,
+        ]);
+
+        $middleware->web(prepend: [
+            ForceHttps::class,
         ]);
 
         $middleware->web(append: [
             EnsureAppInstalled::class,
             SetLocale::class,
+            AddCspHeaders::class,
+            SecurityHeaders::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

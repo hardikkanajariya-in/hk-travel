@@ -16,4 +16,6 @@ Route::middleware(['auth', 'verified'])
         Route::livewire('/', 'pages::admin.dashboard')->name('dashboard');
         Route::livewire('modules', 'pages::admin.modules')->middleware('can:admin.modules.manage')->name('modules');
         Route::livewire('settings', 'pages::admin.settings')->middleware('can:admin.settings.manage')->name('settings');
+        Route::livewire('security', 'pages::admin.security')->middleware('can:admin.security.manage')->name('security');
+        Route::livewire('captcha', 'pages::admin.captcha')->middleware('can:admin.captcha.manage')->name('captcha');
     });

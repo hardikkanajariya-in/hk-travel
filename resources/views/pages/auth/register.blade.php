@@ -41,6 +41,9 @@
             autocomplete="new-password"
         />
 
+        <x-ui.honeypot />
+        <x-ui.captcha action="register" />
+
         <x-ui.button type="submit" class="w-full">{{ __('Create account') }}</x-ui.button>
     </form>
 

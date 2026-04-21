@@ -17,6 +17,9 @@
             autocomplete="email"
         />
 
+        <x-ui.honeypot />
+        <x-ui.captcha action="password-reset" />
+
         <x-ui.button type="submit" class="w-full">{{ __('Send reset link') }}</x-ui.button>
     </form>
 

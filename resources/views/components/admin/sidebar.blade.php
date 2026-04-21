@@ -3,6 +3,8 @@
         ['label' => 'Dashboard', 'route' => 'admin.dashboard', 'icon' => 'home'],
         ['label' => 'Modules', 'route' => 'admin.modules', 'icon' => 'squares-2x2'],
         ['label' => 'Settings', 'route' => 'admin.settings', 'icon' => 'cog-6-tooth'],
+        ['label' => 'Security', 'route' => 'admin.security', 'icon' => 'shield-check'],
+        ['label' => 'Captcha', 'route' => 'admin.captcha', 'icon' => 'shield-exclamation'],
         ['label' => 'Users', 'route' => 'admin.users', 'icon' => 'users'],
     ];
 @endphp

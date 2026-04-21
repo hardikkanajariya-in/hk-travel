@@ -27,6 +27,17 @@ class RolesAndPermissionsSeeder extends Seeder
         'admin.roles.manage',
         'admin.localization.manage',
         'admin.media.manage',
+        'admin.security.manage',
+        'admin.captcha.manage',
+        'admin.audit.view',
+        'admin.audit.purge',
+        'admin.branding.manage',
+        'admin.languages.manage',
+        'admin.permalinks.manage',
+        'admin.redirects.manage',
+        'admin.email-templates.manage',
+        'admin.notifications.manage',
+        'admin.analytics.manage',
     ];
 
     public function run(): void
@@ -49,7 +60,8 @@ class RolesAndPermissionsSeeder extends Seeder
         // we still attach the permission rows so admin UIs reflect the truth.
         $superAdmin->syncPermissions(Permission::all());
 
-        $admin->syncPermissions(array_values(array_filter($all, fn (string $p): bool => $p !== 'admin.roles.manage')));
+        $admin->syncPermissions(array_values(array_filter($all, fn (string $p): bool => $p !== 'admin.roles.manage'
+            && $p !== 'admin.audit.purge')));
 
         $editor->syncPermissions(array_values(array_filter($all, fn (string $p): bool => str_contains($p, '.view')
             || str_contains($p, '.create')

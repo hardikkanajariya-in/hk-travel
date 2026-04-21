@@ -4,9 +4,14 @@ namespace App\Providers;
 
 use App\Actions\Fortify\CreateNewUser;
 use App\Actions\Fortify\ResetUserPassword;
+use App\Core\Captcha\CaptchaService;
+use App\Models\User;
+use App\Rules\Captcha;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Str;
 use Laravel\Fortify\Fortify;
@@ -29,6 +34,7 @@ class FortifyServiceProvider extends ServiceProvider
         $this->configureActions();
         $this->configureViews();
         $this->configureRateLimiting();
+        $this->configureCaptcha();
     }
 
     /**
@@ -67,6 +73,30 @@ class FortifyServiceProvider extends ServiceProvider
             $throttleKey = Str::transliterate(Str::lower($request->input(Fortify::username())).'|'.$request->ip());
 
             return Limit::perMinute(5)->by($throttleKey);
+        });
+    }
+
+    /**
+     * Wire captcha verification into the login flow when enabled. The
+     * register form is handled inside CreateNewUser, and other forms
+     * (password reset, contact, etc.) use the rule directly.
+     */
+    private function configureCaptcha(): void
+    {
+        Fortify::authenticateUsing(function (Request $request) {
+            if (app(CaptchaService::class)->shouldProtect('login')) {
+                Validator::make($request->all(), ['captcha' => [new Captcha]])->validate();
+            }
+
+            $user = config('fortify.username') === 'email'
+                ? User::where('email', $request->input(Fortify::username()))->first()
+                : User::where(Fortify::username(), $request->input(Fortify::username()))->first();
+
+            if ($user && Hash::check($request->input('password'), $user->password)) {
+                return $user;
+            }
+
+            return null;
         });
     }
 }

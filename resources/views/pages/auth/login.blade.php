@@ -38,6 +38,9 @@
 
         <x-ui.checkbox name="remember" :label="__('Remember me')" :checked="(bool) old('remember')" />
 
+        <x-ui.honeypot />
+        <x-ui.captcha action="login" />
+
         <x-ui.button type="submit" class="w-full" data-test="login-button">
             {{ __('Log in') }}
         </x-ui.button>
