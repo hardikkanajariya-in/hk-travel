@@ -1,0 +1,74 @@
+/*
+ * HK Travel design tokens.
+ * Single source of truth for brand colors, fonts, radii, shadows.
+ * Imported by both public theme (app.css) and admin (admin.css).
+ * Runtime overrides for primary/secondary colors are injected by ThemeManager
+ * as inline <style>:root { --hk-color-primary: ... } in the layout head.
+ */
+
+@theme {
+    --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+    --font-display: 'Inter', ui-sans-serif, system-ui, sans-serif;
+    --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, 'Cascadia Mono', 'Segoe UI Mono', monospace;
+
+    --color-hk-primary-50: #eff6ff;
+    --color-hk-primary-100: #dbeafe;
+    --color-hk-primary-200: #bfdbfe;
+    --color-hk-primary-300: #93c5fd;
+    --color-hk-primary-400: #60a5fa;
+    --color-hk-primary-500: #3b82f6;
+    --color-hk-primary-600: #2563eb;
+    --color-hk-primary-700: #1d4ed8;
+    --color-hk-primary-800: #1e40af;
+    --color-hk-primary-900: #1e3a8a;
+    --color-hk-primary-950: #172554;
+
+    --color-hk-accent-50: #fff7ed;
+    --color-hk-accent-100: #ffedd5;
+    --color-hk-accent-200: #fed7aa;
+    --color-hk-accent-300: #fdba74;
+    --color-hk-accent-400: #fb923c;
+    --color-hk-accent-500: #f97316;
+    --color-hk-accent-600: #ea580c;
+    --color-hk-accent-700: #c2410c;
+    --color-hk-accent-800: #9a3412;
+    --color-hk-accent-900: #7c2d12;
+    --color-hk-accent-950: #431407;
+
+    --color-hk-success: #16a34a;
+    --color-hk-warning: #f59e0b;
+    --color-hk-danger: #dc2626;
+    --color-hk-info: #0ea5e9;
+
+    --radius-hk-sm: 0.25rem;
+    --radius-hk-md: 0.5rem;
+    --radius-hk-lg: 0.75rem;
+    --radius-hk-xl: 1rem;
+    --radius-hk-2xl: 1.5rem;
+
+    --shadow-hk-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+    --shadow-hk-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+    --shadow-hk-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+    --shadow-hk-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+
+    --animate-hk-fade-in: hk-fade-in 200ms ease-out;
+    --animate-hk-slide-up: hk-slide-up 250ms cubic-bezier(0.16, 1, 0.3, 1);
+    --animate-hk-shimmer: hk-shimmer 1.6s linear infinite;
+}
+
+@keyframes hk-fade-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes hk-slide-up {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes hk-shimmer {
+    0% { background-position: -468px 0; }
+    100% { background-position: 468px 0; }
+}
+
+@custom-variant dark (&:where(.dark, .dark *));

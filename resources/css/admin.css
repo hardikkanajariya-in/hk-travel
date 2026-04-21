@@ -1,0 +1,36 @@
+/*
+ * Admin entry: Tailwind v4 + HK design tokens.
+ * No third-party UI library; consumes our custom UI kit components.
+ */
+
+@import 'tailwindcss';
+@import './tokens.css';
+
+@source '../views/components/ui';
+@source '../views/livewire/admin';
+@source '../views/admin';
+@source '../../app/Livewire/Admin';
+@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
+
+@layer base {
+    *,
+    ::after,
+    ::before,
+    ::backdrop,
+    ::file-selector-button {
+        border-color: var(--color-gray-200, currentColor);
+    }
+
+    html {
+        -webkit-text-size-adjust: 100%;
+        font-feature-settings: 'cv11', 'ss01', 'ss03';
+    }
+
+    body {
+        @apply bg-zinc-50 text-zinc-900 antialiased;
+    }
+
+    .dark body {
+        @apply bg-zinc-950 text-zinc-100;
+    }
+}
