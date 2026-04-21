@@ -39,7 +39,7 @@ new #[Title('SEO & Sitemaps')] #[Layout('components.layouts.admin')] class exten
             'defaultTitle' => ['nullable', 'string', 'max:120'],
             'defaultTagline' => ['nullable', 'string', 'max:200'],
             'defaultDescription' => ['nullable', 'string', 'max:300'],
-            'defaultImage' => ['nullable', 'url', 'max:500'],
+            'defaultImage' => ['nullable', 'string', 'max:500'],
             'robotsTxt' => ['nullable', 'string', 'max:8000'],
         ]);
 
@@ -84,7 +84,8 @@ new #[Title('SEO & Sitemaps')] #[Layout('components.layouts.admin')] class exten
                 <x-ui.input wire:model="defaultTitle" label="Default title" hint="Shown when a page hasn't set its own title." />
                 <x-ui.input wire:model="defaultTagline" label="Tagline" hint="Appears next to the site name on the home page." />
                 <x-ui.textarea wire:model="defaultDescription" label="Default description" rows="3" hint="Recommended length: 140–160 characters." />
-                <x-ui.input wire:model="defaultImage" label="Default OG image URL" />
+                <x-ui.image-picker wire:model="defaultImage" label="Default share image" folder="seo"
+                                    hint="Shown when one of your pages is shared on social media." />
             </div>
         </x-ui.card>
 

@@ -2,6 +2,7 @@
 
 use App\Core\Installer\InstallationState;
 use App\Core\Modules\ModuleManager;
+use App\Core\Settings\SettingsRepository;
 use App\Models\User;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Hash;
@@ -467,12 +468,20 @@ new #[Title('HK Travel — Install')] #[Layout('components.layouts.installer')] 
     }
 
     /**
-     * Persist module enable/disable choices by writing to the modules
-     * settings table later. For v1 we just keep them in the lock file
-     * since admin module-toggle UI is built next.
+     * Persist module enable/disable choices to the settings store so the
+     * admin Modules page (and ModuleManager) see the same values the user
+     * picked during install. Also keeps a cache copy for legacy lookups.
      */
     protected function persistEnabledModules(): void
     {
+        $settings = app(SettingsRepository::class);
+
+        foreach (array_keys(config('hk-modules.modules', [])) as $key) {
+            $settings->set("modules.$key.enabled", (bool) ($this->modules[$key] ?? false));
+        }
+
+        $settings->flush();
+
         $enabled = collect($this->modules)->filter()->keys()->all();
         cache()->forever('hk:installer:enabled-modules', $enabled);
     }

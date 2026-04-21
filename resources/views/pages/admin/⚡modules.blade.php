@@ -14,6 +14,20 @@ new #[Title('Modules')] #[Layout('components.layouts.admin')] class extends Comp
 
     public function mount(SettingsRepository $settings): void
     {
+        // Back-fill from the installer's cached selection if the settings
+        // store is still empty (older installs wrote the choice to cache
+        // only and never to settings, so the toggles all looked Off).
+        $stored = $settings->get('modules');
+        if (! is_array($stored) || $stored === []) {
+            $cached = cache()->get('hk:installer:enabled-modules');
+            if (is_array($cached) && $cached !== []) {
+                foreach ($cached as $key) {
+                    $settings->set("modules.$key.enabled", true);
+                }
+                $settings->flush();
+            }
+        }
+
         foreach (config('hk-modules.modules', []) as $key => $module) {
             $this->enabled[$key] = (bool) $settings->get("modules.$key.enabled", $module['enabled'] ?? false);
         }

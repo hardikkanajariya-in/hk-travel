@@ -254,7 +254,8 @@ new #[Title('Settings')] #[Layout('components.layouts.admin')] class extends Com
                     <x-ui.input wire:model="state.seo_canonical_host" label="Preferred website address"
                                   placeholder="https://www.example.com"
                                   hint="Optional. Helps avoid duplicate-content issues if your site is reachable on multiple addresses." />
-                    <x-ui.input wire:model="state.seo_og_image" label="Default share image (URL)"
+                    <x-ui.image-picker wire:model="state.seo_og_image" label="Default share image"
+                                  folder="seo"
                                   hint="Shown when someone shares any page of your site on social media." />
                 </div>
                 <div class="mt-4">

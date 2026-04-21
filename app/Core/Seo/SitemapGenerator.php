@@ -5,6 +5,8 @@ namespace App\Core\Seo;
 use App\Core\Modules\ModuleManager;
 use App\Models\Page;
 use Illuminate\Filesystem\Filesystem;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Schema;
 use Spatie\Sitemap\Sitemap;
 use Spatie\Sitemap\SitemapIndex;
 use Spatie\Sitemap\Tags\Url;
@@ -33,29 +35,52 @@ class SitemapGenerator
 
         $written = [];
 
-        // Pages sitemap.
+        // Pages sitemap — always include the homepage, then every published
+        // page. Routes resolve through PageController so the URL matches
+        // what visitors actually see.
         $pages = Sitemap::create();
-        Page::query()->where('status', 'published')->get()->each(function (Page $p) use ($pages): void {
-            $pages->add(
-                Url::create('/'.$p->slug)
-                    ->setLastModificationDate($p->updated_at ?? $p->published_at ?? now())
-                    ->setChangeFrequency(Url::CHANGE_FREQUENCY_WEEKLY)
-                    ->setPriority($p->is_homepage ? 1.0 : 0.7)
-            );
-        });
+        $pages->add(
+            Url::create(route('home'))
+                ->setLastModificationDate(Carbon::now())
+                ->setChangeFrequency(Url::CHANGE_FREQUENCY_DAILY)
+                ->setPriority(1.0)
+        );
+
+        if (Schema::hasTable('pages')) {
+            Page::query()
+                ->where('status', 'published')
+                ->whereNotNull('slug')
+                ->get()
+                ->each(function (Page $p) use ($pages): void {
+                    if ($p->is_homepage ?? false) {
+                        return; // already added as `/`
+                    }
+                    $pages->add(
+                        Url::create(url('/'.ltrim((string) $p->slug, '/')))
+                            ->setLastModificationDate($p->updated_at ?? $p->published_at ?? Carbon::now())
+                            ->setChangeFrequency(Url::CHANGE_FREQUENCY_WEEKLY)
+                            ->setPriority(0.7)
+                    );
+                });
+        }
+
         $pages->writeToFile($base.DIRECTORY_SEPARATOR.'sitemap-pages.xml');
         $written[] = url('/sitemaps/sitemap-pages.xml');
 
         // Module-contributed sitemaps. Modules opt in by exposing a
-        // `sitemapUrls(): iterable` method on their manifest class.
+        // `sitemapUrls(): iterable<Url|string>` method on their manifest class.
         foreach ($this->modules->all() as $key => $module) {
             if (! $this->modules->enabled((string) $key) || ! method_exists($module, 'sitemapUrls')) {
                 continue;
             }
             $sm = Sitemap::create();
-            $urls = $module->{'sitemapUrls'}();
-            foreach ((array) $urls as $u) {
-                $sm->add($u);
+            $count = 0;
+            foreach ((array) $module->{'sitemapUrls'}() as $u) {
+                $sm->add($u instanceof Url ? $u : Url::create((string) $u));
+                $count++;
+            }
+            if ($count === 0) {
+                continue;
             }
             $slug = strtolower((string) $key);
             $sm->writeToFile($base.DIRECTORY_SEPARATOR."sitemap-{$slug}.xml");
@@ -72,6 +97,7 @@ class SitemapGenerator
         return [
             'index' => $base.DIRECTORY_SEPARATOR.'sitemap.xml',
             'children' => $written,
+            'page_count' => count($pages->getTags()),
         ];
     }
 }

@@ -24,7 +24,7 @@
 4. **Custom UI kit scaffold** in `resources/views/components/ui/` — button, input, textarea, select, checkbox, radio, switch, badge, card, modal, drawer, dropdown, menu, table, tabs, accordion, tooltip, toast, alert, breadcrumbs, pagination, skeleton, spinner, progress, datepicker, daterangepicker, file-uploader, image-cropper, rich-text, kanban-board, calendar, color-picker, code-editor.
 5. Folder layout: `app/Core/{Settings,Theme,Installer,Localization,Modules,Permalink,Cache,Security,Storage,Captcha,Notifications,Email}` + `app/Modules/`. Build `ModuleManager` + base `ModuleServiceProvider`.
 6. `config/hk.php` + DB-overridable file-cached `SettingsRepository`.
-7. **`StorageManager`** wrapping Laravel filesystem; ships `local` (public + private); S3/Spaces/GCS adapters present but disabled with admin "Coming soon" placeholders.
+7. **`StorageManager`** wrapping Laravel filesystem; ships `local` (public + private); S3/Spaces/GCS adapters present but disabled with admin "Coming soon" placeholders. Every admin image input goes through `<x-ui.image-picker>` → `MediaUploadController` → `StorageManager::publicDisk()`, so swapping in a cloud disk later requires no view edits.
 8. Web installer wizard (lock file): requirements → DB choice → URL/locale/timezone → admin user → modules to enable → captcha keys (skippable) → write `.env` → migrate+seed → cache warm → write lock.
 
 **Auth, Users, Security, Captcha**

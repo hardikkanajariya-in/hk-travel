@@ -304,7 +304,8 @@ new #[Title('Edit page')] #[Layout('components.layouts.admin')] class extends Co
                     <div class="space-y-3">
                         <x-ui.input wire:model="seo.meta_title" label="Meta title" />
                         <x-ui.textarea wire:model="seo.meta_description" label="Meta description" rows="3" />
-                        <x-ui.input wire:model="seo.og_image" label="OG image URL" />
+                        <x-ui.image-picker wire:model="seo.og_image" label="Share image" folder="pages"
+                                            hint="Shown when this page is shared on social media." />
                         <label class="flex items-center gap-2 text-sm">
                             <input type="checkbox" wire:model="seo.noindex" class="size-4 rounded border-zinc-300 text-hk-primary-600 focus:ring-hk-primary-500">
                             Hide from search engines (noindex)

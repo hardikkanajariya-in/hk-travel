@@ -85,7 +85,6 @@
             'items' => [
                 ['label' => 'Settings', 'route' => 'admin.settings'],
                 ['label' => 'Modules', 'route' => 'admin.modules'],
-                ['label' => 'Languages', 'route' => 'admin.languages'],
                 ['label' => 'Permalinks', 'route' => 'admin.permalinks'],
                 ['label' => 'SEO', 'route' => 'admin.seo'],
             ],

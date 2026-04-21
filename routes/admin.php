@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\MediaUploadController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -20,7 +21,6 @@ Route::middleware(['auth', 'verified'])
         Route::livewire('captcha', 'pages::admin.captcha')->middleware('can:admin.captcha.manage')->name('captcha');
         Route::livewire('audit', 'pages::admin.audit')->middleware('can:admin.audit.view')->name('audit');
         Route::livewire('branding', 'pages::admin.branding')->middleware('can:admin.branding.manage')->name('branding');
-        Route::livewire('languages', 'pages::admin.languages')->middleware('can:admin.languages.manage')->name('languages');
         Route::livewire('permalinks', 'pages::admin.permalinks')->middleware('can:admin.permalinks.manage')->name('permalinks');
         Route::livewire('email-templates', 'pages::admin.email-templates')->middleware('can:admin.email-templates.manage')->name('email-templates');
         Route::livewire('notifications', 'pages::admin.notifications')->middleware('can:admin.notifications.manage')->name('notifications');
@@ -40,4 +40,10 @@ Route::middleware(['auth', 'verified'])
             Route::livewire('leads/{lead}', 'pages::admin.lead-detail')->middleware('can:admin.crm.leads.view')->name('leads.show');
             Route::livewire('pipelines', 'pages::admin.pipelines')->middleware('can:admin.crm.pipelines.manage')->name('pipelines');
         });
+
+        // Shared media upload endpoint used by <x-ui.image-picker>. Saves
+        // through the public disk (StorageManager) so adding S3/Spaces/GCS
+        // later requires no view changes.
+        Route::post('media/upload-image', [MediaUploadController::class, 'image'])
+            ->name('media.upload-image');
     });

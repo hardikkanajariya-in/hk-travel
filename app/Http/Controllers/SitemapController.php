@@ -15,7 +15,9 @@ class SitemapController extends Controller
     {
         $path = public_path('sitemaps/sitemap.xml');
 
-        if (! $this->files->exists($path)) {
+        // Regenerate if missing OR older than 1 hour. Keeps the file fresh
+        // without forcing an expensive rebuild on every public request.
+        if (! $this->files->exists($path) || (time() - $this->files->lastModified($path)) > 3600) {
             $generator->generate();
         }
 
