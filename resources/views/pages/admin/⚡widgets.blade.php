@@ -8,9 +8,12 @@ use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Component;
 
-new #[Title('Widget zones')] #[Layout('components.layouts.admin')] class extends Component {
+new #[Title('Footer & sidebar blocks')] #[Layout('components.layouts.admin')] class extends Component {
     /** @var array<int, string> */
     public array $zones = [];
+
+    /** @var array<int, string> */
+    public array $allZones = [];
 
     public string $activeZone = '';
 
@@ -21,14 +24,67 @@ new #[Title('Widget zones')] #[Layout('components.layouts.admin')] class extends
 
     public string $newType = '';
 
+    public int $footerColumns = 3;
+
     public ?string $flash = null;
 
     public function mount(): void
     {
         $themeKey = (string) app(SettingsRepository::class)->get('theme.active', config('hk.theme.active', 'default'));
         $theme = app(ThemeManager::class)->all()->get($themeKey);
-        $this->zones = (array) ($theme?->supports['widget_areas'] ?? ['footer-1', 'footer-2', 'footer-3', 'sidebar']);
-        $this->activeZone = $this->zones[0] ?? 'footer-1';
+        $this->allZones = (array) ($theme?->supports['widget_areas'] ?? ['footer-1', 'footer-2', 'footer-3', 'sidebar']);
+
+        $this->footerColumns = (int) app(SettingsRepository::class)->get('theme.footer_columns', 3);
+        $this->footerColumns = max(1, min(4, $this->footerColumns));
+
+        $this->zones = $this->visibleZones();
+        $this->activeZone = $this->zones[0] ?? ($this->allZones[0] ?? 'footer-1');
+    }
+
+    /**
+     * Restrict the footer columns visible in the tabs to the number the user
+     * has chosen, while keeping non-footer zones (e.g. "sidebar") intact.
+     *
+     * @return array<int, string>
+     */
+    protected function visibleZones(): array
+    {
+        return collect($this->allZones)
+            ->filter(function (string $zone): bool {
+                if (! str_starts_with($zone, 'footer-')) {
+                    return true;
+                }
+                $n = (int) substr($zone, 7);
+
+                return $n >= 1 && $n <= $this->footerColumns;
+            })
+            ->values()
+            ->all();
+    }
+
+    public function updatedFooterColumns(): void
+    {
+        $this->footerColumns = max(1, min(4, (int) $this->footerColumns));
+        app(SettingsRepository::class)->set('theme.footer_columns', $this->footerColumns);
+        $this->zones = $this->visibleZones();
+        if (! in_array($this->activeZone, $this->zones, true)) {
+            $this->activeZone = $this->zones[0] ?? '';
+            $this->editingWidget = null;
+        }
+        $this->flash = 'Footer layout updated.';
+    }
+
+    /**
+     * Human-friendly label for a zone key. Keeps the technical key out of
+     * the UI per our non-technical-user rules.
+     */
+    public function zoneLabel(string $zone): string
+    {
+        return match (true) {
+            $zone === 'sidebar' => 'Sidebar',
+            str_starts_with($zone, 'footer-') => 'Footer column '.substr($zone, 7),
+            default => \Illuminate\Support\Str::headline($zone),
+        };
     }
 
     public function selectZone(string $zone): void
@@ -144,40 +200,61 @@ new #[Title('Widget zones')] #[Layout('components.layouts.admin')] class extends
 ?>
 
 <div class="space-y-6">
-    <x-admin.page-header title="Widget zones" description="Drop reusable blocks into theme-defined zones (sidebar, footer, etc.)." />
+    <x-admin.page-header
+        title="Footer & sidebar blocks"
+        description="Choose how many columns your footer has and add reusable blocks (about text, links, contact info…) into each column."
+    />
 
     @if ($flash)
         <x-admin.flash :message="$flash" />
     @endif
 
-    {{-- Zone tabs --}}
-    <div class="flex flex-wrap gap-2 border-b border-zinc-200 dark:border-zinc-800">
-        @foreach ($zones as $zone)
-            <button type="button" wire:click="selectZone('{{ $zone }}')"
-                    @class([
-                        '-mb-px px-4 py-2 text-sm font-medium border-b-2 transition',
-                        'border-hk-primary-500 text-hk-primary-700 dark:text-hk-primary-300' => $activeZone === $zone,
-                        'border-transparent text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-200' => $activeZone !== $zone,
-                    ])>
-                <span class="font-mono">@{{ $zone }}</span>
-                <span class="ml-1 text-xs text-zinc-400">({{ \App\Models\Widget::where('zone', $zone)->count() }})</span>
-            </button>
-        @endforeach
+    {{-- Zone tabs + inline footer-columns chooser --}}
+    <div class="flex flex-wrap items-end justify-between gap-3 border-b border-zinc-200 dark:border-zinc-800">
+        <div class="flex flex-wrap gap-2">
+            @foreach ($zones as $zone)
+                <button type="button" wire:click="selectZone('{{ $zone }}')"
+                        @class([
+                            '-mb-px px-4 py-2 text-sm font-medium border-b-2 transition',
+                            'border-hk-primary-500 text-hk-primary-700 dark:text-hk-primary-300' => $activeZone === $zone,
+                            'border-transparent text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-200' => $activeZone !== $zone,
+                        ])>
+                    <span>{{ $this->zoneLabel($zone) }}</span>
+                    <span class="ml-1 text-xs text-zinc-400">({{ \App\Models\Widget::where('zone', $zone)->count() }})</span>
+                </button>
+            @endforeach
+        </div>
+
+        <div class="-mb-px flex items-center gap-2 pb-2">
+            <label for="footerColumns" class="text-xs text-zinc-500">Footer columns</label>
+            <select id="footerColumns" wire:model.live="footerColumns"
+                    class="rounded-md border border-zinc-300 bg-white px-2 py-1 text-xs font-medium text-zinc-700 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-200">
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+                <option value="4">4</option>
+            </select>
+        </div>
     </div>
 
     <div class="grid grid-cols-1 gap-6 lg:grid-cols-12">
         {{-- Widget list --}}
         <div class="lg:col-span-8">
             <x-ui.card>
-                <div class="mb-4 flex items-center justify-between gap-2">
-                    <h3 class="text-sm font-semibold">Widgets in <code class="rounded bg-zinc-100 px-1 dark:bg-zinc-800">{{ $activeZone }}</code></h3>
-                    <div class="flex items-center gap-2">
-                        <select wire:model="newType" class="rounded-md border border-zinc-300 px-3 py-1.5 text-sm dark:border-zinc-700 dark:bg-zinc-900">
-                            <option value="">— pick widget type —</option>
-                            @foreach ($this->availableTypes() as $key => $label)
-                                <option value="{{ $key }}">{{ $label }}</option>
-                            @endforeach
-                        </select>
+                <div class="mb-4 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+                    <div>
+                        <h3 class="text-sm font-semibold">Blocks in {{ $this->zoneLabel($activeZone) }}</h3>
+                        <p class="mt-0.5 text-xs text-zinc-500">Drag to reorder. Click a block to edit its content.</p>
+                    </div>
+                    <div class="flex items-end gap-2">
+                        <div class="min-w-[14rem]">
+                            <x-ui.select
+                                wire:model="newType"
+                                label="Add a block"
+                                placeholder="Choose a block type…"
+                                :options="$this->availableTypes()"
+                            />
+                        </div>
                         <x-ui.button size="sm" wire:click="addWidget">+ Add</x-ui.button>
                     </div>
                 </div>
@@ -209,7 +286,7 @@ new #[Title('Widget zones')] #[Layout('components.layouts.admin')] class extends
                         </li>
                     @empty
                         <li class="rounded-lg border-2 border-dashed border-zinc-200 bg-zinc-50 p-12 text-center text-sm text-zinc-500 dark:border-zinc-800 dark:bg-zinc-900">
-                            No widgets in this zone yet.
+                            Nothing in this column yet. Pick a block type on the right and click <strong>+ Add</strong>.
                         </li>
                     @endforelse
                 </ul>
@@ -263,7 +340,7 @@ new #[Title('Widget zones')] #[Layout('components.layouts.admin')] class extends
                 </x-ui.card>
             @else
                 <div class="rounded-lg border-2 border-dashed border-zinc-200 bg-zinc-50 p-8 text-center text-sm text-zinc-500 dark:border-zinc-800 dark:bg-zinc-900">
-                    Select a widget to edit.
+                    Click a block on the left to edit its content.
                 </div>
             @endif
         </div>

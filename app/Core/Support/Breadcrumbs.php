@@ -25,7 +25,7 @@ class Breadcrumbs
         'admin.pages' => 'Pages',
         'admin.page-editor' => 'Edit page',
         'admin.menus' => 'Menus',
-        'admin.widgets' => 'Widgets',
+        'admin.widgets' => 'Footer & sidebar',
         'admin.contact-forms' => 'Forms',
         'admin.contact-form-builder' => 'Form builder',
         'admin.contact-submissions' => 'Submissions',

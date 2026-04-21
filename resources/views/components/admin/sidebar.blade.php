@@ -45,7 +45,7 @@
             'items' => [
                 ['label' => 'Pages', 'route' => 'admin.pages'],
                 ['label' => 'Menus', 'route' => 'admin.menus'],
-                ['label' => 'Widgets', 'route' => 'admin.widgets'],
+                ['label' => 'Footer & sidebar', 'route' => 'admin.widgets'],
                 ['label' => 'Forms', 'route' => 'admin.contact-forms'],
                 ['label' => 'Submissions', 'route' => 'admin.contact-submissions'],
             ],

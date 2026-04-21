@@ -11,6 +11,6 @@ return [
         'dark_mode' => true,
         'rtl' => true,
         'header_menus' => ['primary', 'footer'],
-        'widget_areas' => ['footer-1', 'footer-2', 'footer-3', 'sidebar'],
+        'widget_areas' => ['footer-1', 'footer-2', 'footer-3', 'footer-4', 'sidebar'],
     ],
 ];

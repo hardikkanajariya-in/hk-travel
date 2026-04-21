@@ -9,20 +9,35 @@
     $phone = $settings->get('contact.phone');
     $addr  = $settings->get('contact.address');
 
+    // Admin-configurable: how many content columns sit next to the brand block.
+    // Brand column is always shown, so total columns = $columns + 1 (capped at 5).
+    $columns = (int) $settings->get('theme.footer_columns', 3);
+    $columns = max(1, min(4, $columns));
+
     // Friendly fallback content shown when an admin has not yet added widgets
     // to a footer column — so a fresh install never looks empty.
     $hasWidgets = [
         1 => Widget::forZone('footer-1')->isNotEmpty(),
         2 => Widget::forZone('footer-2')->isNotEmpty(),
         3 => Widget::forZone('footer-3')->isNotEmpty(),
+        4 => Widget::forZone('footer-4')->isNotEmpty(),
     ];
+
+    // Tailwind needs the classes to appear verbatim, so map column count to a
+    // pre-known class string instead of building it dynamically.
+    $gridClass = match ($columns) {
+        1 => 'md:grid-cols-2 lg:grid-cols-2',
+        2 => 'md:grid-cols-2 lg:grid-cols-3',
+        3 => 'md:grid-cols-2 lg:grid-cols-4',
+        4 => 'md:grid-cols-2 lg:grid-cols-5',
+    };
 @endphp
 
 <footer class="relative mt-20 overflow-hidden border-t border-zinc-200 bg-gradient-to-b from-zinc-50 to-white dark:border-zinc-800 dark:from-zinc-900 dark:to-zinc-950">
     <x-theme.decoration variant="dots" class="absolute -right-10 top-10 size-40 text-hk-primary-200/40 dark:text-hk-primary-900/30" />
     <x-theme.decoration variant="blob-a" class="absolute -left-32 bottom-0 size-[26rem] text-hk-primary-100/40 dark:text-hk-primary-950/30" />
 
-    <div class="relative mx-auto grid max-w-7xl grid-cols-1 gap-10 px-4 py-14 sm:px-6 md:grid-cols-2 lg:grid-cols-4 lg:px-8">
+    <div class="relative mx-auto grid max-w-7xl grid-cols-1 gap-10 px-4 py-14 sm:px-6 {{ $gridClass }} lg:px-8">
 
         {{-- Brand column --}}
         <div class="lg:col-span-1">
@@ -57,6 +72,7 @@
         </div>
 
         {{-- Column 1: zone or fallback "About" --}}
+        @if ($columns >= 1)
         <div>
             @if ($hasWidgets[1])
                 @zone('footer-1')
@@ -70,8 +86,10 @@
                 </ul>
             @endif
         </div>
+        @endif
 
         {{-- Column 2: zone or fallback footer menu --}}
+        @if ($columns >= 2)
         <div>
             @if ($hasWidgets[2])
                 @zone('footer-2')
@@ -84,8 +102,10 @@
                 </ul>
             @endif
         </div>
+        @endif
 
         {{-- Column 3: zone or fallback contact --}}
+        @if ($columns >= 3)
         <div>
             @if ($hasWidgets[3])
                 @zone('footer-3')
@@ -116,6 +136,19 @@
                 </ul>
             @endif
         </div>
+        @endif
+
+        {{-- Column 4: optional, widget zone only (no fallback) --}}
+        @if ($columns >= 4)
+        <div>
+            @if ($hasWidgets[4])
+                @zone('footer-4')
+            @else
+                <h3 class="text-sm font-bold uppercase tracking-widest text-zinc-900 dark:text-zinc-100">{{ __('More') }}</h3>
+                <p class="mt-4 text-sm text-zinc-500">{{ __('Add blocks to this column from the admin to fill it.') }}</p>
+            @endif
+        </div>
+        @endif
     </div>
 
     <div class="relative border-t border-zinc-200 dark:border-zinc-800">
