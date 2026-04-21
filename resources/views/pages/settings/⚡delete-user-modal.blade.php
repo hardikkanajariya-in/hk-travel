@@ -10,41 +10,35 @@ new class extends Component {
 
     public string $password = '';
 
-    /**
-     * Delete the currently authenticated user.
-     */
     public function deleteUser(Logout $logout): void
     {
-        $this->validate([
-            'password' => $this->currentPasswordRules(),
-        ]);
+        $this->validate(['password' => $this->currentPasswordRules()]);
 
         tap(Auth::user(), $logout(...))->delete();
 
         $this->redirect('/', navigate: true);
     }
-}; ?>
+};
 
-<flux:modal name="confirm-user-deletion" :show="$errors->isNotEmpty()" focusable class="max-w-lg">
-    <form method="POST" wire:submit="deleteUser" class="space-y-6">
-        <div>
-            <flux:heading size="lg">{{ __('Are you sure you want to delete your account?') }}</flux:heading>
+?>
 
-            <flux:subheading>
-                {{ __('Once your account is deleted, all of its resources and data will be permanently deleted. Please enter your password to confirm you would like to permanently delete your account.') }}
-            </flux:subheading>
-        </div>
+<div>
+    <x-ui.modal name="confirm-user-deletion" :title="__('Delete account')" maxWidth="lg">
+        <form wire:submit="deleteUser" class="space-y-5">
+            <p class="text-sm text-zinc-600 dark:text-zinc-400">
+                {{ __('Once your account is deleted, all of its resources and data will be permanently deleted. Please enter your password to confirm.') }}
+            </p>
 
-        <flux:input wire:model="password" :label="__('Password')" type="password" viewable />
+            <x-ui.input wire:model="password" type="password" :label="__('Password')" :error="$errors->first('password')" required />
 
-        <div class="flex justify-end space-x-2 rtl:space-x-reverse">
-            <flux:modal.close>
-                <flux:button variant="filled">{{ __('Cancel') }}</flux:button>
-            </flux:modal.close>
-
-            <flux:button variant="danger" type="submit" data-test="confirm-delete-user-button">
-                {{ __('Delete account') }}
-            </flux:button>
-        </div>
-    </form>
-</flux:modal>
+            <div class="flex justify-end gap-2">
+                <x-ui.button variant="secondary" type="button" x-on:click="$dispatch('close-modal', { name: 'confirm-user-deletion' })">
+                    {{ __('Cancel') }}
+                </x-ui.button>
+                <x-ui.button variant="danger" type="submit" data-test="confirm-delete-user-button">
+                    {{ __('Delete account') }}
+                </x-ui.button>
+            </div>
+        </form>
+    </x-ui.modal>
+</div>

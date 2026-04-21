@@ -17,8 +17,8 @@
                     </button>
                 </x-slot:trigger>
 
-                <x-ui.dropdown-item :href="route('settings.profile.edit')">Profile</x-ui.dropdown-item>
-                <x-ui.dropdown-item :href="route('settings.security.edit')">Security</x-ui.dropdown-item>
+                <x-ui.dropdown-item :href="route('profile.edit')">Profile</x-ui.dropdown-item>
+                <x-ui.dropdown-item :href="route('security.edit')">Security</x-ui.dropdown-item>
                 <div class="my-1 border-t border-zinc-200 dark:border-zinc-800"></div>
                 <form method="POST" action="{{ route('logout') }}">
                     @csrf

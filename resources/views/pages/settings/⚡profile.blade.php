@@ -2,34 +2,28 @@
 
 use App\Concerns\ProfileValidationRules;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
-use Flux\Flux;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Computed;
+use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Component;
 
-new #[Title('Profile settings')] class extends Component {
+new #[Title('Profile settings')] #[Layout('components.layouts.admin')] class extends Component {
     use ProfileValidationRules;
 
     public string $name = '';
     public string $email = '';
+    public ?string $flash = null;
 
-    /**
-     * Mount the component.
-     */
     public function mount(): void
     {
         $this->name = Auth::user()->name;
         $this->email = Auth::user()->email;
     }
 
-    /**
-     * Update the profile information for the currently authenticated user.
-     */
     public function updateProfileInformation(): void
     {
         $user = Auth::user();
-
         $validated = $this->validate($this->profileRules($user->id));
 
         $user->fill($validated);
@@ -40,12 +34,9 @@ new #[Title('Profile settings')] class extends Component {
 
         $user->save();
 
-        Flux::toast(variant: 'success', text: __('Profile updated.'));
+        $this->flash = __('Profile updated.');
     }
 
-    /**
-     * Send an email verification notification to the current user.
-     */
     public function resendVerificationNotification(): void
     {
         $user = Auth::user();
@@ -57,8 +48,7 @@ new #[Title('Profile settings')] class extends Component {
         }
 
         $user->sendEmailVerificationNotification();
-
-        Flux::toast(text: __('A new verification link has been sent to your email address.'));
+        $this->flash = __('A new verification link has been sent to your email address.');
     }
 
     #[Computed]
@@ -73,43 +63,41 @@ new #[Title('Profile settings')] class extends Component {
         return ! Auth::user() instanceof MustVerifyEmail
             || (Auth::user() instanceof MustVerifyEmail && Auth::user()->hasVerifiedEmail());
     }
-}; ?>
+};
 
-<section class="w-full">
-    @include('partials.settings-heading')
+?>
 
-    <flux:heading class="sr-only">{{ __('Profile settings') }}</flux:heading>
+<div>
+    <x-settings.shell :heading="__('Profile')" :subheading="__('Update your name and email address')">
+        @if ($flash)
+            <x-ui.alert variant="success" :dismissible="true" class="mb-4">{{ $flash }}</x-ui.alert>
+        @endif
 
-    <x-pages::settings.layout :heading="__('Profile')" :subheading="__('Update your name and email address')">
-        <form wire:submit="updateProfileInformation" class="my-6 w-full space-y-6">
-            <flux:input wire:model="name" :label="__('Name')" type="text" required autofocus autocomplete="name" />
+        <form wire:submit="updateProfileInformation" class="space-y-5">
+            <x-ui.input wire:model="name" :label="__('Name')" :error="$errors->first('name')" required autofocus autocomplete="name" />
 
             <div>
-                <flux:input wire:model="email" :label="__('Email')" type="email" required autocomplete="email" />
+                <x-ui.input wire:model="email" type="email" :label="__('Email')" :error="$errors->first('email')" required autocomplete="email" />
 
                 @if ($this->hasUnverifiedEmail)
-                    <div>
-                        <flux:text class="mt-4">
-                            {{ __('Your email address is unverified.') }}
-
-                            <flux:link class="text-sm cursor-pointer" wire:click.prevent="resendVerificationNotification">
-                                {{ __('Click here to re-send the verification email.') }}
-                            </flux:link>
-                        </flux:text>
-
-                    </div>
+                    <p class="mt-2 text-sm text-zinc-600 dark:text-zinc-400">
+                        {{ __('Your email address is unverified.') }}
+                        <button type="button" wire:click.prevent="resendVerificationNotification" class="text-hk-primary-600 hover:underline">
+                            {{ __('Click here to re-send the verification email.') }}
+                        </button>
+                    </p>
                 @endif
             </div>
 
-            <div class="flex items-center gap-4">
-                <flux:button variant="primary" type="submit" data-test="update-profile-button">
-                    {{ __('Save') }}
-                </flux:button>
+            <div>
+                <x-ui.button type="submit" data-test="update-profile-button">{{ __('Save') }}</x-ui.button>
             </div>
         </form>
 
         @if ($this->showDeleteUser)
-            <livewire:pages::settings.delete-user-form />
+            <div class="mt-12 pt-6 border-t border-zinc-200 dark:border-zinc-800">
+                <livewire:pages::settings.delete-user-form />
+            </div>
         @endif
-    </x-pages::settings.layout>
-</section>
+    </x-settings.shell>
+</div>
