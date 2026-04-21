@@ -12,6 +12,7 @@ use App\Core\Theme\ThemeManager;
 use Illuminate\Cache\Repository as CacheRepository;
 use Illuminate\Filesystem\Filesystem;
 use Illuminate\Filesystem\FilesystemManager;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Translation\Translator;
 
@@ -60,5 +61,8 @@ class HkCoreServiceProvider extends ServiceProvider
         // Activate the configured public theme; safe to call even when no
         // theme is installed (it falls back to bare app views).
         $this->app->make(ThemeManager::class)->activate();
+
+        // super-admin role bypasses every Gate::check().
+        Gate::before(fn ($user, string $ability) => method_exists($user, 'hasRole') && $user->hasRole('super-admin') ? true : null);
     }
 }

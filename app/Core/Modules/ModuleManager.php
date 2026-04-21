@@ -2,6 +2,7 @@
 
 namespace App\Core\Modules;
 
+use App\Core\Settings\SettingsRepository;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Support\Collection;
 
@@ -28,9 +29,12 @@ class ModuleManager
     public function discover(): self
     {
         $modules = config('hk-modules.modules', []);
+        $overrides = $this->safelyResolveOverrides();
 
         foreach ($modules as $key => $config) {
-            if (! ($config['enabled'] ?? false)) {
+            $enabled = $overrides[$key] ?? ($config['enabled'] ?? false);
+
+            if (! $enabled) {
                 continue;
             }
 
@@ -50,6 +54,35 @@ class ModuleManager
         }
 
         return $this;
+    }
+
+    /**
+     * Pull per-module enable flags from SettingsRepository.
+     * Returns [] when settings table doesn't exist yet (pre-install).
+     *
+     * @return array<string, bool>
+     */
+    protected function safelyResolveOverrides(): array
+    {
+        try {
+            $settings = $this->app->make(SettingsRepository::class);
+            $value = $settings->get('modules');
+        } catch (\Throwable) {
+            return [];
+        }
+
+        if (! is_array($value)) {
+            return [];
+        }
+
+        $out = [];
+        foreach ($value as $key => $row) {
+            if (is_array($row) && array_key_exists('enabled', $row)) {
+                $out[$key] = (bool) $row['enabled'];
+            }
+        }
+
+        return $out;
     }
 
     /** @return Collection<string, ModuleContract> */

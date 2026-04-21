@@ -154,7 +154,7 @@ new #[Title('HK Travel — Install')] #[Layout('components.layouts.installer')] 
                 'email' => $this->adminEmail,
                 'password' => Hash::make($this->adminPassword),
                 'email_verified_at' => now(),
-            ]);
+            ])->assignRole('super-admin');
 
             $this->persistEnabledModules();
 
