@@ -240,7 +240,7 @@ new #[Title('Leads')] #[Layout('components.layouts.admin')] class extends Compon
                             <td class="px-3 py-2 text-xs text-zinc-500 whitespace-nowrap">{{ $l->created_at?->diffForHumans() }}</td>
                             <td class="px-3 py-2 text-right">
                                 <a href="{{ route('admin.crm.leads.show', $l) }}" wire:navigate class="text-xs text-hk-primary-600 hover:underline">Open</a>
-                                <button wire:click="delete({{ $l->id }})" wire:confirm="Delete this lead?" class="ml-3 text-xs text-red-600 hover:underline">Delete</button>
+                                <button wire:click="delete({{ $l->id }})" wire:confirm="{{ __('admin.confirm.delete_lead') }}" class="ml-3 text-xs text-red-600 hover:underline">{{ __('admin.actions.delete') }}</button>
                             </td>
                         </tr>
                     @empty

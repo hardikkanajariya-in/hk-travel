@@ -321,7 +321,7 @@ new #[Title('Menus')] #[Layout('components.layouts.admin')] class extends Compon
                         </div>
                         <div class="flex items-center gap-2">
                             <button wire:click="editMenu({{ $currentMenu->id }})" class="text-xs text-hk-primary-600 hover:underline">Settings</button>
-                            <button wire:click="deleteMenu({{ $currentMenu->id }})" wire:confirm="Delete this menu?" class="text-xs text-red-600 hover:underline">Delete</button>
+                            <button wire:click="deleteMenu({{ $currentMenu->id }})" wire:confirm="{{ __('admin.confirm.delete_menu') }}" class="text-xs text-red-600 hover:underline">{{ __('admin.actions.delete') }}</button>
                             <x-ui.button size="sm" wire:click="newItem">+ Add item</x-ui.button>
                         </div>
                     </div>
@@ -341,7 +341,7 @@ new #[Title('Menus')] #[Layout('components.layouts.admin')] class extends Compon
                                     <span class="font-mono text-xs text-zinc-400">{{ $item->resolveUrl($editingLocale) }}</span>
                                     <button wire:click="newItem({{ $item->id }})" class="text-xs text-hk-primary-600 hover:underline">+ Child</button>
                                     <button wire:click="editItem({{ $item->id }})" class="text-xs text-zinc-500 hover:underline">Edit</button>
-                                    <button wire:click="deleteItem({{ $item->id }})" wire:confirm="Delete this item?" class="text-xs text-red-600 hover:underline">Delete</button>
+                                    <button wire:click="deleteItem({{ $item->id }})" wire:confirm="{{ __('admin.confirm.delete_item') }}" class="text-xs text-red-600 hover:underline">{{ __('admin.actions.delete') }}</button>
                                 </div>
 
                                 @php $children = $item->children->sortBy('position')->values(); @endphp
@@ -357,7 +357,7 @@ new #[Title('Menus')] #[Layout('components.layouts.admin')] class extends Compon
                                                     <span class="flex-1 text-sm">{{ $child->localizedLabel($editingLocale) }}</span>
                                                     <span class="font-mono text-xs text-zinc-400">{{ $child->resolveUrl($editingLocale) }}</span>
                                                     <button wire:click="editItem({{ $child->id }})" class="text-xs text-zinc-500 hover:underline">Edit</button>
-                                                    <button wire:click="deleteItem({{ $child->id }})" wire:confirm="Delete?" class="text-xs text-red-600 hover:underline">Delete</button>
+                                                    <button wire:click="deleteItem({{ $child->id }})" wire:confirm="{{ __('admin.confirm.delete') }}" class="text-xs text-red-600 hover:underline">{{ __('admin.actions.delete') }}</button>
                                                 </div>
                                             </li>
                                         @endforeach

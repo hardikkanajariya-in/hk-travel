@@ -306,7 +306,7 @@ new #[Title('Lead')] #[Layout('components.layouts.admin')] class extends Compone
                             <option value="{{ $c->id }}">{{ $c->name }} — {{ $c->email }}</option>
                         @endforeach
                     </select>
-                    <button wire:click="merge" wire:confirm="Merge this lead into the selected one? Activities will be moved and this lead deleted." class="mt-2 text-xs text-amber-600 hover:underline">Merge into selected</button>
+                    <button wire:click="merge" wire:confirm="{{ __('admin.confirm.merge_lead') }}" class="mt-2 text-xs text-amber-600 hover:underline">Merge into selected</button>
                 </x-ui.card>
             @endif
         </div>
@@ -341,7 +341,7 @@ new #[Title('Lead')] #[Layout('components.layouts.admin')] class extends Compone
                                     <x-ui.badge size="sm" variant="neutral">{{ $a->type }}</x-ui.badge>
                                     {{ $a->user?->name ?? 'System' }} · {{ $a->created_at?->diffForHumans() }}
                                 </span>
-                                <button wire:click="deleteActivity({{ $a->id }})" wire:confirm="Delete?" class="text-red-500 hover:underline">×</button>
+                                <button wire:click="deleteActivity({{ $a->id }})" wire:confirm="{{ __('admin.confirm.delete') }}" class="text-red-500 hover:underline">×</button>
                             </div>
                             @if ($a->subject)<div class="text-sm font-medium mt-1">{{ $a->subject }}</div>@endif
                             @if ($a->body)<div class="text-sm text-zinc-700 dark:text-zinc-300 mt-1 whitespace-pre-wrap">{{ $a->body }}</div>@endif

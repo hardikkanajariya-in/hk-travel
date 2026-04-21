@@ -226,19 +226,18 @@ new #[Title('HK Travel — Install')] #[Layout('components.layouts.installer')] 
     <div class="mb-8 text-center">
         <div class="mb-4 inline-flex items-center gap-2 rounded-full bg-white/70 dark:bg-zinc-900/60 px-4 py-1.5 text-xs font-semibold uppercase tracking-wider text-hk-primary-700 dark:text-hk-primary-300 ring-1 ring-hk-primary-200/60 dark:ring-hk-primary-800/60 shadow-sm backdrop-blur">
             <span class="size-1.5 rounded-full bg-hk-primary-500 animate-pulse"></span>
-            Setup wizard
+            {{ __('installer.wizard.badge') }}
         </div>
         <h1 class="text-3xl sm:text-4xl font-bold tracking-tight">
-            <span class="hk-gradient-text">HK Travel</span>
-            <span class="text-zinc-900 dark:text-zinc-100">— Setup</span>
+            <span class="hk-gradient-text">{{ __('installer.wizard.title') }}</span>
         </h1>
         <p class="mt-2 text-sm text-zinc-500 dark:text-zinc-400">
-            Step {{ $step }} of {{ $this->totalSteps }} — let's get your site online.
+            {{ __('installer.wizard.progress', ['current' => $step, 'total' => $this->totalSteps]) }}
         </p>
     </div>
 
-    <ol class="mb-8 hidden sm:flex items-center justify-between gap-2" aria-label="Progress">
-        @foreach ([1 => 'Server', 2 => 'App', 3 => 'Database', 4 => 'Admin', 5 => 'Modules'] as $i => $label)
+    <ol class="mb-8 hidden sm:flex items-center justify-between gap-2" aria-label="{{ __('installer.wizard.progress_aria') }}">
+        @foreach ([1 => __('installer.steps.server'), 2 => __('installer.steps.app'), 3 => __('installer.steps.database'), 4 => __('installer.steps.admin'), 5 => __('installer.steps.modules')] as $i => $label)
             <li class="flex flex-1 items-center gap-2">
                 <span @class([
                     'flex size-8 shrink-0 items-center justify-center rounded-full text-xs font-bold transition-all duration-300',
@@ -281,9 +280,9 @@ new #[Title('HK Travel — Install')] #[Layout('components.layouts.installer')] 
 
     <x-ui.card>
         @if ($step === 1)
-            <h2 class="mb-1 text-lg font-semibold">Server requirements</h2>
+            <h2 class="mb-1 text-lg font-semibold">{{ __('installer.server.heading') }}</h2>
             <p class="mb-5 text-sm text-zinc-500 dark:text-zinc-400">
-                All checks must pass before continuing.
+                {{ __('installer.server.subtitle') }}
             </p>
             <ul class="grid grid-cols-1 gap-3 text-sm sm:grid-cols-2">
                 @foreach ($this->requirements as $req)
@@ -313,7 +312,7 @@ new #[Title('HK Travel — Install')] #[Layout('components.layouts.installer')] 
                             'text-emerald-700 dark:text-emerald-300' => $req['ok'],
                             'text-red-700 dark:text-red-300' => ! $req['ok'],
                         ])>
-                            {{ $req['ok'] ? 'OK' : 'Missing' }}
+                            {{ $req['ok'] ? __('installer.server.ok') : __('installer.server.missing') }}
                         </span>
                     </li>
                 @endforeach
@@ -322,72 +321,70 @@ new #[Title('HK Travel — Install')] #[Layout('components.layouts.installer')] 
         @endif
 
         @if ($step === 2)
-            <h2 class="mb-4 text-lg font-medium">Application settings</h2>
+            <h2 class="mb-4 text-lg font-medium">{{ __('installer.app.heading') }}</h2>
             <div class="space-y-4">
-                <x-ui.input wire:model="appName" label="Site name" required />
-                <x-ui.input wire:model="appUrl" label="Site URL" type="url" required hint="e.g. https://example.com" />
+                <x-ui.input wire:model="appName" :label="__('installer.app.fields.site_name')" required />
+                <x-ui.input wire:model="appUrl" :label="__('installer.app.fields.site_url')" type="url" required :hint="__('installer.app.fields.site_url_hint')" />
                 <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                     <x-ui.select
                         wire:model="locale"
-                        label="Default locale"
+                        :label="__('installer.app.fields.locale')"
                         required
                         :options="[
-                            'en' => 'English',
-                            'hi' => 'हिन्दी (Hindi)',
-                            'gu' => 'ગુજરાતી (Gujarati)',
+                            'en' => __('installer.app.locales.en'),
+                            'hi' => __('installer.app.locales.hi'),
+                            'gu' => __('installer.app.locales.gu'),
                         ]"
                     />
-                    <x-ui.input wire:model="timezone" label="Timezone" required />
+                    <x-ui.input wire:model="timezone" :label="__('installer.app.fields.timezone')" required />
                 </div>
             </div>
         @endif
 
         @if ($step === 3)
-            <h2 class="mb-4 text-lg font-medium">Database connection</h2>
+            <h2 class="mb-4 text-lg font-medium">{{ __('installer.database.heading') }}</h2>
             <div class="space-y-4">
                 <x-ui.select
                     wire:model.live="dbConnection"
-                    label="Driver"
+                    :label="__('installer.database.driver')"
                     :options="[
-                        'sqlite' => 'SQLite (recommended for small deployments)',
-                        'mysql' => 'MySQL',
-                        // 'mariadb' => 'MariaDB',
-                        // 'pgsql' => 'PostgreSQL',
+                        'sqlite' => __('installer.database.drivers.sqlite'),
+                        'mysql' => __('installer.database.drivers.mysql'),
                     ]"
                 />
 
                 @if ($dbConnection !== 'sqlite')
                     <div class="grid grid-cols-2 gap-4">
-                        <x-ui.input wire:model="dbHost" label="Host" required />
-                        <x-ui.input wire:model="dbPort" label="Port" required />
+                        <x-ui.input wire:model="dbHost" :label="__('installer.database.host')" required />
+                        <x-ui.input wire:model="dbPort" :label="__('installer.database.port')" required />
                     </div>
-                    <x-ui.input wire:model="dbDatabase" label="Database name" required />
+                    <x-ui.input wire:model="dbDatabase" :label="__('installer.database.database')" required />
                     <div class="grid grid-cols-2 gap-4">
-                        <x-ui.input wire:model="dbUsername" label="Username" required />
-                        <x-ui.input wire:model="dbPassword" type="password" label="Password" />
+                        <x-ui.input wire:model="dbUsername" :label="__('installer.database.username')" required />
+                        <x-ui.input wire:model="dbPassword" type="password" :label="__('installer.database.password')" />
                     </div>
                 @else
                     <p class="rounded-md bg-zinc-50 dark:bg-zinc-900 p-3 text-sm text-zinc-600 dark:text-zinc-400">
-                        SQLite database will be created at <code class="font-mono text-xs">database/database.sqlite</code>.
+                        {!! __('installer.database.sqlite_notice', ['path' => '<code class="font-mono text-xs">database/database.sqlite</code>']) !!}
                     </p>
                 @endif
             </div>
         @endif
 
         @if ($step === 4)
-            <h2 class="mb-4 text-lg font-medium">Administrator account</h2>
+            <h2 class="mb-4 text-lg font-medium">{{ __('installer.admin_step.heading') }}</h2>
             <div class="space-y-4">
-                <x-ui.input wire:model="adminName" label="Full name" required />
-                <x-ui.input wire:model="adminEmail" type="email" label="Email" required />
-                <x-ui.input wire:model="adminPassword" type="password" label="Password" required hint="At least 8 characters" />
-                <x-ui.input wire:model="adminPasswordConfirmation" type="password" label="Confirm password" required />
+                <x-ui.input wire:model="adminName" :label="__('installer.admin_step.fields.name')" required />
+                <x-ui.input wire:model="adminEmail" type="email" :label="__('installer.admin_step.fields.email')" required />
+                <x-ui.input wire:model="adminPassword" type="password" :label="__('installer.admin_step.fields.password')" required :hint="__('installer.admin_step.fields.password_hint')" />
+                <x-ui.input wire:model="adminPasswordConfirmation" type="password" :label="__('installer.admin_step.fields.password_confirmation')" required />
             </div>
         @endif
 
         @if ($step === 5)
-            <h2 class="mb-4 text-lg font-medium">Enable travel modules</h2>
+            <h2 class="mb-4 text-lg font-medium">{{ __('installer.modules.heading') }}</h2>
             <p class="mb-4 text-sm text-zinc-600 dark:text-zinc-400">
-                Pick the features to activate now. You can toggle these any time from the admin panel.
+                {{ __('installer.modules.subtitle') }}
             </p>
             <div class="grid grid-cols-1 gap-2 sm:grid-cols-2">
                 @foreach ($this->moduleList as $key => $module)
@@ -406,16 +403,16 @@ new #[Title('HK Travel — Install')] #[Layout('components.layouts.installer')] 
 
         <div class="mt-8 flex items-center justify-between">
             @if ($step > 1)
-                <x-ui.button variant="secondary" wire:click="back" wire:loading.attr="disabled">Back</x-ui.button>
+                <x-ui.button variant="secondary" wire:click="back" wire:loading.attr="disabled">{{ __('installer.buttons.back') }}</x-ui.button>
             @else
                 <span></span>
             @endif
 
             @if ($step < $this->totalSteps)
-                <x-ui.button wire:click="next" wire:loading.attr="disabled">Continue</x-ui.button>
+                <x-ui.button wire:click="next" wire:loading.attr="disabled">{{ __('installer.buttons.continue') }}</x-ui.button>
             @else
                 <x-ui.button wire:click="install" :loading="$installing" wire:loading.attr="disabled">
-                    Install
+                    {{ __('installer.buttons.install') }}
                 </x-ui.button>
             @endif
         </div>

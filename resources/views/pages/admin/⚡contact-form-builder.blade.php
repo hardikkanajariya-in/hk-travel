@@ -249,7 +249,7 @@ new #[Title('Edit form')] #[Layout('components.layouts.admin')] class extends Co
                                 @if ($field['required'] ?? false)<x-ui.badge size="sm" variant="warning">required</x-ui.badge>@endif
                             </button>
                             <button wire:click="duplicateField({{ $i }})" class="text-xs text-zinc-500 hover:underline">Duplicate</button>
-                            <button wire:click="removeField({{ $i }})" wire:confirm="Remove field?" class="text-xs text-red-600 hover:underline">Remove</button>
+                            <button wire:click="removeField({{ $i }})" wire:confirm="{{ __('admin.confirm.remove_field') }}" class="text-xs text-red-600 hover:underline">{{ __('admin.actions.remove') }}</button>
                         </div>
                     </li>
                 @empty

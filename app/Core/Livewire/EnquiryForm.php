@@ -92,7 +92,7 @@ class EnquiryForm extends Component
 
         if (method_exists($captcha, 'enabled') && $captcha->enabled('enquiry')) {
             if (! $captcha->verify($this->captchaToken)) {
-                $this->addError('captchaToken', 'Captcha verification failed.');
+                $this->addError('captchaToken', __('errors.captcha_failed'));
 
                 return;
             }

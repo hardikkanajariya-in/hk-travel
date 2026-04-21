@@ -159,7 +159,7 @@ new #[Title('Languages')] #[Layout('components.layouts.admin')] class extends Co
                                     <td class="px-4 py-2 text-right">
                                         <button type="button" wire:click="edit({{ $lang->id }})" class="text-xs text-hk-primary-600 hover:underline">Edit</button>
                                         @if (! $lang->is_default)
-                                            <button type="button" wire:click="delete({{ $lang->id }})" wire:confirm="Delete this language?" class="text-xs text-red-600 hover:underline ml-2">Delete</button>
+                                            <button type="button" wire:click="delete({{ $lang->id }})" wire:confirm="{{ __('admin.confirm.delete') }}" class="text-xs text-red-600 hover:underline ml-2">{{ __('admin.actions.delete') }}</button>
                                         @endif
                                     </td>
                                 </tr>

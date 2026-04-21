@@ -66,7 +66,7 @@
                             {{ $row->is_published ? 'Unpublish' : 'Publish' }}
                         </button>
                         <a href="{{ route('admin.destinations.edit', $row->id) }}" wire:navigate class="text-xs text-zinc-700 hover:underline">Edit</a>
-                        <button wire:click="delete('{{ $row->id }}')" wire:confirm="Delete this destination?" class="text-xs text-hk-danger hover:underline">Delete</button>
+                        <button wire:click="delete('{{ $row->id }}')" wire:confirm="{{ __('admin.confirm.delete') }}" class="text-xs text-hk-danger hover:underline">{{ __('admin.actions.delete') }}</button>
                     </td>
                 </tr>
             @empty

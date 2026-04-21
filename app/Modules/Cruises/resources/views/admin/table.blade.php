@@ -35,7 +35,7 @@
                     <td class="px-4 py-3 text-right space-x-2">
                         <button wire:click="togglePublish('{{ $c->id }}')" class="text-xs text-hk-primary-600 hover:underline">{{ $c->is_published ? 'Unpublish' : 'Publish' }}</button>
                         <a href="{{ route('admin.cruises.edit', $c->id) }}" wire:navigate class="text-xs hover:underline">Edit</a>
-                        <button wire:click="delete('{{ $c->id }}')" wire:confirm="Delete?" class="text-xs text-hk-danger hover:underline">Delete</button>
+                        <button wire:click="delete('{{ $c->id }}')" wire:confirm="{{ __('admin.confirm.delete') }}" class="text-xs text-hk-danger hover:underline">{{ __('admin.actions.delete') }}</button>
                     </td>
                 </tr>
             @empty

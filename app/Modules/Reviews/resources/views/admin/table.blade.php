@@ -83,7 +83,7 @@
                         @if ($review->status !== 'spam')
                             <button wire:click="markSpam('{{ $review->id }}')" class="text-xs text-zinc-500 hover:underline">Spam</button>
                         @endif
-                        <button wire:click="delete('{{ $review->id }}')" wire:confirm="Delete this review?" class="text-xs text-hk-danger hover:underline">Delete</button>
+                        <button wire:click="delete('{{ $review->id }}')" wire:confirm="{{ __('admin.confirm.delete') }}" class="text-xs text-hk-danger hover:underline">{{ __('admin.actions.delete') }}</button>
                     </td>
                 </tr>
             @empty

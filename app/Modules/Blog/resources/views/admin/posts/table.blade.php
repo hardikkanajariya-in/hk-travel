@@ -55,7 +55,7 @@
                             @endif
                         @endcan
                         @can('blog.delete')
-                            <button wire:click="delete('{{ $post->id }}')" wire:confirm="{{ __('Delete this post?') }}" class="text-red-600 hover:underline">{{ __('Delete') }}</button>
+                            <button wire:click="delete('{{ $post->id }}')" wire:confirm="{{ __('admin.confirm.delete_post') }}" class="text-red-600 hover:underline">{{ __('admin.actions.delete') }}</button>
                         @endcan
                     </td>
                 </tr>

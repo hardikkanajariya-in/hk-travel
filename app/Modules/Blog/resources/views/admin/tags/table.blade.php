@@ -27,7 +27,7 @@
                     <td class="px-3 py-2">{{ $tag->posts_count }}</td>
                     <td class="px-3 py-2 text-right space-x-2">
                         <a href="{{ route('admin.blog.tags.edit', $tag->id) }}" wire:navigate class="text-blue-600 hover:underline">{{ __('Edit') }}</a>
-                        <button wire:click="delete('{{ $tag->id }}')" wire:confirm="{{ __('Delete?') }}" class="text-red-600 hover:underline">{{ __('Delete') }}</button>
+                        <button wire:click="delete('{{ $tag->id }}')" wire:confirm="{{ __('admin.confirm.delete') }}" class="text-red-600 hover:underline">{{ __('admin.actions.delete') }}</button>
                     </td>
                 </tr>
             @empty

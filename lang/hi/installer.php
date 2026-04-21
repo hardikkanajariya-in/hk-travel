@@ -1,0 +1,80 @@
+<?php
+
+return [
+    'wizard' => [
+        'badge' => 'सेटअप विज़ार्ड',
+        'title' => 'HK Travel — सेटअप',
+        'progress' => 'चरण :current / :total — अपनी साइट को ऑनलाइन करते हैं।',
+        'progress_aria' => 'प्रगति',
+    ],
+
+    'steps' => [
+        'server' => 'सर्वर',
+        'app' => 'ऐप',
+        'database' => 'डेटाबेस',
+        'admin' => 'एडमिन',
+        'modules' => 'मॉड्यूल',
+    ],
+
+    'server' => [
+        'heading' => 'सर्वर आवश्यकताएँ',
+        'subtitle' => 'जारी रखने से पहले सभी जाँचें पास होनी चाहिए।',
+        'ok' => 'ठीक है',
+        'missing' => 'अनुपस्थित',
+    ],
+
+    'app' => [
+        'heading' => 'एप्लिकेशन सेटिंग्स',
+        'fields' => [
+            'site_name' => 'साइट का नाम',
+            'site_url' => 'साइट URL',
+            'site_url_hint' => 'जैसे https://example.com',
+            'locale' => 'डिफ़ॉल्ट भाषा',
+            'timezone' => 'समय क्षेत्र',
+        ],
+        'locales' => [
+            'en' => 'English',
+            'hi' => 'हिन्दी (Hindi)',
+            'gu' => 'ગુજરાતી (Gujarati)',
+        ],
+    ],
+
+    'database' => [
+        'heading' => 'डेटाबेस कनेक्शन',
+        'driver' => 'ड्राइवर',
+        'drivers' => [
+            'sqlite' => 'SQLite (छोटी तैनाती के लिए अनुशंसित)',
+            'mysql' => 'MySQL',
+            'mariadb' => 'MariaDB',
+            'pgsql' => 'PostgreSQL',
+        ],
+        'host' => 'होस्ट',
+        'port' => 'पोर्ट',
+        'database' => 'डेटाबेस नाम',
+        'username' => 'उपयोगकर्ता नाम',
+        'password' => 'पासवर्ड',
+        'sqlite_notice' => 'SQLite डेटाबेस :path पर बनाया जाएगा।',
+    ],
+
+    'admin_step' => [
+        'heading' => 'व्यवस्थापक खाता',
+        'fields' => [
+            'name' => 'पूरा नाम',
+            'email' => 'ईमेल',
+            'password' => 'पासवर्ड',
+            'password_confirmation' => 'पासवर्ड की पुष्टि करें',
+            'password_hint' => 'कम से कम 8 अक्षर',
+        ],
+    ],
+
+    'modules' => [
+        'heading' => 'यात्रा मॉड्यूल सक्षम करें',
+        'subtitle' => 'अभी सक्रिय करने हेतु सुविधाएँ चुनें। आप इन्हें एडमिन पैनल से कभी भी बदल सकते हैं।',
+    ],
+
+    'buttons' => [
+        'back' => 'पीछे',
+        'continue' => 'जारी रखें',
+        'install' => 'इंस्टॉल करें',
+    ],
+];

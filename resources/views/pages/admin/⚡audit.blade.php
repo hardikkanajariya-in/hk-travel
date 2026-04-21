@@ -98,7 +98,7 @@ new #[Title('Audit log')] #[Layout('components.layouts.admin')] class extends Co
         <div class="mt-3 flex items-center justify-between gap-2">
             <button type="button" wire:click="clearFilters" class="text-sm text-zinc-600 hover:underline">Clear filters</button>
             @can('admin.audit.purge')
-                <x-ui.button variant="danger" size="sm" wire:click="purge" wire:confirm="Permanently delete ALL audit log entries?">Purge all</x-ui.button>
+                <x-ui.button variant="danger" size="sm" wire:click="purge" wire:confirm="{{ __('admin.confirm.purge_audit') }}">Purge all</x-ui.button>
             @endcan
         </div>
     </x-ui.card>

@@ -84,7 +84,7 @@ class ReviewForm extends Component
 
         if (method_exists($captcha, 'enabled') && $captcha->enabled()) {
             if (! $captcha->verify((string) $this->captchaToken, request()->ip())) {
-                $this->addError('captchaToken', __('Captcha verification failed.'));
+                $this->addError('captchaToken', __('errors.captcha_failed'));
 
                 return;
             }

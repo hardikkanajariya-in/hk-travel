@@ -204,7 +204,7 @@ new #[Title('Widget zones')] #[Layout('components.layouts.admin')] class extends
                                 <button wire:click="toggleActive({{ $w->id }})" class="text-xs {{ $w->is_active ? 'text-green-600' : 'text-zinc-400' }} hover:underline">
                                     {{ $w->is_active ? 'Active' : 'Disabled' }}
                                 </button>
-                                <button wire:click="deleteWidget({{ $w->id }})" wire:confirm="Remove this widget?" class="text-xs text-red-600 hover:underline">Remove</button>
+                                <button wire:click="deleteWidget({{ $w->id }})" wire:confirm="{{ __('admin.confirm.remove_widget') }}" class="text-xs text-red-600 hover:underline">{{ __('admin.actions.remove') }}</button>
                             </div>
                         </li>
                     @empty

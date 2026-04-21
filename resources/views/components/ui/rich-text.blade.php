@@ -55,11 +55,11 @@
             <button type="button" @click="insert('<h3></h3>')" class="rounded px-2 py-1 text-zinc-700 hover:bg-zinc-100 dark:text-zinc-200 dark:hover:bg-zinc-800">H3</button>
             <button type="button" @click="insert('<p></p>')" class="rounded px-2 py-1 text-zinc-700 hover:bg-zinc-100 dark:text-zinc-200 dark:hover:bg-zinc-800">P</button>
             <span class="mx-1 h-4 w-px bg-zinc-200 dark:bg-zinc-700"></span>
-            <button type="button" @click="insert('<ul>\n  <li></li>\n</ul>')" class="rounded px-2 py-1 text-zinc-700 hover:bg-zinc-100 dark:text-zinc-200 dark:hover:bg-zinc-800">• List</button>
-            <button type="button" @click="insert('<ol>\n  <li></li>\n</ol>')" class="rounded px-2 py-1 text-zinc-700 hover:bg-zinc-100 dark:text-zinc-200 dark:hover:bg-zinc-800">1. List</button>
+            <button type="button" @click="insert('<ul>\n  <li></li>\n</ul>')" class="rounded px-2 py-1 text-zinc-700 hover:bg-zinc-100 dark:text-zinc-200 dark:hover:bg-zinc-800">{{ __('ui.richtext.list') }}</button>
+            <button type="button" @click="insert('<ol>\n  <li></li>\n</ol>')" class="rounded px-2 py-1 text-zinc-700 hover:bg-zinc-100 dark:text-zinc-200 dark:hover:bg-zinc-800">{{ __('ui.richtext.ordered_list') }}</button>
             <button type="button" @click="insert('<a href=&quot;https://&quot;></a>')" class="rounded px-2 py-1 text-zinc-700 hover:bg-zinc-100 dark:text-zinc-200 dark:hover:bg-zinc-800">Link</button>
             <button type="button" @click="insert('<blockquote></blockquote>')" class="rounded px-2 py-1 text-zinc-700 hover:bg-zinc-100 dark:text-zinc-200 dark:hover:bg-zinc-800">“ Quote</button>
-            <span class="ml-auto text-[10px] uppercase tracking-wide text-zinc-400 dark:text-zinc-500">HTML · sanitised on save</span>
+            <span class="ml-auto text-[10px] uppercase tracking-wide text-zinc-400 dark:text-zinc-500">{{ __('ui.richtext.sanitize_notice') }}</span>
         </div>
 
         <textarea

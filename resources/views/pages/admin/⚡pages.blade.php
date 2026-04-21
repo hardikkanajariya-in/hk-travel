@@ -154,7 +154,7 @@ new #[Title('Pages')] #[Layout('components.layouts.admin')] class extends Compon
                             <td class="px-4 py-3 text-right space-x-2">
                                 <a href="{{ route('admin.pages.edit', $page) }}" wire:navigate class="text-xs text-hk-primary-600 hover:underline">Edit</a>
                                 <a href="{{ url('/'.$page->slug) }}" target="_blank" rel="noopener" class="text-xs text-zinc-500 hover:underline">View</a>
-                                <button wire:click="delete({{ $page->id }})" wire:confirm="Delete this page and all its blocks?" class="text-xs text-red-600 hover:underline">Delete</button>
+                                <button wire:click="delete({{ $page->id }})" wire:confirm="{{ __('admin.confirm.delete_page') }}" class="text-xs text-red-600 hover:underline">{{ __('admin.actions.delete') }}</button>
                             </td>
                         </tr>
                     @empty

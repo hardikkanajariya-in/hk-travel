@@ -70,7 +70,7 @@
                             {{ $tour->is_published ? 'Unpublish' : 'Publish' }}
                         </button>
                         <a href="{{ route('admin.tours.edit', $tour->id) }}" wire:navigate class="text-xs hover:underline">Edit</a>
-                        <button wire:click="delete('{{ $tour->id }}')" wire:confirm="Delete this tour?" class="text-xs text-hk-danger hover:underline">Delete</button>
+                        <button wire:click="delete('{{ $tour->id }}')" wire:confirm="{{ __('admin.confirm.delete') }}" class="text-xs text-hk-danger hover:underline">{{ __('admin.actions.delete') }}</button>
                     </td>
                 </tr>
             @empty

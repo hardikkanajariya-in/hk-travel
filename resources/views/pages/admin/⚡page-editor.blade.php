@@ -346,7 +346,7 @@ new #[Title('Edit page')] #[Layout('components.layouts.admin')] class extends Co
                                 <button type="button" wire:click="duplicateBlock({{ $i }})" class="rounded p-1 hover:bg-zinc-100 dark:hover:bg-zinc-800" title="Duplicate">
                                     <svg viewBox="0 0 20 20" fill="currentColor" class="size-4"><path d="M7 3a2 2 0 00-2 2v8a2 2 0 002 2h6a2 2 0 002-2V5a2 2 0 00-2-2H7zm2 4a1 1 0 011-1h2a1 1 0 010 2h-2a1 1 0 01-1-1zm0 3a1 1 0 011-1h2a1 1 0 010 2h-2a1 1 0 01-1-1z" /><path d="M3 7a2 2 0 012-2v9a3 3 0 003 3h6a2 2 0 01-2 2H7a4 4 0 01-4-4V7z" /></svg>
                                 </button>
-                                <button type="button" wire:click="removeBlock({{ $i }})" wire:confirm="Remove this block?" class="rounded p-1 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-950" title="Delete">
+                                <button type="button" wire:click="removeBlock({{ $i }})" wire:confirm="{{ __('admin.confirm.delete') }}" class="rounded p-1 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-950" title="{{ __('admin.actions.delete') }}">
                                     <svg viewBox="0 0 20 20" fill="currentColor" class="size-4"><path fill-rule="evenodd" d="M8.75 1A1.75 1.75 0 007 2.75V3H4.5a.75.75 0 000 1.5h11a.75.75 0 000-1.5H13v-.25A1.75 1.75 0 0011.25 1h-2.5zM5.5 6.25a.75.75 0 011.5 0v9.25a.75.75 0 01-1.5 0V6.25zm4 0a.75.75 0 011.5 0v9.25a.75.75 0 01-1.5 0V6.25zm4 0a.75.75 0 011.5 0v9.25a.75.75 0 01-1.5 0V6.25z" clip-rule="evenodd" /></svg>
                                 </button>
                             </div>

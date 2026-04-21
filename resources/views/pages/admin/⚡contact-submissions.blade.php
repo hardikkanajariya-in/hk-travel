@@ -162,7 +162,7 @@ new #[Title('Form submissions')] #[Layout('components.layouts.admin')] class ext
                             </td>
                             <td class="px-3 py-2 text-right">
                                 <button wire:click="open({{ $s->id }})" class="text-xs text-hk-primary-600 hover:underline">View</button>
-                                <button wire:click="delete({{ $s->id }})" wire:confirm="Delete this submission?" class="ml-3 text-xs text-red-600 hover:underline">Delete</button>
+                                <button wire:click="delete({{ $s->id }})" wire:confirm="{{ __('admin.confirm.delete_submission') }}" class="ml-3 text-xs text-red-600 hover:underline">{{ __('admin.actions.delete') }}</button>
                             </td>
                         </tr>
                     @empty

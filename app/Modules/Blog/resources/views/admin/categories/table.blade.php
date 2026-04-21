@@ -27,7 +27,7 @@
                     <td class="px-3 py-2">{{ $cat->posts_count }}</td>
                     <td class="px-3 py-2 text-right space-x-2">
                         <a href="{{ route('admin.blog.categories.edit', $cat->id) }}" wire:navigate class="text-blue-600 hover:underline">{{ __('Edit') }}</a>
-                        <button wire:click="delete('{{ $cat->id }}')" wire:confirm="{{ __('Delete?') }}" class="text-red-600 hover:underline">{{ __('Delete') }}</button>
+                        <button wire:click="delete('{{ $cat->id }}')" wire:confirm="{{ __('admin.confirm.delete') }}" class="text-red-600 hover:underline">{{ __('admin.actions.delete') }}</button>
                     </td>
                 </tr>
             @empty
