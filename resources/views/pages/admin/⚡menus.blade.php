@@ -240,11 +240,39 @@ new #[Title('Menus')] #[Layout('components.layouts.admin')] class extends Compon
 
     public function with(): array
     {
+        $menus = Menu::orderBy('name')->get();
+
+        // Map of location-key => menu currently bound there. Used to surface
+        // "already used by X" hints inside the location dropdown so users
+        // never wonder why two menus seem to fight over the same slot.
+        $usage = $menus->whereNotNull('location')->keyBy('location');
+
+        $friendly = [
+            'primary' => 'Header navigation (top of every page)',
+            'header' => 'Header navigation (top of every page)',
+            'footer' => 'Footer navigation (bottom of every page)',
+            'mobile' => 'Mobile menu (small screens)',
+            'sidebar' => 'Sidebar navigation',
+        ];
+
+        $locationOptions = ['' => 'Not shown anywhere yet (draft)'];
+        foreach ($this->themeLocations as $loc) {
+            $label = $friendly[$loc] ?? \Illuminate\Support\Str::headline((string) $loc);
+            $taken = $usage->get($loc);
+            if ($taken && $taken->id !== $this->editingMenuId) {
+                $label .= ' — currently used by "'.$taken->name.'" (will be reassigned)';
+            }
+            $locationOptions[$loc] = $label;
+        }
+
         return [
-            'menus' => Menu::orderBy('name')->get(),
+            'menus' => $menus,
             'currentMenu' => $this->menuId ? Menu::with('items.children.children')->find($this->menuId) : null,
             'pages' => Page::orderBy('title')->get(['id', 'title', 'slug']),
             'languages' => Language::query()->where('is_active', true)->orderBy('sort_order')->get(),
+            'locationOptions' => $locationOptions,
+            'locationCount' => count($this->themeLocations),
+            'locationsFilled' => $usage->only($this->themeLocations)->count(),
         ];
     }
 };
@@ -274,7 +302,16 @@ new #[Title('Menus')] #[Layout('components.layouts.admin')] class extends Compon
                                     ])>
                                 <span class="font-medium">{{ $m->name }}</span>
                                 @if ($m->location)
-                                    <x-ui.badge variant="info" size="sm">{{ $m->location }}</x-ui.badge>
+                                    @php
+                                        $shortLabel = match ($m->location) {
+                                            'primary', 'header' => 'Header',
+                                            'footer' => 'Footer',
+                                            'mobile' => 'Mobile',
+                                            'sidebar' => 'Sidebar',
+                                            default => \Illuminate\Support\Str::headline($m->location),
+                                        };
+                                    @endphp
+                                    <x-ui.badge variant="info" size="sm">{{ $shortLabel }}</x-ui.badge>
                                 @endif
                             </button>
                         </li>
@@ -285,20 +322,24 @@ new #[Title('Menus')] #[Layout('components.layouts.admin')] class extends Compon
             </x-ui.card>
 
             <x-ui.card>
-                <h3 class="text-sm font-semibold mb-3">{{ $editingMenuId ? 'Edit menu' : 'New menu' }}</h3>
+                <h3 class="text-sm font-semibold">{{ $editingMenuId ? 'Edit menu' : 'New menu' }}</h3>
+                <p class="mb-3 mt-1 text-xs text-zinc-500">
+                    Your active theme provides
+                    <strong class="text-zinc-700 dark:text-zinc-300">{{ $locationCount }}</strong>
+                    display {{ \Illuminate\Support\Str::plural('spot', $locationCount) }}
+                    ({{ $locationsFilled }} filled). Pick where this menu should appear, or save it as a draft.
+                </p>
                 <div class="space-y-3">
                     <x-ui.input wire:model.live="menuName" label="Name" :error="$errors->first('menuName')" />
-                    <x-ui.input wire:model="menuSlug" label="Slug" :error="$errors->first('menuSlug')" />
-                    <div>
-                        <label class="block text-sm font-medium mb-1">Location</label>
-                        <select wire:model="menuLocation" class="w-full rounded-md border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900">
-                            <option value="">(no location)</option>
-                            @foreach ($themeLocations as $loc)
-                                <option value="{{ $loc }}">{{ $loc }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <div class="flex justify-between gap-2">
+                    <x-ui.input wire:model="menuSlug" label="Slug" hint="Used internally — letters, numbers and dashes only." :error="$errors->first('menuSlug')" />
+                    <x-ui.select
+                        wire:model="menuLocation"
+                        label="Where should it appear?"
+                        hint="Display spots are defined by the active theme."
+                        :options="$locationOptions"
+                        :error="$errors->first('menuLocation')"
+                    />
+                    <div class="flex justify-between gap-2 pt-1">
                         @if ($editingMenuId)
                             <button type="button" wire:click="openCreateMenu" class="text-xs text-zinc-500 hover:underline">Cancel edit</button>
                         @else

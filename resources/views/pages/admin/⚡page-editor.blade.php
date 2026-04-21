@@ -277,8 +277,8 @@ new #[Title('Edit page')] #[Layout('components.layouts.admin')] class extends Co
     @endif
 
     <div class="grid grid-cols-1 gap-6 lg:grid-cols-12">
-        {{-- LEFT: block list --}}
-        <div class="lg:col-span-3">
+        {{-- LEFT: page settings + SEO --}}
+        <div class="lg:col-span-3 space-y-6">
             <x-ui.card>
                 <h3 class="text-sm font-semibold mb-3">Page settings</h3>
                 <div class="space-y-3">
@@ -316,7 +316,7 @@ new #[Title('Edit page')] #[Layout('components.layouts.admin')] class extends Co
         </div>
 
         {{-- CENTER: blocks --}}
-        <div class="lg:col-span-6">
+        <div class="lg:col-span-5">
             <div class="mb-3 flex items-center justify-between">
                 <h3 class="text-sm font-semibold uppercase tracking-wide text-zinc-500">Blocks ({{ count($blocks) }})</h3>
                 <x-ui.button size="sm" x-on:click="$dispatch('open-modal', { name: 'block-picker' })">+ Add block</x-ui.button>
@@ -362,7 +362,8 @@ new #[Title('Edit page')] #[Layout('components.layouts.admin')] class extends Co
         </div>
 
         {{-- RIGHT: block editor --}}
-        <div class="lg:col-span-3">
+        <div class="lg:col-span-4">
+            <div class="lg:sticky lg:top-20">
             @if ($editingBlock !== null && isset($blocks[$editingBlock]))
                 @php
                     $row = $blocks[$editingBlock];
@@ -468,6 +469,7 @@ new #[Title('Edit page')] #[Layout('components.layouts.admin')] class extends Co
                     Select a block to edit its content.
                 </div>
             @endif
+            </div>
         </div>
     </div>
 

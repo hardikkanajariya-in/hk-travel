@@ -54,7 +54,7 @@
                     <a href="{{ route('hotels.index') }}" wire:navigate class="hover:text-hk-primary-600">Hotels</a>
                 @endif
                 @if ($manager->enabled('flights'))
-                    <a href="{{ route('flights.index') }}" wire:navigate class="hover:text-hk-primary-600">Flights</a>
+                    <a href="{{ route('flights.search') }}" wire:navigate class="hover:text-hk-primary-600">Flights</a>
                 @endif
                 @if ($manager->enabled('activities'))
                     <a href="{{ route('activities.index') }}" wire:navigate class="hover:text-hk-primary-600">Activities</a>

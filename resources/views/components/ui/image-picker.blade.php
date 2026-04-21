@@ -40,15 +40,15 @@
         :class="dragging
             ? 'border-hk-primary-500 bg-hk-primary-50 dark:bg-hk-primary-950/30'
             : '{{ $hasError ? 'border-hk-danger' : 'border-zinc-300 dark:border-zinc-700' }}'"
-        class="group relative flex cursor-pointer items-center gap-4 rounded-xl border-2 border-dashed bg-white p-3 transition hover:border-hk-primary-400 dark:bg-zinc-900"
+        class="group relative flex cursor-pointer flex-col gap-3 rounded-xl border-2 border-dashed bg-white p-3 transition hover:border-hk-primary-400 dark:bg-zinc-900 @container"
     >
-        {{-- Preview frame --}}
-        <div class="{{ $aspect }} flex w-32 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-zinc-100 dark:bg-zinc-800">
+        {{-- Preview frame: full-width on top so it stays usable inside narrow sidebars/columns. --}}
+        <div class="{{ $aspect }} flex w-full items-center justify-center overflow-hidden rounded-lg bg-zinc-100 dark:bg-zinc-800">
             <template x-if="url">
                 <img :src="url" alt="" class="size-full object-cover" />
             </template>
             <template x-if="! url && ! uploading">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.4" stroke="currentColor" class="size-8 text-zinc-400">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.4" stroke="currentColor" class="size-10 text-zinc-400">
                     <path stroke-linecap="round" stroke-linejoin="round" d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 0 0 1.5-1.5V6a1.5 1.5 0 0 0-1.5-1.5H3.75A1.5 1.5 0 0 0 2.25 6v12a1.5 1.5 0 0 0 1.5 1.5Zm10.5-11.25h.008v.008h-.008V8.25Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z"/>
                 </svg>
             </template>
@@ -63,33 +63,36 @@
             </template>
         </div>
 
-        <div class="min-w-0 flex-1 text-sm">
-            <p class="font-medium text-zinc-700 dark:text-zinc-200">
-                <span x-show="! url">Click or drop an image here</span>
-                <span x-show="url" x-cloak>Image uploaded</span>
-            </p>
-            <p class="text-xs text-zinc-500 dark:text-zinc-400">JPG, PNG, GIF, WebP or SVG. Up to 5 MB.</p>
-            <p x-show="url" x-cloak class="mt-1 truncate font-mono text-[11px] text-zinc-400" x-text="url"></p>
-        </div>
+        {{-- Info + actions: stacks on narrow widths, sits side-by-side once we have room. --}}
+        <div class="flex flex-col gap-2 @sm:flex-row @sm:items-center @sm:justify-between">
+            <div class="min-w-0 flex-1 text-sm">
+                <p class="font-medium text-zinc-700 dark:text-zinc-200">
+                    <span x-show="! url">Click or drop an image here</span>
+                    <span x-show="url" x-cloak>Image uploaded</span>
+                </p>
+                <p class="text-xs text-zinc-500 dark:text-zinc-400">JPG, PNG, GIF, WebP or SVG. Up to 5 MB.</p>
+                <p x-show="url" x-cloak class="mt-1 truncate font-mono text-[11px] text-zinc-400" x-text="url"></p>
+            </div>
 
-        <div class="ml-auto flex shrink-0 flex-col gap-2 sm:flex-row" @click.stop>
-            <button
-                type="button"
-                @click.prevent="$refs.input.click()"
-                class="rounded-md bg-hk-primary-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-hk-primary-700"
-            >
-                <span x-show="! url">Choose</span>
-                <span x-show="url" x-cloak>Replace</span>
-            </button>
-            <button
-                type="button"
-                x-show="url"
-                x-cloak
-                @click.prevent="clear()"
-                class="rounded-md border border-zinc-200 bg-white px-3 py-1.5 text-xs font-medium text-zinc-700 hover:border-hk-danger hover:text-hk-danger dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-200"
-            >
-                Remove
-            </button>
+            <div class="flex shrink-0 gap-2" @click.stop>
+                <button
+                    type="button"
+                    @click.prevent="$refs.input.click()"
+                    class="rounded-md bg-hk-primary-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-hk-primary-700"
+                >
+                    <span x-show="! url">Choose</span>
+                    <span x-show="url" x-cloak>Replace</span>
+                </button>
+                <button
+                    type="button"
+                    x-show="url"
+                    x-cloak
+                    @click.prevent="clear()"
+                    class="rounded-md border border-zinc-200 bg-white px-3 py-1.5 text-xs font-medium text-zinc-700 hover:border-hk-danger hover:text-hk-danger dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-200"
+                >
+                    Remove
+                </button>
+            </div>
         </div>
 
         <input
