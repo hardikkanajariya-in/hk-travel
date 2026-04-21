@@ -4,20 +4,24 @@ namespace App\Providers;
 
 use App\Core\Captcha\CaptchaService;
 use App\Core\Installer\InstallationState;
+use App\Core\Localization\LocaleManager;
 use App\Core\Modules\ModuleManager;
 use App\Core\Settings\SettingsRepository;
 use App\Core\Storage\StorageManager;
+use App\Core\Theme\ThemeManager;
 use Illuminate\Cache\Repository as CacheRepository;
 use Illuminate\Filesystem\Filesystem;
 use Illuminate\Filesystem\FilesystemManager;
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Translation\Translator;
 
 /**
  * Boots HK Travel core services.
  *
- * Registers singletons for settings, storage, captcha, install state and
- * the module registry. ModuleServiceProvider then iterates registered
- * modules and bootstraps each one's routes/views/migrations.
+ * Registers singletons for settings, storage, captcha, install state,
+ * the module registry, theme manager and locale manager. The companion
+ * ModuleServiceProvider then iterates enabled modules and bootstraps
+ * each one's routes/views/migrations.
  */
 class HkCoreServiceProvider extends ServiceProvider
 {
@@ -41,11 +45,20 @@ class HkCoreServiceProvider extends ServiceProvider
         ));
 
         $this->app->singleton(ModuleManager::class, fn ($app) => (new ModuleManager($app))->discover());
+
+        $this->app->singleton(ThemeManager::class, fn ($app) => (new ThemeManager(
+            $app, $app->make(Filesystem::class)
+        ))->discover());
+
+        $this->app->singleton(LocaleManager::class, fn ($app) => new LocaleManager(
+            $app->make(Translator::class)
+        ));
     }
 
     public function boot(): void
     {
-        // Module bootstrapping happens in ModuleServiceProvider, which is
-        // registered after this provider in bootstrap/providers.php.
+        // Activate the configured public theme; safe to call even when no
+        // theme is installed (it falls back to bare app views).
+        $this->app->make(ThemeManager::class)->activate();
     }
 }
