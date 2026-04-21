@@ -22,7 +22,7 @@ class EnsureAppInstalled
             return $next($request);
         }
 
-        if (! $this->state->isInstalled() && ! $request->is('install*', '_debugbar*', 'up')) {
+        if (! $this->state->isInstalled() && ! $request->is('install*', 'livewire*', '_debugbar*', 'up')) {
             return redirect()->route('install.welcome');
         }
 

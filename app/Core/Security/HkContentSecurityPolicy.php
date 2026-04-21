@@ -48,6 +48,10 @@ class HkContentSecurityPolicy implements Preset
                 'https://www.gstatic.com/recaptcha/',
             ])
             ->addNonce(Directive::SCRIPT)
+            // Allows Livewire (and other trusted scripts) to inject further
+            // scripts during runtime morphs/updates without each one needing
+            // its own nonce. Required for `wire:click` round-trips.
+            ->add(Directive::SCRIPT, Keyword::STRICT_DYNAMIC)
             ->add(Directive::STYLE, [
                 Keyword::SELF,
                 Keyword::UNSAFE_INLINE,
