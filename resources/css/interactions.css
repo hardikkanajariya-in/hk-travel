@@ -144,7 +144,6 @@
     .hk-aurora {
         position: relative;
         isolation: isolate;
-        overflow: hidden;
     }
 
     .hk-aurora::before,
@@ -157,6 +156,7 @@
         opacity: 0.55;
         pointer-events: none;
         animation: hk-aurora-float 18s ease-in-out infinite;
+        will-change: transform;
     }
 
     .hk-aurora::before {

@@ -8,7 +8,8 @@
     @vite(['resources/css/admin.css', 'resources/js/app.js'])
     @livewireStyles
 </head>
-<body class="hk-aurora min-h-full bg-gradient-to-br from-zinc-50 via-white to-zinc-100 dark:from-zinc-950 dark:via-zinc-900 dark:to-zinc-950 text-zinc-900 dark:text-zinc-100 antialiased">
+<body class="min-h-full bg-gradient-to-br from-zinc-50 via-white to-zinc-100 dark:from-zinc-950 dark:via-zinc-900 dark:to-zinc-950 text-zinc-900 dark:text-zinc-100 antialiased">
+    <div class="hk-aurora pointer-events-none fixed inset-0 -z-10 overflow-hidden" aria-hidden="true"></div>
     <main class="relative z-10 flex min-h-screen items-center justify-center px-4 py-10 sm:py-16">
         {{ $slot }}
     </main>

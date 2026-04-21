@@ -273,16 +273,40 @@ new #[Title('HK Travel — Install')] #[Layout('components.layouts.installer')] 
 
     <x-ui.card>
         @if ($step === 1)
-            <h2 class="mb-4 text-lg font-medium">Server requirements</h2>
-            <ul class="space-y-2 text-sm">
+            <h2 class="mb-1 text-lg font-semibold">Server requirements</h2>
+            <p class="mb-5 text-sm text-zinc-500 dark:text-zinc-400">
+                All checks must pass before continuing.
+            </p>
+            <ul class="grid grid-cols-1 gap-3 text-sm sm:grid-cols-2">
                 @foreach ($this->requirements as $req)
-                    <li class="flex items-center justify-between border-b border-zinc-100 dark:border-zinc-800 py-2 last:border-0">
-                        <span>{{ $req['label'] }}</span>
-                        @if ($req['ok'])
-                            <x-ui.badge variant="success">OK</x-ui.badge>
-                        @else
-                            <x-ui.badge variant="danger">Missing</x-ui.badge>
-                        @endif
+                    <li @class([
+                        'flex items-center gap-3 rounded-xl border p-3 transition-colors',
+                        'border-emerald-200/70 bg-emerald-50/60 dark:border-emerald-800/60 dark:bg-emerald-950/30' => $req['ok'],
+                        'border-red-200/70 bg-red-50/60 dark:border-red-800/60 dark:bg-red-950/30' => ! $req['ok'],
+                    ])>
+                        <span @class([
+                            'flex size-7 shrink-0 items-center justify-center rounded-full ring-1 ring-inset',
+                            'bg-emerald-500 text-white ring-emerald-600/30 shadow-sm shadow-emerald-500/30' => $req['ok'],
+                            'bg-red-500 text-white ring-red-600/30 shadow-sm shadow-red-500/30' => ! $req['ok'],
+                        ])>
+                            @if ($req['ok'])
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="size-4">
+                                    <path fill-rule="evenodd" d="M16.704 5.29a1 1 0 010 1.42l-7.5 7.5a1 1 0 01-1.42 0l-3.5-3.5a1 1 0 111.42-1.42L8.5 12.08l6.79-6.79a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                                </svg>
+                            @else
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="size-4">
+                                    <path fill-rule="evenodd" d="M6.28 5.22a.75.75 0 00-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 101.06 1.06L10 11.06l3.72 3.72a.75.75 0 101.06-1.06L11.06 10l3.72-3.72a.75.75 0 00-1.06-1.06L10 8.94 6.28 5.22z" clip-rule="evenodd"/>
+                                </svg>
+                            @endif
+                        </span>
+                        <span class="grow font-medium text-zinc-800 dark:text-zinc-100">{{ $req['label'] }}</span>
+                        <span @class([
+                            'text-[11px] font-semibold uppercase tracking-wider',
+                            'text-emerald-700 dark:text-emerald-300' => $req['ok'],
+                            'text-red-700 dark:text-red-300' => ! $req['ok'],
+                        ])>
+                            {{ $req['ok'] ? 'OK' : 'Missing' }}
+                        </span>
                     </li>
                 @endforeach
             </ul>
