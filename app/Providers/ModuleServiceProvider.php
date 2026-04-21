@@ -18,10 +18,22 @@ class ModuleServiceProvider extends ServiceProvider
 {
     public function register(): void
     {
-        $manager = $this->app->make(ModuleManager::class);
+        // Register sub-providers eagerly based on file config only.
+        // DB-overridable enable flags are evaluated in boot() (DB-safe phase).
+        foreach ((array) config('hk-modules.modules', []) as $key => $config) {
+            if (! ($config['enabled'] ?? false)) {
+                continue;
+            }
 
-        foreach ($manager->all() as $module) {
-            if ($provider = $module->provider()) {
+            $class = $config['manifest'] ?? null;
+
+            if (! $class || ! class_exists($class)) {
+                continue;
+            }
+
+            $instance = $this->app->make($class);
+
+            if ($instance instanceof ModuleContract && ($provider = $instance->provider())) {
                 $this->app->register($provider);
             }
         }
@@ -29,6 +41,7 @@ class ModuleServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
+        // ModuleManager has been populated in HkCoreServiceProvider::boot().
         $manager = $this->app->make(ModuleManager::class);
 
         foreach ($manager->all() as $module) {

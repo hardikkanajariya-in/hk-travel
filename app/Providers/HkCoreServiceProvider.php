@@ -45,7 +45,7 @@ class HkCoreServiceProvider extends ServiceProvider
             $app->make(Filesystem::class)
         ));
 
-        $this->app->singleton(ModuleManager::class, fn ($app) => (new ModuleManager($app))->discover());
+        $this->app->singleton(ModuleManager::class, fn ($app) => new ModuleManager($app));
 
         $this->app->singleton(ThemeManager::class, fn ($app) => (new ThemeManager(
             $app, $app->make(Filesystem::class)
@@ -58,6 +58,9 @@ class HkCoreServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
+        // Discover & register module manifests now that the DB is available.
+        $this->app->make(ModuleManager::class)->discover();
+
         // Activate the configured public theme; safe to call even when no
         // theme is installed (it falls back to bare app views).
         $this->app->make(ThemeManager::class)->activate();

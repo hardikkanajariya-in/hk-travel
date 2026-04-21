@@ -77,6 +77,14 @@ class ModuleManager
 
         $out = [];
         foreach ($value as $key => $row) {
+            // Flat shape: 'tours.enabled' => true
+            if (is_string($key) && str_ends_with($key, '.enabled')) {
+                $moduleKey = substr($key, 0, -strlen('.enabled'));
+                $out[$moduleKey] = (bool) $row;
+
+                continue;
+            }
+            // Nested shape: 'tours' => ['enabled' => true]
             if (is_array($row) && array_key_exists('enabled', $row)) {
                 $out[$key] = (bool) $row['enabled'];
             }
