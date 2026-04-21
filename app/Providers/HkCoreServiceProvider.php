@@ -52,7 +52,8 @@ class HkCoreServiceProvider extends ServiceProvider
         ))->discover());
 
         $this->app->singleton(LocaleManager::class, fn ($app) => new LocaleManager(
-            $app->make(Translator::class)
+            $app->make(Translator::class),
+            $app->make(CacheRepository::class)
         ));
     }
 

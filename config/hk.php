@@ -59,6 +59,11 @@ return [
         ],
     ],
 
+    'audit' => [
+        'enabled' => true,
+        'retention_days' => env('HK_AUDIT_RETENTION_DAYS', 180),
+    ],
+
     'captcha' => [
         'enabled' => false,
         'driver' => 'turnstile',
@@ -114,10 +119,49 @@ return [
     'seo' => [
         'site_title_separator' => '·',
         'meta_description' => null,
+        'og_image' => null,
+        'robots_default' => 'index, follow',
+        'canonical_host' => null,
         'analytics' => [
             'ga4' => null,
             'gtm' => null,
+            'meta_pixel' => null,
+            'hotjar' => null,
+            'custom_head' => null,
+            'custom_body' => null,
         ],
+    ],
+
+    'general' => [
+        'timezone' => env('APP_TIMEZONE', 'UTC'),
+        'date_format' => 'Y-m-d',
+        'time_format' => 'H:i',
+    ],
+
+    'contact' => [
+        'email' => null,
+        'phone' => null,
+        'address' => null,
+        'hours' => null,
+        'map_embed' => null,
+        'social' => [
+            'facebook' => null,
+            'instagram' => null,
+            'twitter' => null,
+            'youtube' => null,
+            'linkedin' => null,
+            'whatsapp' => null,
+        ],
+    ],
+
+    'cookie' => [
+        'enabled' => true,
+        'message' => 'We use cookies to improve your experience. You can manage your preferences anytime.',
+        'accept_label' => 'Accept all',
+        'reject_label' => 'Reject',
+        'settings_label' => 'Preferences',
+        'policy_url' => '/privacy',
+        'position' => 'bottom',
     ],
 
     'installer' => [

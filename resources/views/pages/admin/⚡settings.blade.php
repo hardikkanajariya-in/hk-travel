@@ -1,80 +1,302 @@
 <?php
 
-use App\Core\Settings\SettingsRepository;
+use App\Concerns\SettingsForm;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Component;
 
 new #[Title('Settings')] #[Layout('components.layouts.admin')] class extends Component {
-    public string $brandName = '';
-    public string $brandTagline = '';
-    public string $primaryColor = '#2563eb';
-    public string $accentColor = '#f97316';
-    public string $defaultLocale = 'en';
-    public string $defaultCurrency = 'USD';
+    use SettingsForm;
 
-    public ?string $flash = null;
-
-    public function mount(SettingsRepository $settings): void
+    public function mount(): void
     {
-        $this->brandName = (string) $settings->get('brand.name', config('hk.brand.name'));
-        $this->brandTagline = (string) $settings->get('brand.tagline', config('hk.brand.tagline'));
-        $this->primaryColor = (string) $settings->get('brand.primary_color', '#2563eb');
-        $this->accentColor = (string) $settings->get('brand.accent_color', '#f97316');
-        $this->defaultLocale = (string) $settings->get('localization.default', 'en');
-        $this->defaultCurrency = (string) $settings->get('payments.default_currency', 'USD');
+        $this->state = [
+            // General
+            'site_name' => '',
+            'tagline' => '',
+            'default_locale' => 'en',
+            'default_currency' => 'USD',
+            'timezone' => 'UTC',
+            'date_format' => 'Y-m-d',
+            'time_format' => 'H:i',
+
+            // Contact
+            'contact_email' => '',
+            'contact_phone' => '',
+            'contact_address' => '',
+            'contact_hours' => '',
+            'contact_map_embed' => '',
+            'social_facebook' => '',
+            'social_instagram' => '',
+            'social_twitter' => '',
+            'social_youtube' => '',
+            'social_linkedin' => '',
+            'social_whatsapp' => '',
+
+            // SEO defaults
+            'seo_title_separator' => '·',
+            'seo_meta_description' => '',
+            'seo_og_image' => '',
+            'seo_robots_default' => 'index, follow',
+            'seo_canonical_host' => '',
+
+            // Analytics
+            'analytics_ga4' => '',
+            'analytics_gtm' => '',
+            'analytics_meta_pixel' => '',
+            'analytics_hotjar' => '',
+            'analytics_custom_head' => '',
+            'analytics_custom_body' => '',
+
+            // Cookie banner
+            'cookie_enabled' => true,
+            'cookie_message' => 'We use cookies to improve your experience. You can manage your preferences anytime.',
+            'cookie_accept_label' => 'Accept all',
+            'cookie_reject_label' => 'Reject',
+            'cookie_settings_label' => 'Preferences',
+            'cookie_policy_url' => '/privacy',
+            'cookie_position' => 'bottom',
+        ];
+
+        $this->loadSettings();
     }
 
-    public function save(SettingsRepository $settings): void
+    public function save(): void
     {
-        $this->validate([
-            'brandName' => 'required|string|max:120',
-            'brandTagline' => 'nullable|string|max:255',
-            'primaryColor' => 'required|string|regex:/^#[0-9a-fA-F]{6}$/',
-            'accentColor' => 'required|string|regex:/^#[0-9a-fA-F]{6}$/',
-            'defaultLocale' => 'required|string|max:8',
-            'defaultCurrency' => 'required|string|size:3',
-        ]);
+        $this->saveSettings();
+    }
 
-        $settings->setMany([
-            'brand.name' => $this->brandName,
-            'brand.tagline' => $this->brandTagline,
-            'brand.primary_color' => $this->primaryColor,
-            'brand.accent_color' => $this->accentColor,
-            'localization.default' => $this->defaultLocale,
-            'payments.default_currency' => $this->defaultCurrency,
-        ]);
+    /** @return array<string, string> */
+    protected function settingsKeys(): array
+    {
+        return [
+            // General
+            'site_name' => 'brand.name',
+            'tagline' => 'brand.tagline',
+            'default_locale' => 'localization.default',
+            'default_currency' => 'payments.default_currency',
+            'timezone' => 'general.timezone',
+            'date_format' => 'general.date_format',
+            'time_format' => 'general.time_format',
 
-        $this->flash = 'Settings saved.';
+            // Contact
+            'contact_email' => 'contact.email',
+            'contact_phone' => 'contact.phone',
+            'contact_address' => 'contact.address',
+            'contact_hours' => 'contact.hours',
+            'contact_map_embed' => 'contact.map_embed',
+            'social_facebook' => 'contact.social.facebook',
+            'social_instagram' => 'contact.social.instagram',
+            'social_twitter' => 'contact.social.twitter',
+            'social_youtube' => 'contact.social.youtube',
+            'social_linkedin' => 'contact.social.linkedin',
+            'social_whatsapp' => 'contact.social.whatsapp',
+
+            // SEO
+            'seo_title_separator' => 'seo.site_title_separator',
+            'seo_meta_description' => 'seo.meta_description',
+            'seo_og_image' => 'seo.og_image',
+            'seo_robots_default' => 'seo.robots_default',
+            'seo_canonical_host' => 'seo.canonical_host',
+
+            // Analytics
+            'analytics_ga4' => 'seo.analytics.ga4',
+            'analytics_gtm' => 'seo.analytics.gtm',
+            'analytics_meta_pixel' => 'seo.analytics.meta_pixel',
+            'analytics_hotjar' => 'seo.analytics.hotjar',
+            'analytics_custom_head' => 'seo.analytics.custom_head',
+            'analytics_custom_body' => 'seo.analytics.custom_body',
+
+            // Cookie banner
+            'cookie_enabled' => 'cookie.enabled',
+            'cookie_message' => 'cookie.message',
+            'cookie_accept_label' => 'cookie.accept_label',
+            'cookie_reject_label' => 'cookie.reject_label',
+            'cookie_settings_label' => 'cookie.settings_label',
+            'cookie_policy_url' => 'cookie.policy_url',
+            'cookie_position' => 'cookie.position',
+        ];
+    }
+
+    /** @return array<string, mixed> */
+    protected function settingsRules(): array
+    {
+        return [
+            'state.site_name' => 'required|string|max:120',
+            'state.tagline' => 'nullable|string|max:255',
+            'state.default_locale' => 'required|string|max:8',
+            'state.default_currency' => 'required|string|size:3',
+            'state.timezone' => 'required|string|max:64',
+            'state.date_format' => 'required|string|max:32',
+            'state.time_format' => 'required|string|max:32',
+
+            'state.contact_email' => 'nullable|email',
+            'state.contact_phone' => 'nullable|string|max:64',
+            'state.contact_address' => 'nullable|string|max:1000',
+            'state.contact_hours' => 'nullable|string|max:255',
+            'state.contact_map_embed' => 'nullable|string|max:5000',
+            'state.social_facebook' => 'nullable|url|max:255',
+            'state.social_instagram' => 'nullable|url|max:255',
+            'state.social_twitter' => 'nullable|url|max:255',
+            'state.social_youtube' => 'nullable|url|max:255',
+            'state.social_linkedin' => 'nullable|url|max:255',
+            'state.social_whatsapp' => 'nullable|string|max:64',
+
+            'state.seo_title_separator' => 'required|string|max:8',
+            'state.seo_meta_description' => 'nullable|string|max:255',
+            'state.seo_og_image' => 'nullable|string|max:255',
+            'state.seo_robots_default' => 'required|string|max:64',
+            'state.seo_canonical_host' => 'nullable|string|max:255',
+
+            'state.analytics_ga4' => 'nullable|string|max:32',
+            'state.analytics_gtm' => 'nullable|string|max:32',
+            'state.analytics_meta_pixel' => 'nullable|string|max:32',
+            'state.analytics_hotjar' => 'nullable|string|max:32',
+            'state.analytics_custom_head' => 'nullable|string|max:5000',
+            'state.analytics_custom_body' => 'nullable|string|max:5000',
+
+            'state.cookie_enabled' => 'boolean',
+            'state.cookie_message' => 'required_if:state.cookie_enabled,true|nullable|string|max:1000',
+            'state.cookie_accept_label' => 'required_if:state.cookie_enabled,true|nullable|string|max:64',
+            'state.cookie_reject_label' => 'nullable|string|max:64',
+            'state.cookie_settings_label' => 'nullable|string|max:64',
+            'state.cookie_policy_url' => 'nullable|string|max:255',
+            'state.cookie_position' => 'required|in:bottom,top,bottom-left,bottom-right',
+        ];
     }
 };
 
 ?>
 
 <div class="space-y-6">
-    @if ($flash)
-        <x-ui.alert variant="success" :dismissible="true">{{ $flash }}</x-ui.alert>
-    @endif
+    <x-admin.page-header title="Settings" subtitle="Site identity, contact details, SEO, analytics, and cookie banner." />
 
-    <x-ui.card>
-        <h2 class="text-base font-semibold mb-4">Branding</h2>
-        <div class="space-y-4">
-            <x-ui.input wire:model="brandName" label="Site name" required />
-            <x-ui.input wire:model="brandTagline" label="Tagline" />
-            <div class="grid grid-cols-2 gap-4">
-                <x-ui.input wire:model="primaryColor" label="Primary color" type="color" />
-                <x-ui.input wire:model="accentColor" label="Accent color" type="color" />
-            </div>
-        </div>
-    </x-ui.card>
+    <x-admin.flash :message="session('settings.saved')" />
 
-    <x-ui.card>
-        <h2 class="text-base font-semibold mb-4">Localization & currency</h2>
-        <div class="grid grid-cols-2 gap-4">
-            <x-ui.input wire:model="defaultLocale" label="Default locale" required hint="e.g. en, fr, ar" />
-            <x-ui.input wire:model="defaultCurrency" label="Default currency" required hint="ISO 4217 code, e.g. USD" />
-        </div>
-    </x-ui.card>
+    <x-ui.tabs :tabs="[
+        'general' => 'General',
+        'contact' => 'Contact',
+        'seo' => 'SEO',
+        'analytics' => 'Analytics',
+        'cookie' => 'Cookie banner',
+    ]">
+        <x-ui.tab-panel name="general">
+            <x-ui.card>
+                <h2 class="text-base font-semibold mb-4">Site identity</h2>
+                <div class="space-y-4">
+                    <x-ui.input wire:model="state.site_name" label="Site name" required />
+                    <x-ui.input wire:model="state.tagline" label="Tagline" />
+                </div>
+            </x-ui.card>
+
+            <x-ui.card>
+                <h2 class="text-base font-semibold mb-4">Locale & formats</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <x-ui.input wire:model="state.default_locale" label="Default locale" required hint="e.g. en, fr, ar" />
+                    <x-ui.input wire:model="state.default_currency" label="Default currency" required hint="ISO 4217, e.g. USD" />
+                    <x-ui.input wire:model="state.timezone" label="Timezone" required hint="e.g. UTC, Asia/Kolkata" />
+                    <x-ui.input wire:model="state.date_format" label="Date format" required hint="PHP date()" />
+                    <x-ui.input wire:model="state.time_format" label="Time format" required hint="PHP date()" />
+                </div>
+            </x-ui.card>
+        </x-ui.tab-panel>
+
+        <x-ui.tab-panel name="contact">
+            <x-ui.card>
+                <h2 class="text-base font-semibold mb-4">Contact information</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <x-ui.input type="email" wire:model="state.contact_email" label="Email" />
+                    <x-ui.input wire:model="state.contact_phone" label="Phone" />
+                    <x-ui.input wire:model="state.contact_hours" label="Working hours" />
+                    <x-ui.input wire:model="state.social_whatsapp" label="WhatsApp number" />
+                </div>
+                <div class="mt-4">
+                    <x-ui.textarea wire:model="state.contact_address" label="Address" rows="3" />
+                </div>
+                <div class="mt-4">
+                    <x-ui.textarea wire:model="state.contact_map_embed" label="Map embed (HTML iframe)" rows="3" hint="Will be sanitized server-side." />
+                </div>
+            </x-ui.card>
+
+            <x-ui.card>
+                <h2 class="text-base font-semibold mb-4">Social links</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <x-ui.input wire:model="state.social_facebook" label="Facebook URL" />
+                    <x-ui.input wire:model="state.social_instagram" label="Instagram URL" />
+                    <x-ui.input wire:model="state.social_twitter" label="Twitter / X URL" />
+                    <x-ui.input wire:model="state.social_youtube" label="YouTube URL" />
+                    <x-ui.input wire:model="state.social_linkedin" label="LinkedIn URL" />
+                </div>
+            </x-ui.card>
+        </x-ui.tab-panel>
+
+        <x-ui.tab-panel name="seo">
+            <x-ui.card>
+                <h2 class="text-base font-semibold mb-4">SEO defaults</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <x-ui.input wire:model="state.seo_title_separator" label="Title separator" required />
+                    <x-ui.input wire:model="state.seo_robots_default" label="Default robots" required hint="e.g. index, follow" />
+                    <x-ui.input wire:model="state.seo_canonical_host" label="Canonical host" hint="https://www.example.com (optional)" />
+                    <x-ui.input wire:model="state.seo_og_image" label="Default OG image URL" />
+                </div>
+                <div class="mt-4">
+                    <x-ui.textarea wire:model="state.seo_meta_description" label="Default meta description" rows="3" />
+                </div>
+            </x-ui.card>
+        </x-ui.tab-panel>
+
+        <x-ui.tab-panel name="analytics">
+            <x-ui.card>
+                <h2 class="text-base font-semibold mb-4">Analytics IDs</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <x-ui.input wire:model="state.analytics_ga4" label="Google Analytics 4 ID" placeholder="G-XXXXXXX" />
+                    <x-ui.input wire:model="state.analytics_gtm" label="Google Tag Manager ID" placeholder="GTM-XXXXXXX" />
+                    <x-ui.input wire:model="state.analytics_meta_pixel" label="Meta Pixel ID" />
+                    <x-ui.input wire:model="state.analytics_hotjar" label="Hotjar ID" />
+                </div>
+            </x-ui.card>
+
+            <x-ui.card>
+                <h2 class="text-base font-semibold mb-4">Custom snippets</h2>
+                <p class="text-xs text-zinc-500 mb-3">Injected only for users with the <code>developer</code> role. Sanitized otherwise.</p>
+                <div class="space-y-4">
+                    <x-ui.textarea wire:model="state.analytics_custom_head" label="Inside &lt;head&gt;" rows="4" />
+                    <x-ui.textarea wire:model="state.analytics_custom_body" label="End of &lt;body&gt;" rows="4" />
+                </div>
+            </x-ui.card>
+        </x-ui.tab-panel>
+
+        <x-ui.tab-panel name="cookie">
+            <x-ui.card>
+                <h2 class="text-base font-semibold mb-4">Cookie banner</h2>
+                <label class="flex items-center gap-2 mb-4">
+                    <input type="checkbox" wire:model.live="state.cookie_enabled" class="size-4 rounded border-zinc-300 text-hk-primary-600">
+                    <span class="text-sm">Show cookie banner to first-time visitors</span>
+                </label>
+
+                <div class="space-y-4">
+                    <x-ui.textarea wire:model="state.cookie_message" label="Banner message" rows="3" />
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <x-ui.input wire:model="state.cookie_accept_label" label="Accept button label" />
+                        <x-ui.input wire:model="state.cookie_reject_label" label="Reject button label" />
+                        <x-ui.input wire:model="state.cookie_settings_label" label="Preferences label" />
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <x-ui.input wire:model="state.cookie_policy_url" label="Policy URL" />
+                        <div>
+                            <label class="block text-sm font-medium mb-1">Position</label>
+                            <select wire:model="state.cookie_position" class="block w-full rounded-md border-zinc-300 dark:border-zinc-700 dark:bg-zinc-900 text-sm">
+                                <option value="bottom">Bottom (full width)</option>
+                                <option value="top">Top (full width)</option>
+                                <option value="bottom-left">Bottom left card</option>
+                                <option value="bottom-right">Bottom right card</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </x-ui.card>
+        </x-ui.tab-panel>
+    </x-ui.tabs>
 
     <div class="flex justify-end">
         <x-ui.button wire:click="save">Save changes</x-ui.button>

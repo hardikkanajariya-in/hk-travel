@@ -9,6 +9,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>{{ $title ? $title.' · '.config('hk.brand.name') : config('hk.brand.name').' Admin' }}</title>
+    {!! app(\App\Core\Branding\BrandingService::class)->headTags() !!}
     @vite(['resources/css/admin.css', 'resources/js/app.js'])
     @livewireStyles
 </head>

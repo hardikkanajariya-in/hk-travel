@@ -13,6 +13,9 @@ class DatabaseSeeder extends Seeder
     {
         $this->call([
             RolesAndPermissionsSeeder::class,
+            LanguagesSeeder::class,
+            EmailTemplatesSeeder::class,
+            NotificationChannelsSeeder::class,
         ]);
     }
 }

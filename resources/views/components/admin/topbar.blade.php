@@ -6,6 +6,9 @@
     </div>
 
     <div class="flex items-center gap-3">
+        <x-ui.locale-switcher />
+        <livewire:pages::admin.notification-bell />
+
         @auth
             <x-ui.dropdown align="right" width="56">
                 <x-slot:trigger>

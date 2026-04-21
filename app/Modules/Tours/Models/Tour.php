@@ -2,17 +2,22 @@
 
 namespace App\Modules\Tours\Models;
 
+use App\Concerns\HasAuditLog;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Spatie\Translatable\HasTranslations;
 
 class Tour extends Model
 {
-    use HasUlids, SoftDeletes;
+    use HasAuditLog, HasTranslations, HasUlids, SoftDeletes;
 
     protected $table = 'tours';
 
     protected $guarded = ['id'];
+
+    /** @var array<int, string> */
+    public $translatable = ['name', 'description'];
 
     protected function casts(): array
     {

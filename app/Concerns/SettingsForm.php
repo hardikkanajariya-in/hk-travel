@@ -4,6 +4,7 @@ namespace App\Concerns;
 
 use App\Core\Settings\SettingsRepository;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Auth;
 
 /**
  * Shared Livewire trait for "settings form" admin pages.
@@ -34,8 +35,22 @@ trait SettingsForm
         $this->validate($this->settingsRules());
 
         $repo = app(SettingsRepository::class);
+        $changed = [];
         foreach ($this->settingsKeys() as $stateKey => $settingsKey) {
-            $repo->set($settingsKey, Arr::get($this->state, $stateKey));
+            $new = Arr::get($this->state, $stateKey);
+            $old = $repo->get($settingsKey);
+            if ($new !== $old) {
+                $changed[$settingsKey] = ['from' => $old, 'to' => $new];
+            }
+            $repo->set($settingsKey, $new);
+        }
+
+        if ($changed !== []) {
+            activity('settings')
+                ->causedBy(Auth::user())
+                ->withProperties(['changed' => $changed, 'component' => static::class])
+                ->event('updated')
+                ->log('settings.updated');
         }
 
         session()->flash('settings.saved', __('Settings updated.'));

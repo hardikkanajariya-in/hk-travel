@@ -2,6 +2,7 @@
 
 use App\Http\Middleware\EnsureAppInstalled;
 use App\Http\Middleware\ForceHttps;
+use App\Http\Middleware\HandleLegacyPermalinks;
 use App\Http\Middleware\RedirectIfInstalled;
 use App\Http\Middleware\SecurityHeaders;
 use App\Http\Middleware\SetLocale;
@@ -35,6 +36,7 @@ return Application::configure(basePath: dirname(__DIR__))
 
         $middleware->web(prepend: [
             ForceHttps::class,
+            HandleLegacyPermalinks::class,
         ]);
 
         $middleware->web(append: [

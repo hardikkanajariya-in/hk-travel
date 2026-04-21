@@ -47,6 +47,7 @@ class HkContentSecurityPolicy implements Preset
                 'https://www.google.com/recaptcha/',
                 'https://www.gstatic.com/recaptcha/',
             ])
+            ->addNonce(Directive::SCRIPT)
             ->add(Directive::STYLE, [
                 Keyword::SELF,
                 Keyword::UNSAFE_INLINE,

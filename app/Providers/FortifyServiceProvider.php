@@ -5,10 +5,15 @@ namespace App\Providers;
 use App\Actions\Fortify\CreateNewUser;
 use App\Actions\Fortify\ResetUserPassword;
 use App\Core\Captcha\CaptchaService;
+use App\Core\Email\TemplateRenderer;
+use App\Models\EmailTemplate;
 use App\Models\User;
 use App\Rules\Captcha;
+use Illuminate\Auth\Notifications\ResetPassword;
+use Illuminate\Auth\Notifications\VerifyEmail;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
+use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Validator;
@@ -35,6 +40,7 @@ class FortifyServiceProvider extends ServiceProvider
         $this->configureViews();
         $this->configureRateLimiting();
         $this->configureCaptcha();
+        $this->configureNotifications();
     }
 
     /**
@@ -98,5 +104,49 @@ class FortifyServiceProvider extends ServiceProvider
 
             return null;
         });
+    }
+
+    /**
+     * Wire the built-in auth notifications through `HkMail` so admins
+     * can edit subjects/bodies from the dashboard while the Laravel
+     * notification system (and its testing fakes) keep working.
+     */
+    private function configureNotifications(): void
+    {
+        ResetPassword::toMailUsing(function (mixed $notifiable, string $token): MailMessage {
+            $url = url(route('password.reset', ['token' => $token, 'email' => $notifiable->getEmailForPasswordReset()], false));
+
+            return $this->buildMail('fortify.reset_password', [
+                'user' => ['name' => $notifiable->name ?? '', 'email' => $notifiable->getEmailForPasswordReset()],
+                'url' => $url,
+            ], fallbackSubject: 'Reset your password');
+        });
+
+        VerifyEmail::toMailUsing(function (mixed $notifiable, string $url): MailMessage {
+            return $this->buildMail('fortify.verify_email', [
+                'user' => ['name' => $notifiable->name ?? '', 'email' => $notifiable->getEmailForVerification()],
+                'url' => $url,
+            ], fallbackSubject: 'Verify your email');
+        });
+    }
+
+    /**
+     * Render a `MailMessage` from a DB-backed template by key, falling
+     * back to a minimal default if the row hasn't been seeded yet.
+     *
+     * @param  array<string, mixed>  $vars
+     */
+    private function buildMail(string $key, array $vars, string $fallbackSubject): MailMessage
+    {
+        $template = EmailTemplate::with('translations')->where('key', $key)->where('is_active', true)->first();
+        $renderer = app(TemplateRenderer::class);
+        $message = new MailMessage;
+
+        if ($template && ($tr = $template->translation(app()->getLocale()))) {
+            return $message->subject($renderer->renderText($tr->subject, $vars))
+                ->view('emails.raw', ['content' => $renderer->render($tr->body_html, $vars)]);
+        }
+
+        return $message->subject($fallbackSubject)->line($fallbackSubject);
     }
 }

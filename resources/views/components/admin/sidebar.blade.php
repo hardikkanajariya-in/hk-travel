@@ -3,8 +3,14 @@
         ['label' => 'Dashboard', 'route' => 'admin.dashboard', 'icon' => 'home'],
         ['label' => 'Modules', 'route' => 'admin.modules', 'icon' => 'squares-2x2'],
         ['label' => 'Settings', 'route' => 'admin.settings', 'icon' => 'cog-6-tooth'],
+        ['label' => 'Branding', 'route' => 'admin.branding', 'icon' => 'paint-brush'],
+        ['label' => 'Languages', 'route' => 'admin.languages', 'icon' => 'language'],
+        ['label' => 'Permalinks', 'route' => 'admin.permalinks', 'icon' => 'link'],
+        ['label' => 'Email templates', 'route' => 'admin.email-templates', 'icon' => 'envelope'],
+        ['label' => 'Notifications', 'route' => 'admin.notifications', 'icon' => 'bell'],
         ['label' => 'Security', 'route' => 'admin.security', 'icon' => 'shield-check'],
         ['label' => 'Captcha', 'route' => 'admin.captcha', 'icon' => 'shield-exclamation'],
+        ['label' => 'Audit log', 'route' => 'admin.audit', 'icon' => 'clipboard-document-list'],
         ['label' => 'Users', 'route' => 'admin.users', 'icon' => 'users'],
     ];
 @endphp
