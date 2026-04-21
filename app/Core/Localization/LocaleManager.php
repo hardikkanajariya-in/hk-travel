@@ -103,16 +103,25 @@ class LocaleManager
     /** @return Collection<int, array<string, mixed>> */
     public function languages(): Collection
     {
-        return $this->cache->remember(self::CACHE_KEY, self::CACHE_TTL, function (): Collection {
+        $rows = $this->cache->remember(self::CACHE_KEY, self::CACHE_TTL, function (): array {
             try {
                 /** @var Collection<int, Language> $models */
                 $models = Language::query()->active()->get(['code', 'name', 'native_name', 'flag', 'is_rtl', 'is_default']);
 
-                return $models->map(fn (Language $l): array => $l->toArray())->values();
+                return $models->map(fn (Language $l): array => $l->toArray())->values()->all();
             } catch (Throwable) {
-                return collect();
+                return [];
             }
         });
+
+        if (! is_array($rows)) {
+            // Stale/corrupt cache (e.g. an old serialized model) — drop it and refetch.
+            $this->cache->forget(self::CACHE_KEY);
+
+            return $this->languages();
+        }
+
+        return collect($rows);
     }
 
     public function flush(): void
