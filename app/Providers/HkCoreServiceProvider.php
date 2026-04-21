@@ -6,13 +6,17 @@ use App\Core\Captcha\CaptchaService;
 use App\Core\Installer\InstallationState;
 use App\Core\Localization\LocaleManager;
 use App\Core\Modules\ModuleManager;
+use App\Core\PageBuilder\BlockRegistry;
+use App\Core\PageBuilder\BlockRenderer;
 use App\Core\Settings\SettingsRepository;
 use App\Core\Storage\StorageManager;
 use App\Core\Theme\ThemeManager;
 use Illuminate\Cache\Repository as CacheRepository;
 use Illuminate\Filesystem\Filesystem;
 use Illuminate\Filesystem\FilesystemManager;
+use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Translation\Translator;
 
@@ -55,6 +59,9 @@ class HkCoreServiceProvider extends ServiceProvider
             $app->make(Translator::class),
             $app->make(CacheRepository::class)
         ));
+
+        $this->app->singleton(BlockRegistry::class);
+        $this->app->singleton(BlockRenderer::class);
     }
 
     public function boot(): void
@@ -65,6 +72,22 @@ class HkCoreServiceProvider extends ServiceProvider
         // Activate the configured public theme; safe to call even when no
         // theme is installed (it falls back to bare app views).
         $this->app->make(ThemeManager::class)->activate();
+
+        // Page-builder views can be overridden by the active theme by
+        // shipping a `page-builder/blocks/{name}.blade.php` file.
+        View::addNamespace('page-builder', resource_path('views/page-builder'));
+
+        // `@zone('footer-1')` renders every active widget bound to that zone.
+        Blade::directive('zone', function (string $expression): string {
+            return "<?php
+                \$__zoneRenderer = app(\\App\\Core\\PageBuilder\\BlockRenderer::class);
+                \$__zoneUser = auth()->user();
+                foreach (\\App\\Models\\Widget::forZone({$expression}) as \$__zoneWidget) {
+                    echo \$__zoneRenderer->renderWidget(\$__zoneWidget, \$__zoneUser);
+                }
+                unset(\$__zoneRenderer, \$__zoneUser, \$__zoneWidget);
+            ?>";
+        });
 
         // super-admin role bypasses every Gate::check().
         Gate::before(fn ($user, string $ability) => method_exists($user, 'hasRole') && $user->hasRole('super-admin') ? true : null);

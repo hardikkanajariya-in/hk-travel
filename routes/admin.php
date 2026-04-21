@@ -24,4 +24,9 @@ Route::middleware(['auth', 'verified'])
         Route::livewire('permalinks', 'pages::admin.permalinks')->middleware('can:admin.permalinks.manage')->name('permalinks');
         Route::livewire('email-templates', 'pages::admin.email-templates')->middleware('can:admin.email-templates.manage')->name('email-templates');
         Route::livewire('notifications', 'pages::admin.notifications')->middleware('can:admin.notifications.manage')->name('notifications');
+        Route::livewire('themes', 'pages::admin.themes')->middleware('can:admin.themes.manage')->name('themes');
+        Route::livewire('menus', 'pages::admin.menus')->middleware('can:admin.menus.manage')->name('menus');
+        Route::livewire('widgets', 'pages::admin.widgets')->middleware('can:admin.widgets.manage')->name('widgets');
+        Route::livewire('pages', 'pages::admin.pages')->middleware('can:admin.pages.manage')->name('pages');
+        Route::livewire('pages/{page}/edit', 'pages::admin.page-editor')->middleware('can:admin.pages.manage')->name('pages.edit');
     });

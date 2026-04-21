@@ -2,9 +2,11 @@
 
 namespace App\Core\Theme;
 
+use App\Core\Settings\SettingsRepository;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Filesystem\Filesystem;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Blade;
 use RuntimeException;
 
 /**
@@ -69,7 +71,15 @@ class ThemeManager
 
     public function activate(?string $key = null): void
     {
-        $key ??= (string) config('hk.theme.active', 'default');
+        if ($key === null) {
+            // Prefer the DB-stored override, fall back to config/.env default.
+            try {
+                $key = (string) $this->app->make(SettingsRepository::class)
+                    ->get('theme.active', config('hk.theme.active', 'default'));
+            } catch (\Throwable) {
+                $key = (string) config('hk.theme.active', 'default');
+            }
+        }
 
         $theme = $this->themes->get($key);
 
@@ -83,6 +93,14 @@ class ThemeManager
 
         if ($this->files->isDirectory($theme->viewsPath())) {
             $finder->prependLocation($theme->viewsPath());
+        }
+
+        // Expose the theme's `views/components` directory as an anonymous
+        // Blade component path so themes can override `<x-layouts.app>`,
+        // `<x-theme.menu>`, etc.
+        $componentsPath = $theme->viewsPath().DIRECTORY_SEPARATOR.'components';
+        if ($this->files->isDirectory($componentsPath)) {
+            Blade::anonymousComponentPath($componentsPath);
         }
     }
 

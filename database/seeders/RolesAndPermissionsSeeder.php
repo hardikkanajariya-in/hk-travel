@@ -38,6 +38,10 @@ class RolesAndPermissionsSeeder extends Seeder
         'admin.email-templates.manage',
         'admin.notifications.manage',
         'admin.analytics.manage',
+        'admin.pages.manage',
+        'admin.menus.manage',
+        'admin.widgets.manage',
+        'pages.developer-blocks',
     ];
 
     public function run(): void
@@ -61,7 +65,8 @@ class RolesAndPermissionsSeeder extends Seeder
         $superAdmin->syncPermissions(Permission::all());
 
         $admin->syncPermissions(array_values(array_filter($all, fn (string $p): bool => $p !== 'admin.roles.manage'
-            && $p !== 'admin.audit.purge')));
+            && $p !== 'admin.audit.purge'
+            && $p !== 'pages.developer-blocks')));
 
         $editor->syncPermissions(array_values(array_filter($all, fn (string $p): bool => str_contains($p, '.view')
             || str_contains($p, '.create')

@@ -1,6 +1,10 @@
 @php
     $items = [
         ['label' => 'Dashboard', 'route' => 'admin.dashboard', 'icon' => 'home'],
+        ['label' => 'Pages', 'route' => 'admin.pages', 'icon' => 'document'],
+        ['label' => 'Menus', 'route' => 'admin.menus', 'icon' => 'bars-3'],
+        ['label' => 'Widgets', 'route' => 'admin.widgets', 'icon' => 'rectangle-group'],
+        ['label' => 'Themes', 'route' => 'admin.themes', 'icon' => 'swatch'],
         ['label' => 'Modules', 'route' => 'admin.modules', 'icon' => 'squares-2x2'],
         ['label' => 'Settings', 'route' => 'admin.settings', 'icon' => 'cog-6-tooth'],
         ['label' => 'Branding', 'route' => 'admin.branding', 'icon' => 'paint-brush'],
