@@ -51,20 +51,22 @@ class TourIndex extends Component
 
     public function render(): View
     {
-        $tours = Tour::query()
-            ->with('destination')
-            ->where('is_published', true)
-            ->when($this->search, fn ($q) => $q->where('name', 'like', "%{$this->search}%"))
-            ->when($this->destinationId, fn ($q) => $q->where('destination_id', $this->destinationId))
-            ->when($this->difficulty, fn ($q) => $q->where('difficulty', $this->difficulty))
-            ->when($this->priceMin !== null, fn ($q) => $q->where('price', '>=', $this->priceMin))
-            ->when($this->priceMax !== null, fn ($q) => $q->where('price', '<=', $this->priceMax))
-            ->when($this->sort === 'price_asc', fn ($q) => $q->orderBy('price'))
-            ->when($this->sort === 'price_desc', fn ($q) => $q->orderByDesc('price'))
-            ->when($this->sort === 'newest', fn ($q) => $q->orderByDesc('published_at'))
-            ->when($this->sort === 'rating', fn ($q) => $q->orderByDesc('rating_avg'))
-            ->when($this->sort === 'featured', fn ($q) => $q->orderByDesc('is_featured')->orderByDesc('published_at'))
-            ->paginate(12);
+        $tours = Schema::hasTable('tours')
+            ? Tour::query()
+                ->with('destination')
+                ->where('is_published', true)
+                ->when($this->search, fn ($q) => $q->where('name', 'like', "%{$this->search}%"))
+                ->when($this->destinationId, fn ($q) => $q->where('destination_id', $this->destinationId))
+                ->when($this->difficulty, fn ($q) => $q->where('difficulty', $this->difficulty))
+                ->when($this->priceMin !== null, fn ($q) => $q->where('price', '>=', $this->priceMin))
+                ->when($this->priceMax !== null, fn ($q) => $q->where('price', '<=', $this->priceMax))
+                ->when($this->sort === 'price_asc', fn ($q) => $q->orderBy('price'))
+                ->when($this->sort === 'price_desc', fn ($q) => $q->orderByDesc('price'))
+                ->when($this->sort === 'newest', fn ($q) => $q->orderByDesc('published_at'))
+                ->when($this->sort === 'rating', fn ($q) => $q->orderByDesc('rating_avg'))
+                ->when($this->sort === 'featured', fn ($q) => $q->orderByDesc('is_featured')->orderByDesc('published_at'))
+                ->paginate(12)
+            : new \Illuminate\Pagination\LengthAwarePaginator([], 0, 12);
 
         return view('tours::public.index', [
             'tours' => $tours,

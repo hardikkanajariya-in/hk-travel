@@ -17,6 +17,7 @@ class DatabaseSeeder extends Seeder
             EmailTemplatesSeeder::class,
             NotificationChannelsSeeder::class,
             PipelinesSeeder::class,
+            DefaultContentSeeder::class,
         ]);
     }
 }
