@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Vite;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
@@ -26,6 +27,28 @@ class AppServiceProvider extends ServiceProvider
     {
         $this->app->singleton(EmailTemplateRegistry::class);
         $this->app->singleton(NotificationRegistry::class);
+
+        $this->forceSafeDriversWhenNotInstalled();
+    }
+
+    /**
+     * Before the app is installed, the database tables backing the
+     * configured session/cache stores do not exist yet. Force file-based
+     * drivers so the install wizard itself can run without 1146 errors.
+     */
+    protected function forceSafeDriversWhenNotInstalled(): void
+    {
+        $lockFile = storage_path('app/'.config('hk.installer.lock_file', 'installed.lock'));
+
+        if (file_exists($lockFile)) {
+            return;
+        }
+
+        config([
+            'session.driver' => 'file',
+            'cache.default' => 'file',
+            'queue.default' => 'sync',
+        ]);
     }
 
     /**
@@ -51,6 +74,9 @@ class AppServiceProvider extends ServiceProvider
     protected function configureDefaults(): void
     {
         Date::use(CarbonImmutable::class);
+
+        // Older MySQL/MariaDB versions limit utf8mb4 indexes to 191 chars.
+        Schema::defaultStringLength(191);
 
         DB::prohibitDestructiveCommands(
             app()->isProduction(),

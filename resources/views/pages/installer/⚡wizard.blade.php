@@ -177,7 +177,7 @@ new #[Title('HK Travel — Install')] #[Layout('components.layouts.installer')] 
             $this->writeEnv();
             Artisan::call('config:clear');
 
-            Artisan::call('migrate', ['--force' => true, '--seed' => true]);
+            Artisan::call('migrate:fresh', ['--force' => true, '--seed' => true]);
 
             // Promote the locale chosen during install to "default" and ensure
             // it's active. The seeder activates en/hi/gu by default; this just
@@ -447,10 +447,135 @@ new #[Title('HK Travel — Install')] #[Layout('components.layouts.installer')] 
             @if ($step < $this->totalSteps)
                 <x-ui.button wire:click="next" wire:loading.attr="disabled">{{ __('installer.buttons.continue') }}</x-ui.button>
             @else
-                <x-ui.button wire:click="install" :loading="$installing" wire:loading.attr="disabled">
+                <x-ui.button
+                    wire:click="install"
+                    :loading="$installing"
+                    wire:loading.attr="disabled"
+                    wire:target="install"
+                    x-on:click="window.dispatchEvent(new CustomEvent('hk-install-started'))"
+                >
                     {{ __('installer.buttons.install') }}
                 </x-ui.button>
             @endif
         </div>
     </x-ui.card>
+
+    {{-- Install progress overlay --}}
+    <div
+        x-data="{
+            open: false,
+            progress: 0,
+            stepIndex: 0,
+            steps: @js([
+                __('installer.progress.steps.env'),
+                __('installer.progress.steps.migrate'),
+                __('installer.progress.steps.seed'),
+                __('installer.progress.steps.locale'),
+                __('installer.progress.steps.admin'),
+                __('installer.progress.steps.modules'),
+                __('installer.progress.steps.cache'),
+                __('installer.progress.steps.finalize'),
+            ]),
+            timer: null,
+            start() {
+                this.open = true;
+                this.progress = 0;
+                this.stepIndex = 0;
+                clearInterval(this.timer);
+                this.timer = setInterval(() => {
+                    const remaining = 95 - this.progress;
+                    if (remaining > 0) {
+                        this.progress += Math.max(0.4, remaining * 0.04);
+                    }
+                    this.stepIndex = Math.min(
+                        this.steps.length - 1,
+                        Math.floor((this.progress / 95) * this.steps.length),
+                    );
+                }, 220);
+            },
+            finish() {
+                clearInterval(this.timer);
+                this.progress = 100;
+                this.stepIndex = this.steps.length - 1;
+            },
+            close() {
+                clearInterval(this.timer);
+                this.open = false;
+                this.progress = 0;
+                this.stepIndex = 0;
+            },
+        }"
+        x-on:hk-install-started.window="start()"
+    >
+        <div
+            x-show="open"
+            x-transition.opacity
+            x-cloak
+            class="fixed inset-0 z-50 flex items-center justify-center bg-zinc-950/70 backdrop-blur-sm p-4"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="install-progress-title"
+        >
+            <div class="w-full max-w-md rounded-2xl bg-white dark:bg-zinc-900 shadow-2xl ring-1 ring-zinc-200 dark:ring-zinc-800 p-6">
+                <div class="flex items-center gap-3">
+                    <span class="relative flex size-10 items-center justify-center rounded-full bg-hk-primary-50 dark:bg-hk-primary-500/10">
+                        <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-hk-primary-400/40"></span>
+                        <svg class="relative size-5 text-hk-primary-600 animate-spin" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+                        </svg>
+                    </span>
+                    <div>
+                        <h3 id="install-progress-title" class="text-base font-semibold text-zinc-900 dark:text-zinc-100">
+                            {{ __('installer.progress.title') }}
+                        </h3>
+                        <p class="text-xs text-zinc-500 dark:text-zinc-400">
+                            {{ __('installer.progress.subtitle') }}
+                        </p>
+                    </div>
+                </div>
+
+                <div class="mt-5">
+                    <div class="flex items-center justify-between mb-1.5">
+                        <span class="text-sm text-zinc-700 dark:text-zinc-300" x-text="steps[stepIndex]"></span>
+                        <span class="text-xs font-mono text-zinc-500 tabular-nums" x-text="Math.floor(progress) + '%'"></span>
+                    </div>
+                    <div class="h-2 w-full overflow-hidden rounded-full bg-zinc-100 dark:bg-zinc-800">
+                        <div
+                            class="h-full rounded-full bg-gradient-to-r from-hk-primary-500 to-hk-primary-600 transition-[width] duration-300 ease-out"
+                            :style="`width: ${progress}%`"
+                        ></div>
+                    </div>
+                </div>
+
+                <p class="mt-4 text-xs text-zinc-500 dark:text-zinc-400 italic">
+                    {{ __('installer.progress.hint') }}
+                </p>
+            </div>
+        </div>
+
+        {{-- Auto-close on Livewire request completion if no redirect happened
+             (i.e. install failed and the error message will now render). --}}
+        <script>
+            document.addEventListener('livewire:init', () => {
+                Livewire.hook('commit', ({ succeed }) => {
+                    succeed(({ effects }) => {
+                        // If a redirect is queued we leave the overlay up — the
+                        // navigation will tear down the page anyway.
+                        if (effects && effects.redirect) {
+                            const overlay = document.querySelector('[x-data*=hk-install-started]');
+                            overlay && overlay._x_dataStack && overlay._x_dataStack[0].finish();
+                            return;
+                        }
+                        setTimeout(() => {
+                            const overlay = document.querySelector('[x-data*=hk-install-started]');
+                            if (overlay && overlay._x_dataStack && overlay._x_dataStack[0].open) {
+                                overlay._x_dataStack[0].close();
+                            }
+                        }, 250);
+                    });
+                });
+            });
+        </script>
+    </div>
 </div>

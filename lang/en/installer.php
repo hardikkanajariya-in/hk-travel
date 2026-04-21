@@ -77,4 +77,20 @@ return [
         'continue' => 'Continue',
         'install' => 'Install',
     ],
+
+    'progress' => [
+        'title' => 'Setting up your application',
+        'subtitle' => 'This usually takes 10–30 seconds.',
+        'hint' => 'Please don’t close this window — we’ll redirect you to the login page when it’s done.',
+        'steps' => [
+            'env' => 'Writing environment configuration…',
+            'migrate' => 'Building database tables…',
+            'seed' => 'Seeding default data…',
+            'locale' => 'Configuring languages…',
+            'admin' => 'Creating administrator account…',
+            'modules' => 'Activating selected modules…',
+            'cache' => 'Clearing caches…',
+            'finalize' => 'Finalising installation…',
+        ],
+    ],
 ];

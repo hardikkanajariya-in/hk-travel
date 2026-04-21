@@ -73,7 +73,11 @@ class SettingsRepository
 
     public function flush(): void
     {
-        $this->cache->forget(self::CACHE_KEY);
+        try {
+            $this->cache->forget(self::CACHE_KEY);
+        } catch (Throwable) {
+            // Cache store may be unavailable (e.g. database driver pre-install).
+        }
         $this->overrides = null;
     }
 
@@ -84,21 +88,39 @@ class SettingsRepository
             return $this->overrides;
         }
 
-        return $this->overrides = $this->cache->remember(self::CACHE_KEY, self::CACHE_TTL, function (): array {
-            try {
-                $rows = DB::table('hk_settings')->get(['group', 'key', 'value']);
-            } catch (Throwable) {
-                return []; // Table may not exist yet (pre-install).
-            }
+        return $this->overrides = $this->loadFromCache();
+    }
 
-            $out = [];
-            foreach ($rows as $row) {
-                $path = $row->group.($row->key !== '' ? '.'.$row->key : '');
-                Arr::set($out, $path, json_decode((string) $row->value, true));
-            }
+    /** @return array<string, mixed> */
+    protected function loadFromCache(): array
+    {
+        try {
+            return $this->cache->remember(self::CACHE_KEY, self::CACHE_TTL, function (): array {
+                return $this->loadFromDatabase();
+            });
+        } catch (Throwable) {
+            // Cache store itself may be unavailable (e.g. database cache
+            // driver before the `cache` table exists during install).
+            return $this->loadFromDatabase();
+        }
+    }
 
-            return $out;
-        });
+    /** @return array<string, mixed> */
+    protected function loadFromDatabase(): array
+    {
+        try {
+            $rows = DB::table('hk_settings')->get(['group', 'key', 'value']);
+        } catch (Throwable) {
+            return []; // Table may not exist yet (pre-install).
+        }
+
+        $out = [];
+        foreach ($rows as $row) {
+            $path = $row->group.($row->key !== '' ? '.'.$row->key : '');
+            Arr::set($out, $path, json_decode((string) $row->value, true));
+        }
+
+        return $out;
     }
 
     /** @return array{0: string, 1: string} */
