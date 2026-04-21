@@ -18,6 +18,7 @@ class DatabaseSeeder extends Seeder
             NotificationChannelsSeeder::class,
             PipelinesSeeder::class,
             DefaultContentSeeder::class,
+            ModulesSampleSeeder::class,
         ]);
     }
 }
