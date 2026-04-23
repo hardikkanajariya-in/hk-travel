@@ -3,6 +3,7 @@
 namespace App\Modules\Taxi;
 
 use App\Core\Modules\Module;
+use App\Core\Routing\PublicUrlGenerator;
 use App\Modules\Taxi\Models\TaxiService;
 use Illuminate\Support\Facades\Schema;
 
@@ -44,9 +45,12 @@ class TaxiModule extends Module
         if (! Schema::hasTable('taxi_services')) {
             return [];
         }
+
+        $urls = app(PublicUrlGenerator::class);
+
         foreach (TaxiService::query()->where('is_published', true)->get(['slug', 'updated_at']) as $row) {
             yield [
-                'loc' => route('taxi.show', $row->slug),
+                'loc' => $urls->entity('taxi', ['slug' => $row->slug]),
                 'lastmod' => $row->updated_at,
                 'changefreq' => 'weekly',
                 'priority' => 0.5,

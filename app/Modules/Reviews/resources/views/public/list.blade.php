@@ -12,12 +12,10 @@
         </div>
 
         @if ($count > 0)
-            <select wire:model.live="sort" class="rounded-md border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-3 py-2 text-sm">
-                <option value="newest">Newest</option>
-                <option value="rating_desc">Highest rated</option>
-                <option value="rating_asc">Lowest rated</option>
-                <option value="helpful">Most helpful</option>
-            </select>
+            <x-ui.select
+                wire:model.live="sort"
+                :options="\App\Core\Support\Choices::reviewSortOptions()"
+            />
         @endif
     </div>
 
@@ -66,7 +64,7 @@
                     @if (! empty($review->criteria))
                         <div class="mt-3 flex flex-wrap gap-3 text-xs text-zinc-500">
                             @foreach ((array) $review->criteria as $k => $v)
-                                <span><span class="font-medium text-zinc-700 dark:text-zinc-300">{{ ucfirst($k) }}</span>: {{ number_format((float) $v, 1) }}/5</span>
+                                <span><span class="font-medium text-zinc-700 dark:text-zinc-300">{{ __('reviews::reviews.criteria.'.$k) }}</span>: {{ number_format((float) $v, 1) }}/5</span>
                             @endforeach
                         </div>
                     @endif

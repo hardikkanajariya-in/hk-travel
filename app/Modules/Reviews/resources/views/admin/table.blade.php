@@ -11,19 +11,14 @@
     <x-ui.card :padded="false">
         <div class="flex flex-wrap gap-3 p-4 border-b border-zinc-200 dark:border-zinc-800">
             <x-ui.input wire:model.live.debounce.500ms="search" placeholder="Search title, body, author…" class="w-72" />
-            <select wire:model.live="status" class="rounded-md border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-3 py-2 text-sm">
-                <option value="">All statuses</option>
-                <option value="pending">{{ __('reviews::reviews.moderation.pending') }}</option>
-                <option value="approved">{{ __('reviews::reviews.moderation.approved') }}</option>
-                <option value="rejected">{{ __('reviews::reviews.moderation.rejected') }}</option>
-                <option value="spam">{{ __('reviews::reviews.moderation.spam') }}</option>
-            </select>
-            <select wire:model.live="type" class="rounded-md border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-3 py-2 text-sm">
-                <option value="">All types</option>
-                @foreach ($types as $t)
-                    <option value="{{ $t }}">{{ class_basename($t) }}</option>
-                @endforeach
-            </select>
+            <x-ui.select
+                wire:model.live="status"
+                :options="['' => 'All statuses'] + \App\Core\Support\Choices::moderationStatuses()"
+            />
+            <x-ui.select
+                wire:model.live="type"
+                :options="collect($types)->mapWithKeys(fn ($type) => [$type => class_basename($type)])->prepend('All types', '')->all()"
+            />
         </div>
 
         <x-ui.table>
@@ -47,8 +42,12 @@
                     </td>
                     <td class="px-4 py-3 align-top text-sm">
                         <span class="text-zinc-500">{{ class_basename($review->reviewable_type) }}</span>
-                        @if ($review->reviewable && property_exists($review->reviewable, 'name'))
-                            <div class="text-xs text-zinc-400 mt-0.5">{{ $review->reviewable->name ?? '' }}</div>
+                        @php
+                            $reviewableLabel = data_get($review->reviewable, 'name')
+                                ?: data_get($review->reviewable, 'title');
+                        @endphp
+                        @if ($reviewableLabel)
+                            <div class="text-xs text-zinc-400 mt-0.5">{{ $reviewableLabel }}</div>
                         @endif
                     </td>
                     <td class="px-4 py-3 align-top text-sm max-w-md">

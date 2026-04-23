@@ -1,4 +1,8 @@
 <div>
+    @php
+        $urls = app(\App\Core\Routing\PublicUrlGenerator::class);
+        $modules = app(\App\Core\Modules\ModuleManager::class);
+    @endphp
     @php $schema = $tour->toSeoMeta()['schema'] ?? null; @endphp
     @if ($schema)
         <script type="application/ld+json">{!! json_encode($schema, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) !!}</script>
@@ -13,10 +17,10 @@
         <div class="mx-auto max-w-7xl px-6 -mt-16 relative">
             <div class="rounded-xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 p-6 md:p-8 shadow-sm">
                 <nav class="text-xs text-zinc-500 mb-2">
-                    <a href="{{ route('tours.index') }}" wire:navigate class="hover:underline">Tours</a>
+                    <a href="{{ $urls->route('tours.index') }}" wire:navigate class="hover:underline">Tours</a>
                     @if ($tour->destination)
                         <span class="mx-1">/</span>
-                        <a href="{{ route('destinations.show', $tour->destination->slug) }}" wire:navigate class="hover:underline">{{ $tour->destination->name }}</a>
+                        <a href="{{ $urls->entity('destination', ['slug' => $tour->destination->slug]) }}" wire:navigate class="hover:underline">{{ $tour->destination->name }}</a>
                     @endif
                     <span class="mx-1">/</span>
                     <span>{{ $tour->name }}</span>
@@ -75,13 +79,24 @@
                     <h2 class="text-xl font-semibold mb-4">You may also like</h2>
                     <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                         @foreach ($related as $r)
-                            <a href="{{ route('tours.show', $r->slug) }}" wire:navigate class="block rounded-lg border border-zinc-200 dark:border-zinc-800 p-4 hover:shadow-sm transition">
+                            <a href="{{ $urls->entity('tour', ['slug' => $r->slug]) }}" wire:navigate class="block rounded-lg border border-zinc-200 dark:border-zinc-800 p-4 hover:shadow-sm transition">
                                 <h3 class="font-medium">{{ $r->name }}</h3>
                                 <p class="text-xs text-zinc-500 mt-1">{{ $r->duration_days }}d · {{ $r->currency }} {{ number_format($r->effectivePrice(), 0) }}</p>
                             </a>
                         @endforeach
                     </div>
                 </div>
+            @endif
+
+            @if ($modules->enabled('reviews'))
+                <section class="space-y-6">
+                    <livewire:reviews-public.review-list :reviewable="$tour" />
+
+                    <x-ui.card class="p-6">
+                        <h2 class="mb-4 text-xl font-semibold">{{ __('reviews::reviews.leave_review') }}</h2>
+                        <livewire:reviews-public.review-form :reviewable="$tour" />
+                    </x-ui.card>
+                </section>
             @endif
         </div>
 

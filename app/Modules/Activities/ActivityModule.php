@@ -3,6 +3,7 @@
 namespace App\Modules\Activities;
 
 use App\Core\Modules\Module;
+use App\Core\Routing\PublicUrlGenerator;
 use App\Modules\Activities\Models\Activity;
 use Illuminate\Support\Facades\Schema;
 
@@ -44,9 +45,12 @@ class ActivityModule extends Module
         if (! Schema::hasTable('activities')) {
             return [];
         }
+
+        $urls = app(PublicUrlGenerator::class);
+
         foreach (Activity::query()->where('is_published', true)->get(['slug', 'updated_at']) as $row) {
             yield [
-                'loc' => route('activities.show', $row->slug),
+                'loc' => $urls->entity('activity', ['slug' => $row->slug]),
                 'lastmod' => $row->updated_at,
                 'changefreq' => 'weekly',
                 'priority' => 0.7,

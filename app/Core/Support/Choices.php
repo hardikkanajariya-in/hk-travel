@@ -223,6 +223,95 @@ class Choices
     }
 
     /**
+     * Flight search data sources.
+     *
+     * @return array<string, string>
+     */
+    public static function flightProviders(): array
+    {
+        return [
+            'stub' => 'Saved offers only (recommended while setting up)',
+            'amadeus' => 'Amadeus live flight results',
+            'duffel' => 'Duffel live flight results',
+        ];
+    }
+
+    /**
+     * Train search data sources.
+     *
+     * @return array<string, string>
+     */
+    public static function trainProviders(): array
+    {
+        return [
+            'stub' => 'Saved offers only (recommended while setting up)',
+            'sabre' => 'Sabre Rail live train results',
+            'trainline' => 'Trainline live train results',
+        ];
+    }
+
+    /**
+     * Review sort order labels.
+     *
+     * @return array<string, string>
+     */
+    public static function reviewSortOptions(): array
+    {
+        return [
+            'newest' => 'Newest first',
+            'rating_desc' => 'Highest rating first',
+            'rating_asc' => 'Lowest rating first',
+            'helpful' => 'Most helpful first',
+        ];
+    }
+
+    /**
+     * Review score labels.
+     *
+     * @return array<int, string>
+     */
+    public static function reviewScoreOptions(): array
+    {
+        return [
+            5 => '5 out of 5',
+            4 => '4 out of 5',
+            3 => '3 out of 5',
+            2 => '2 out of 5',
+            1 => '1 out of 5',
+        ];
+    }
+
+    /**
+     * Moderation status labels.
+     *
+     * @return array<string, string>
+     */
+    public static function moderationStatuses(): array
+    {
+        return [
+            'pending' => 'Waiting for review',
+            'approved' => 'Approved',
+            'rejected' => 'Rejected',
+            'spam' => 'Spam',
+        ];
+    }
+
+    /**
+     * Blog publishing status labels.
+     *
+     * @return array<string, string>
+     */
+    public static function blogPostStatuses(): array
+    {
+        return [
+            'draft' => 'Draft',
+            'scheduled' => 'Scheduled for later',
+            'published' => 'Published',
+            'archived' => 'Archived',
+        ];
+    }
+
+    /**
      * Country codes for flag selection (ISO 3166-1 alpha-2, lowercase).
      *
      * @return array<string, string>

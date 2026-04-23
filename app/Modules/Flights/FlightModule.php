@@ -3,9 +3,11 @@
 namespace App\Modules\Flights;
 
 use App\Core\Modules\Module;
+use App\Core\Settings\SettingsRepository;
 use App\Modules\Flights\Contracts\FlightProvider;
 use App\Modules\Flights\Providers\AmadeusProvider;
 use App\Modules\Flights\Providers\DuffelProvider;
+use App\Modules\Flights\Providers\FallbackFlightProvider;
 use App\Modules\Flights\Providers\StubProvider;
 
 class FlightModule extends Module
@@ -33,13 +35,19 @@ class FlightModule extends Module
     public function register(): void
     {
         app()->singleton(FlightProvider::class, function (): FlightProvider {
-            $driver = (string) config('hk-modules.modules.flights.provider', 'stub');
+            $settings = app(SettingsRepository::class);
+            $driver = (string) $settings->get('modules.flights.provider', config('hk-modules.modules.flights.provider', 'stub'));
+            $fallback = new StubProvider;
 
-            return match ($driver) {
-                'amadeus' => new AmadeusProvider((array) config('hk-modules.modules.flights.amadeus', [])),
-                'duffel' => new DuffelProvider((array) config('hk-modules.modules.flights.duffel', [])),
-                default => new StubProvider,
+            $preferred = match ($driver) {
+                'amadeus' => new AmadeusProvider((array) $settings->get('modules.flights.amadeus', config('hk-modules.modules.flights.amadeus', []))),
+                'duffel' => new DuffelProvider((array) $settings->get('modules.flights.duffel', config('hk-modules.modules.flights.duffel', []))),
+                default => $fallback,
             };
+
+            return $preferred instanceof StubProvider
+                ? $preferred
+                : new FallbackFlightProvider($preferred, $fallback);
         });
     }
 

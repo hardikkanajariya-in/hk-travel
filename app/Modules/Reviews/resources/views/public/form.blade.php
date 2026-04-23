@@ -26,11 +26,10 @@
                     @foreach ($criteriaKeys as $key)
                         <div>
                             <label class="block text-xs font-medium mb-1">{{ __('reviews::reviews.criteria.'.$key, [], app()->getLocale()) ?? ucfirst($key) }}</label>
-                            <select wire:model="criteria.{{ $key }}" class="block w-full rounded-md border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-3 py-2 text-sm">
-                                @foreach (range(5, 1) as $n)
-                                    <option value="{{ $n }}">{{ $n }} ★</option>
-                                @endforeach
-                            </select>
+                            <x-ui.select
+                                wire:model="criteria.{{ $key }}"
+                                :options="\App\Core\Support\Choices::reviewScoreOptions()"
+                            />
                         </div>
                     @endforeach
                 </div>

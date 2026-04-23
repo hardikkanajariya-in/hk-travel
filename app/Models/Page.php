@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Concerns\HasAuditLog;
+use App\Modules\Comments\Concerns\HasComments;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -23,7 +24,7 @@ use Illuminate\Support\Carbon;
  */
 class Page extends Model
 {
-    use HasAuditLog, HasFactory;
+    use HasAuditLog, HasComments, HasFactory;
 
     protected $guarded = ['id'];
 

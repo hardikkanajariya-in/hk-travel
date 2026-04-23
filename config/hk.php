@@ -109,10 +109,16 @@ return [
     'permalinks' => [
         'tour' => '/tours/{slug}',
         'hotel' => '/hotels/{slug}',
+        'activity' => '/activities/{slug}',
+        'bus' => '/buses/{slug}',
+        'car' => '/cars/{slug}',
+        'cruise' => '/cruises/{slug}',
         'flight_search' => '/flights',
         'package' => '/packages/{slug}',
         'blog_post' => '/blog/{slug}',
-        'destination' => '/destinations/{country}/{city}',
+        'destination' => '/destinations/{slug}',
+        'taxi' => '/taxi/{slug}',
+        'visa' => '/visa/{slug}',
         'page' => '/{slug}',
     ],
 

@@ -15,7 +15,7 @@ return [
         'cancel_reply' => 'Cancel reply',
     ],
     'thanks' => 'Thanks — your comment is awaiting moderation.',
-    'closed' => 'Comments are closed for this post.',
+    'closed' => 'Comments are turned off here.',
     'no_comments' => 'No comments yet. Be the first to share your thoughts.',
     'reply' => 'Reply',
     'count' => '{0} No comments|{1} 1 comment|[2,*] :count comments',

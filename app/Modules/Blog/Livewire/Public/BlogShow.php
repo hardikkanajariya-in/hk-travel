@@ -2,6 +2,8 @@
 
 namespace App\Modules\Blog\Livewire\Public;
 
+use App\Core\Concerns\EnsuresCanonicalPublicUrl;
+use App\Core\Routing\PublicUrlGenerator;
 use App\Core\Seo\SeoManager;
 use App\Modules\Blog\Models\BlogPost;
 use Illuminate\Contracts\View\View;
@@ -12,9 +14,11 @@ use Livewire\Component;
 #[Layout('components.layouts.public')]
 class BlogShow extends Component
 {
+    use EnsuresCanonicalPublicUrl;
+
     public BlogPost $post;
 
-    public function mount(string $slug, SeoManager $seo): void
+    public function mount(string $slug, SeoManager $seo, PublicUrlGenerator $urls): void
     {
         $this->post = BlogPost::query()
             ->with(['author', 'categories', 'tags'])
@@ -28,8 +32,9 @@ class BlogShow extends Component
         $meta = $this->post->toSeoMeta();
         $seo->title($meta['title'])
             ->description($meta['description'])
-            ->image($meta['image'])
-            ->canonical(route('blog.show', $this->post->slug));
+            ->image($meta['image']);
+
+        $this->ensureCanonicalPublicUrl('blog_post', $this->post->slug, $seo, $urls);
     }
 
     public function render(): View

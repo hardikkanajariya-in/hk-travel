@@ -41,15 +41,7 @@
         <div class="space-y-6">
             <x-ui.card class="space-y-4 p-5">
                 <h3 class="text-sm font-semibold uppercase text-gray-500">{{ __('Publishing') }}</h3>
-                <div>
-                    <label class="mb-1 block text-sm font-medium">{{ __('Status') }}</label>
-                    <select wire:model="status" class="w-full rounded border-gray-300 dark:border-gray-700 dark:bg-gray-800">
-                        <option value="draft">{{ __('Draft') }}</option>
-                        <option value="scheduled">{{ __('Scheduled') }}</option>
-                        <option value="published">{{ __('Published') }}</option>
-                        <option value="archived">{{ __('Archived') }}</option>
-                    </select>
-                </div>
+                <x-ui.select wire:model="status" label="{{ __('Status') }}" :options="\App\Core\Support\Choices::blogPostStatuses()" />
                 <div>
                     <label class="mb-1 block text-sm font-medium">{{ __('Publish at') }}</label>
                     <input type="datetime-local" wire:model="published_at" class="w-full rounded border-gray-300 dark:border-gray-700 dark:bg-gray-800" />

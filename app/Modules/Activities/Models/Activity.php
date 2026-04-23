@@ -7,6 +7,7 @@ use App\Core\Concerns\ProvidesSeoMeta;
 use App\Core\Contracts\HasSeoMeta;
 use App\Modules\Activities\Database\Factories\ActivityFactory;
 use App\Modules\Destinations\Models\Destination;
+use App\Modules\Reviews\Concerns\HasReviews;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -16,13 +17,16 @@ use Spatie\Translatable\HasTranslations;
 
 class Activity extends Model implements HasSeoMeta
 {
-    use HasAuditLog, HasFactory, HasTranslations, HasUlids, ProvidesSeoMeta, SoftDeletes;
+    use HasAuditLog, HasFactory, HasReviews, HasTranslations, HasUlids, ProvidesSeoMeta, SoftDeletes;
 
     protected $table = 'activities';
 
     protected $guarded = ['id'];
 
     public $translatable = ['name', 'short_description', 'description'];
+
+    /** @var array<int, string> */
+    protected array $reviewCriteria = ['value', 'service', 'quality'];
 
     protected function casts(): array
     {
@@ -61,11 +65,7 @@ class Activity extends Model implements HasSeoMeta
             'name' => $this->name,
             'description' => strip_tags((string) $this->description),
             'image' => $this->cover_image,
-            'aggregateRating' => $this->rating_count > 0 ? [
-                '@type' => 'AggregateRating',
-                'ratingValue' => (float) $this->rating_avg,
-                'reviewCount' => $this->rating_count,
-            ] : null,
+            'aggregateRating' => $this->reviewsAggregateSchema(),
         ];
     }
 }

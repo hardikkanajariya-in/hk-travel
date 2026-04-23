@@ -1,5 +1,6 @@
 @php
     /** @var \App\Models\Page $page */
+    $modules = app(\App\Core\Modules\ModuleManager::class);
     $renderer = app(\App\Core\PageBuilder\PageRenderer::class);
     $crumbs = app(\App\Core\Seo\BreadcrumbService::class);
     if (! $page->is_homepage) {
@@ -36,4 +37,10 @@
     <article class="mx-auto max-w-5xl space-y-8 px-4 py-12 sm:px-6 lg:px-8">
         {!! $renderer->render($page, auth()->user()) !!}
     </article>
+
+    @if ($page->allow_comments && $modules->enabled('comments'))
+        <section class="mx-auto max-w-5xl px-4 pb-12 sm:px-6 lg:px-8">
+            <livewire:comments-public.comment-section :commentable="$page" />
+        </section>
+    @endif
 </x-layouts.app>

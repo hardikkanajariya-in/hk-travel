@@ -27,10 +27,10 @@ new #[Title('HK Travel — Install')] #[Layout('components.layouts.installer')] 
     public string $dbUsername = 'root';
     public string $dbPassword = '';
 
-    public string $adminName = 'Hardik Kanajariya';
-    public string $adminEmail = 'hardik@hardikkanajariya.in';
-    public string $adminPassword = 'Nud@#38648';
-    public string $adminPasswordConfirmation = 'Nud@#38648';
+    public string $adminName = '';
+    public string $adminEmail = '';
+    public string $adminPassword = '';
+    public string $adminPasswordConfirmation = '';
 
     /** @var array<string, bool> */
     public array $modules = [];

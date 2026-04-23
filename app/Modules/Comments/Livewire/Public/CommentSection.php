@@ -111,8 +111,15 @@ class CommentSection extends Component
         if ($this->replyToId) {
             $parent = Comment::query()->find($this->replyToId);
             if ($parent) {
-                $depth = min((int) $parent->depth + 1, Comment::MAX_DEPTH);
-                $parentId = $depth >= Comment::MAX_DEPTH ? $parent->parent_id : $parent->id;
+                $parentDepth = (int) $parent->depth;
+
+                if ($parentDepth >= Comment::MAX_DEPTH) {
+                    $depth = Comment::MAX_DEPTH;
+                    $parentId = $parent->parent_id;
+                } else {
+                    $depth = $parentDepth + 1;
+                    $parentId = $parent->id;
+                }
             }
         }
 

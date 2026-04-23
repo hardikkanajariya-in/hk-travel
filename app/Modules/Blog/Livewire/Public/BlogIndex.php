@@ -27,10 +27,9 @@ class BlogIndex extends Component
 
     public function mount(?string $slug = null): void
     {
-        $route = request()->route()?->getName();
-        if ($route === 'blog.category') {
+        if (request()->routeIs('blog.category', 'localized.blog.category')) {
             $this->categorySlug = $slug;
-        } elseif ($route === 'blog.tag') {
+        } elseif (request()->routeIs('blog.tag', 'localized.blog.tag')) {
             $this->tagSlug = $slug;
         }
     }
@@ -63,9 +62,9 @@ class BlogIndex extends Component
             'posts' => $posts,
             'category' => $category,
             'tag' => $tag,
-            'categories' => BlogCategory::query()->withCount(['posts' => fn ($q) => $q->where('status', BlogPost::STATUS_PUBLISHED)])
+            'categories' => BlogCategory::query()->withCount(['posts' => fn ($q) => $q->published()])
                 ->orderBy('name')->limit(20)->get(),
-            'popularTags' => BlogTag::query()->withCount(['posts' => fn ($q) => $q->where('status', BlogPost::STATUS_PUBLISHED)])
+            'popularTags' => BlogTag::query()->withCount(['posts' => fn ($q) => $q->published()])
                 ->orderByDesc('posts_count')->limit(20)->get(),
         ]);
     }

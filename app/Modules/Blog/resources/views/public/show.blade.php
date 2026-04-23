@@ -1,4 +1,8 @@
 <div>
+    @php
+        $urls = app(\App\Core\Routing\PublicUrlGenerator::class);
+        $modules = app(\App\Core\Modules\ModuleManager::class);
+    @endphp
     @php $schema = $post->toSeoMeta()['schema'] ?? null; @endphp
     @if ($schema)
         <script type="application/ld+json">{!! json_encode($schema, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) !!}</script>
@@ -13,13 +17,13 @@
 
         <header class="mx-auto max-w-3xl px-6 pt-10">
             <nav class="mb-3 text-xs text-zinc-500">
-                <a href="{{ route('blog.index') }}" wire:navigate class="hover:underline">{{ __('blog::blog.title') }}</a>
+                <a href="{{ $urls->route('blog.index') }}" wire:navigate class="hover:underline">{{ __('blog::blog.title') }}</a>
                 <span class="mx-1">/</span>
                 <span>{{ $post->title }}</span>
             </nav>
             <div class="mb-3 flex flex-wrap gap-1">
                 @foreach ($post->categories as $cat)
-                    <a href="{{ route('blog.category', $cat->slug) }}" wire:navigate><x-ui.badge>{{ $cat->name }}</x-ui.badge></a>
+                    <a href="{{ $urls->route('blog.category', ['slug' => $cat->slug]) }}" wire:navigate><x-ui.badge>{{ $cat->name }}</x-ui.badge></a>
                 @endforeach
             </div>
             <h1 class="text-3xl font-bold leading-tight md:text-4xl">{{ $post->title }}</h1>
@@ -43,7 +47,7 @@
                         <p class="not-prose flex flex-wrap items-center gap-1 text-sm">
                             <span class="text-zinc-500">{{ __('blog::blog.tags') }}:</span>
                             @foreach ($post->tags as $t)
-                                <a href="{{ route('blog.tag', $t->slug) }}" wire:navigate class="rounded bg-zinc-100 px-2 py-0.5 text-xs hover:bg-zinc-200 dark:bg-zinc-800">{{ $t->name }}</a>
+                                <a href="{{ $urls->route('blog.tag', ['slug' => $t->slug]) }}" wire:navigate class="rounded bg-zinc-100 px-2 py-0.5 text-xs hover:bg-zinc-200 dark:bg-zinc-800">{{ $t->name }}</a>
                             @endforeach
                         </p>
                     @endif
@@ -68,7 +72,7 @@
                     <h2 class="mb-6 text-2xl font-semibold">{{ __('blog::blog.related') }}</h2>
                     <div class="grid grid-cols-1 gap-6 sm:grid-cols-3">
                         @foreach ($related as $r)
-                            <a href="{{ route('blog.show', $r->slug) }}" wire:navigate class="group block overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-sm transition hover:shadow-md dark:border-zinc-800 dark:bg-zinc-900">
+                            <a href="{{ $urls->entity('blog_post', ['slug' => $r->slug]) }}" wire:navigate class="group block overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-sm transition hover:shadow-md dark:border-zinc-800 dark:bg-zinc-900">
                                 @if ($r->cover_image)
                                     <div class="aspect-video bg-zinc-100 dark:bg-zinc-800">
                                         <img src="{{ $r->cover_image }}" alt="{{ $r->title }}" class="h-full w-full object-cover" loading="lazy">
@@ -84,7 +88,7 @@
                 </section>
             @endif
 
-            @if ($post->allow_comments && config('hk-modules.modules.comments.enabled'))
+            @if ($post->allow_comments && $modules->enabled('comments'))
                 <section class="mx-auto mt-16 max-w-3xl">
                     <livewire:comments-public.comment-section :commentable="$post" />
                 </section>

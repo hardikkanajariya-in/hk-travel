@@ -2,6 +2,8 @@
 
 namespace App\Modules\Tours\Livewire\Public;
 
+use App\Core\Concerns\EnsuresCanonicalPublicUrl;
+use App\Core\Routing\PublicUrlGenerator;
 use App\Core\Seo\SeoManager;
 use App\Modules\Tours\Models\Tour;
 use Illuminate\Contracts\View\View;
@@ -11,9 +13,11 @@ use Livewire\Component;
 #[Layout('components.layouts.public')]
 class TourShow extends Component
 {
+    use EnsuresCanonicalPublicUrl;
+
     public Tour $tour;
 
-    public function mount(string $slug, SeoManager $seo): void
+    public function mount(string $slug, SeoManager $seo, PublicUrlGenerator $urls): void
     {
         $this->tour = Tour::query()
             ->with('destination')
@@ -24,8 +28,9 @@ class TourShow extends Component
         $meta = $this->tour->toSeoMeta();
         $seo->title($meta['title'])
             ->description($meta['description'])
-            ->image($meta['image'])
-            ->canonical(route('tours.show', $this->tour->slug));
+            ->image($meta['image']);
+
+        $this->ensureCanonicalPublicUrl('tour', $this->tour->slug, $seo, $urls);
     }
 
     public function render(): View

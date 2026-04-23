@@ -11,19 +11,14 @@
     <x-ui.card :padded="false">
         <div class="flex flex-wrap gap-3 p-4 border-b border-zinc-200 dark:border-zinc-800">
             <x-ui.input wire:model.live.debounce.500ms="search" placeholder="Search body, author…" class="w-72" />
-            <select wire:model.live="status" class="rounded-md border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-3 py-2 text-sm">
-                <option value="">All statuses</option>
-                <option value="pending">{{ __('comments::comments.moderation.pending') }}</option>
-                <option value="approved">{{ __('comments::comments.moderation.approved') }}</option>
-                <option value="rejected">{{ __('comments::comments.moderation.rejected') }}</option>
-                <option value="spam">{{ __('comments::comments.moderation.spam') }}</option>
-            </select>
-            <select wire:model.live="type" class="rounded-md border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-3 py-2 text-sm">
-                <option value="">All types</option>
-                @foreach ($types as $t)
-                    <option value="{{ $t }}">{{ class_basename($t) }}</option>
-                @endforeach
-            </select>
+            <x-ui.select
+                wire:model.live="status"
+                :options="['' => 'All statuses'] + \App\Core\Support\Choices::moderationStatuses()"
+            />
+            <x-ui.select
+                wire:model.live="type"
+                :options="collect($types)->mapWithKeys(fn ($type) => [$type => class_basename($type)])->prepend('All types', '')->all()"
+            />
         </div>
 
         <x-ui.table>
@@ -49,8 +44,12 @@
                     </td>
                     <td class="px-4 py-3 align-top text-sm text-zinc-500">
                         {{ class_basename($comment->commentable_type) }}
-                        @if ($comment->commentable && property_exists($comment->commentable, 'title'))
-                            <div class="text-xs text-zinc-400 mt-0.5">{{ \Illuminate\Support\Str::limit($comment->commentable->title ?? '', 40) }}</div>
+                        @php
+                            $commentableLabel = data_get($comment->commentable, 'title')
+                                ?: data_get($comment->commentable, 'name');
+                        @endphp
+                        @if ($commentableLabel)
+                            <div class="text-xs text-zinc-400 mt-0.5">{{ \Illuminate\Support\Str::limit($commentableLabel, 40) }}</div>
                         @endif
                     </td>
                     <td class="px-4 py-3 align-top text-sm max-w-xl">

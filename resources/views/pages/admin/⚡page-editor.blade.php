@@ -23,6 +23,8 @@ new #[Title('Edit page')] #[Layout('components.layouts.admin')] class extends Co
 
     public bool $is_homepage = false;
 
+    public bool $allow_comments = false;
+
     /** @var array<string, mixed> */
     public array $seo = [
         'meta_title' => null,
@@ -47,6 +49,7 @@ new #[Title('Edit page')] #[Layout('components.layouts.admin')] class extends Co
         $this->slug = $page->slug;
         $this->status = $page->status;
         $this->is_homepage = (bool) $page->is_homepage;
+        $this->allow_comments = (bool) $page->allow_comments;
         $this->seo = array_merge($this->seo, (array) $page->seo);
 
         $this->blocks = $page->blocks
@@ -206,6 +209,7 @@ new #[Title('Edit page')] #[Layout('components.layouts.admin')] class extends Co
             'title' => $this->title,
             'slug' => $this->slug,
             'status' => $this->status,
+            'allow_comments' => $this->allow_comments,
             'seo' => $this->seo,
             'published_at' => $this->status === 'published' && $this->page->published_at === null ? now() : $this->page->published_at,
             'updated_by' => auth()->id(),
@@ -287,6 +291,10 @@ new #[Title('Edit page')] #[Layout('components.layouts.admin')] class extends Co
                     <label class="flex items-center gap-2 text-sm">
                         <input type="checkbox" wire:model="is_homepage" class="size-4 rounded border-zinc-300 text-hk-primary-600 focus:ring-hk-primary-500">
                         Use as homepage
+                    </label>
+                    <label class="flex items-center gap-2 text-sm">
+                        <input type="checkbox" wire:model="allow_comments" class="size-4 rounded border-zinc-300 text-hk-primary-600 focus:ring-hk-primary-500">
+                        Let visitors leave comments on this page
                     </label>
                     <div>
                         <label class="block text-sm font-medium mb-1">Status</label>

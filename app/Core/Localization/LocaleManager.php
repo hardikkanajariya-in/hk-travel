@@ -37,7 +37,7 @@ class LocaleManager
         $candidates = array_filter([
             $this->fromUrlPrefix($request, $supported),
             $request->query('lang'),
-            $request->session()?->get('locale'),
+            $request->hasSession() ? $request->session()->get('locale') : null,
             $request->cookie('locale'),
             $request->user()?->locale ?? null,
             $request->getPreferredLanguage($supported),

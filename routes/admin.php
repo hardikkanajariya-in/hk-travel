@@ -34,13 +34,6 @@ Route::middleware(['auth', 'verified'])
         Route::livewire('contact-forms/{form}/edit', 'pages::admin.contact-form-builder')->middleware('can:admin.forms.manage')->name('contact-forms.edit');
         Route::livewire('contact-submissions', 'pages::admin.contact-submissions')->middleware('can:admin.forms.submissions.view')->name('contact-submissions');
 
-        Route::prefix('crm')->name('crm.')->group(function () {
-            Route::livewire('leads', 'pages::admin.leads')->middleware('can:admin.crm.leads.view')->name('leads');
-            Route::livewire('kanban', 'pages::admin.leads-kanban')->middleware('can:admin.crm.leads.view')->name('kanban');
-            Route::livewire('leads/{lead}', 'pages::admin.lead-detail')->middleware('can:admin.crm.leads.view')->name('leads.show');
-            Route::livewire('pipelines', 'pages::admin.pipelines')->middleware('can:admin.crm.pipelines.manage')->name('pipelines');
-        });
-
         // Shared media upload endpoint used by <x-ui.image-picker>. Saves
         // through the public disk (StorageManager) so adding S3/Spaces/GCS
         // later requires no view changes.

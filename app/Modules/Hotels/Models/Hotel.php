@@ -7,6 +7,7 @@ use App\Core\Concerns\ProvidesSeoMeta;
 use App\Core\Contracts\HasSeoMeta;
 use App\Modules\Destinations\Models\Destination;
 use App\Modules\Hotels\Database\Factories\HotelFactory;
+use App\Modules\Reviews\Concerns\HasReviews;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -17,13 +18,16 @@ use Spatie\Translatable\HasTranslations;
 
 class Hotel extends Model implements HasSeoMeta
 {
-    use HasAuditLog, HasFactory, HasTranslations, HasUlids, ProvidesSeoMeta, SoftDeletes;
+    use HasAuditLog, HasFactory, HasReviews, HasTranslations, HasUlids, ProvidesSeoMeta, SoftDeletes;
 
     protected $table = 'hotels';
 
     protected $guarded = ['id'];
 
     public $translatable = ['name', 'description'];
+
+    /** @var array<int, string> */
+    protected array $reviewCriteria = ['cleanliness', 'location', 'comfort'];
 
     protected function casts(): array
     {
@@ -69,11 +73,7 @@ class Hotel extends Model implements HasSeoMeta
             'starRating' => $this->star_rating ? ['@type' => 'Rating', 'ratingValue' => $this->star_rating] : null,
             'priceRange' => $this->price_from ? '$$' : null,
             'address' => $this->address,
-            'aggregateRating' => $this->rating_count > 0 ? [
-                '@type' => 'AggregateRating',
-                'ratingValue' => (float) $this->rating_avg,
-                'reviewCount' => $this->rating_count,
-            ] : null,
+            'aggregateRating' => $this->reviewsAggregateSchema(),
         ];
     }
 }

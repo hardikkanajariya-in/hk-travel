@@ -3,6 +3,7 @@
 namespace App\Modules\Destinations;
 
 use App\Core\Modules\Module;
+use App\Core\Routing\PublicUrlGenerator;
 use App\Modules\Destinations\Models\Destination;
 use Illuminate\Support\Facades\Schema;
 
@@ -59,9 +60,11 @@ class DestinationModule extends Module
             return [];
         }
 
+        $urls = app(PublicUrlGenerator::class);
+
         foreach (Destination::query()->where('is_published', true)->get(['slug', 'updated_at']) as $row) {
             yield [
-                'loc' => route('destinations.show', $row->slug),
+                'loc' => $urls->entity('destination', ['slug' => $row->slug]),
                 'lastmod' => $row->updated_at,
                 'changefreq' => 'weekly',
                 'priority' => 0.6,

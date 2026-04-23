@@ -3,6 +3,7 @@
 namespace App\Modules\Buses;
 
 use App\Core\Modules\Module;
+use App\Core\Routing\PublicUrlGenerator;
 use App\Modules\Buses\Models\BusRoute;
 use Illuminate\Support\Facades\Schema;
 
@@ -44,9 +45,12 @@ class BusModule extends Module
         if (! Schema::hasTable('bus_routes')) {
             return [];
         }
+
+        $urls = app(PublicUrlGenerator::class);
+
         foreach (BusRoute::query()->where('is_published', true)->get(['slug', 'updated_at']) as $row) {
             yield [
-                'loc' => route('buses.show', $row->slug),
+                'loc' => $urls->entity('bus', ['slug' => $row->slug]),
                 'lastmod' => $row->updated_at,
                 'changefreq' => 'weekly',
                 'priority' => 0.5,

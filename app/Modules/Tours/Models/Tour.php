@@ -6,6 +6,7 @@ use App\Concerns\HasAuditLog;
 use App\Core\Concerns\ProvidesSeoMeta;
 use App\Core\Contracts\HasSeoMeta;
 use App\Modules\Destinations\Models\Destination;
+use App\Modules\Reviews\Concerns\HasReviews;
 use App\Modules\Tours\Database\Factories\TourFactory;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -16,11 +17,14 @@ use Spatie\Translatable\HasTranslations;
 
 class Tour extends Model implements HasSeoMeta
 {
-    use HasAuditLog, HasFactory, HasTranslations, HasUlids, ProvidesSeoMeta, SoftDeletes;
+    use HasAuditLog, HasFactory, HasReviews, HasTranslations, HasUlids, ProvidesSeoMeta, SoftDeletes;
 
     protected $table = 'tours';
 
     protected $guarded = ['id'];
+
+    /** @var array<int, string> */
+    protected array $reviewCriteria = ['value', 'service', 'quality'];
 
     /** @var array<int, string> */
     public $translatable = ['name', 'description'];
@@ -72,11 +76,7 @@ class Tour extends Model implements HasSeoMeta
                 'price' => $this->effectivePrice(),
                 'priceCurrency' => $this->currency ?: 'USD',
             ],
-            'aggregateRating' => $this->rating_count > 0 ? [
-                '@type' => 'AggregateRating',
-                'ratingValue' => (float) $this->rating_avg,
-                'reviewCount' => $this->rating_count,
-            ] : null,
+            'aggregateRating' => $this->reviewsAggregateSchema(),
         ];
     }
 }

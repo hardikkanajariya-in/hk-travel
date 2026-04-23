@@ -16,6 +16,8 @@ return [
         'cleanliness' => 'Cleanliness',
         'location' => 'Location',
         'comfort' => 'Comfort',
+        'guide' => 'Guide experience',
+        'itinerary' => 'Itinerary',
     ],
     'moderation' => [
         'pending' => 'Pending',

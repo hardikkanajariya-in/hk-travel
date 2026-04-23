@@ -3,6 +3,7 @@
 namespace App\Modules\Blog;
 
 use App\Core\Modules\Module;
+use App\Core\Routing\PublicUrlGenerator;
 use App\Modules\Blog\Livewire\Admin\BlogCategoryForm;
 use App\Modules\Blog\Livewire\Admin\BlogCategoryTable;
 use App\Modules\Blog\Livewire\Admin\BlogPostForm;
@@ -100,9 +101,11 @@ class BlogModule extends Module
             return [];
         }
 
+        $urls = app(PublicUrlGenerator::class);
+
         foreach (BlogPost::query()->published()->get(['slug', 'updated_at']) as $row) {
             yield [
-                'loc' => route('blog.show', $row->slug),
+                'loc' => $urls->entity('blog_post', ['slug' => $row->slug]),
                 'lastmod' => $row->updated_at,
                 'changefreq' => 'weekly',
                 'priority' => 0.7,
@@ -112,7 +115,7 @@ class BlogModule extends Module
         if (Schema::hasTable('blog_categories')) {
             foreach (BlogCategory::query()->get(['slug', 'updated_at']) as $row) {
                 yield [
-                    'loc' => route('blog.category', $row->slug),
+                    'loc' => $urls->route('blog.category', ['slug' => $row->slug]),
                     'lastmod' => $row->updated_at,
                     'changefreq' => 'weekly',
                     'priority' => 0.5,

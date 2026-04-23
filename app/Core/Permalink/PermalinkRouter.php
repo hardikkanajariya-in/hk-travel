@@ -4,6 +4,7 @@ namespace App\Core\Permalink;
 
 use App\Core\Settings\SettingsRepository;
 use App\Models\Permalink;
+use App\Models\PermalinkRedirect;
 use Illuminate\Contracts\Cache\Repository as Cache;
 use Illuminate\Support\Collection;
 use Throwable;
@@ -51,6 +52,30 @@ class PermalinkRouter
             ?? (string) config("hk.permalinks.{$entityType}", '/'.$entityType.'/{slug}');
     }
 
+    /**
+     * @return array{entity_type:string, tokens:array<string, string>}|null
+     */
+    public function match(string $path): ?array
+    {
+        $normalizedPath = $this->normalize($path);
+
+        return collect($this->all())
+            ->sortBy(fn (string $pattern): int => substr_count($pattern, '{'))
+            ->map(function (string $pattern, string $entityType) use ($normalizedPath): ?array {
+                $tokens = $this->extractTokens($pattern, $normalizedPath);
+
+                if ($tokens === null) {
+                    return null;
+                }
+
+                return [
+                    'entity_type' => $entityType,
+                    'tokens' => $tokens,
+                ];
+            })
+            ->first(fn (?array $match): bool => $match !== null);
+    }
+
     /** @return array<string, string> */
     public function all(): array
     {
@@ -80,6 +105,7 @@ class PermalinkRouter
     public function set(string $entityType, string $pattern): Permalink
     {
         $normalized = $this->normalize($pattern);
+        $previous = $this->pattern($entityType);
 
         $row = Permalink::updateOrCreate(
             ['entity_type' => $entityType, 'pattern' => $normalized],
@@ -90,6 +116,17 @@ class PermalinkRouter
         Permalink::where('entity_type', $entityType)
             ->where('id', '!=', $row->id)
             ->update(['is_active' => false]);
+
+        if ($previous !== $normalized) {
+            PermalinkRedirect::updateOrCreate(
+                ['from_path' => $previous],
+                [
+                    'to_path' => $normalized,
+                    'status_code' => 301,
+                    'is_active' => true,
+                ],
+            );
+        }
 
         $this->flush();
 
@@ -119,5 +156,42 @@ class PermalinkRouter
 
             return isset($tokens[$key]) ? rawurlencode((string) $tokens[$key]) : $m[0];
         }, $pattern) ?? $pattern;
+    }
+
+    /**
+     * @return array<string, string>|null
+     */
+    public function extractTokens(string $pattern, string $path): ?array
+    {
+        $normalizedPattern = $this->normalize($pattern);
+        $normalizedPath = $this->normalize($path);
+
+        if (! str_contains($normalizedPattern, '{')) {
+            return $normalizedPattern === $normalizedPath ? [] : null;
+        }
+
+        $segments = preg_split('/(\{\w+\})/', $normalizedPattern, -1, PREG_SPLIT_DELIM_CAPTURE | PREG_SPLIT_NO_EMPTY);
+
+        if ($segments === false) {
+            return null;
+        }
+
+        $regex = collect($segments)
+            ->map(function (string $segment): string {
+                if (preg_match('/^\{(\w+)\}$/', $segment, $matches) === 1) {
+                    return '(?P<'.$matches[1].'>[^/]+)';
+                }
+
+                return preg_quote($segment, '#');
+            })
+            ->implode('');
+
+        if (! preg_match('#^'.$regex.'$#', $normalizedPath, $matches)) {
+            return null;
+        }
+
+        return collect($matches)
+            ->filter(fn ($value, $key) => is_string($key) && is_string($value))
+            ->all();
     }
 }

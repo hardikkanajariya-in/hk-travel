@@ -3,6 +3,7 @@
 namespace App\Modules\Cars;
 
 use App\Core\Modules\Module;
+use App\Core\Routing\PublicUrlGenerator;
 use App\Modules\Cars\Models\CarRental;
 use Illuminate\Support\Facades\Schema;
 
@@ -44,9 +45,12 @@ class CarModule extends Module
         if (! Schema::hasTable('car_rentals')) {
             return [];
         }
+
+        $urls = app(PublicUrlGenerator::class);
+
         foreach (CarRental::query()->where('is_published', true)->get(['slug', 'updated_at']) as $row) {
             yield [
-                'loc' => route('cars.show', $row->slug),
+                'loc' => $urls->entity('car', ['slug' => $row->slug]),
                 'lastmod' => $row->updated_at,
                 'changefreq' => 'weekly',
                 'priority' => 0.6,

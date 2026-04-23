@@ -5,6 +5,7 @@ namespace App\Modules\Blog\Models;
 use App\Concerns\HasAuditLog;
 use App\Core\Concerns\ProvidesSeoMeta;
 use App\Core\Contracts\HasSeoMeta;
+use App\Core\Routing\PublicUrlGenerator;
 use App\Models\User;
 use App\Modules\Blog\Database\Factories\BlogPostFactory;
 use App\Modules\Comments\Concerns\HasComments;
@@ -153,6 +154,8 @@ class BlogPost extends Model implements HasSeoMeta
 
     protected function buildSeoSchema(): ?array
     {
+        $urls = app(PublicUrlGenerator::class);
+
         return [
             '@context' => 'https://schema.org',
             '@type' => 'BlogPosting',
@@ -167,7 +170,7 @@ class BlogPost extends Model implements HasSeoMeta
             ] : null,
             'mainEntityOfPage' => [
                 '@type' => 'WebPage',
-                '@id' => route('blog.show', $this->slug),
+                '@id' => $urls->entity('blog_post', ['slug' => $this->slug]),
             ],
         ];
     }

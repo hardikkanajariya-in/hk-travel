@@ -2,7 +2,9 @@
 
 namespace App\Modules\Destinations\Livewire\Public;
 
+use App\Core\Concerns\EnsuresCanonicalPublicUrl;
 use App\Core\Modules\ModuleManager;
+use App\Core\Routing\PublicUrlGenerator;
 use App\Core\Seo\SeoManager;
 use App\Modules\Activities\Models\Activity;
 use App\Modules\Destinations\Models\Destination;
@@ -16,9 +18,11 @@ use Livewire\Component;
 #[Layout('components.layouts.public')]
 class DestinationShow extends Component
 {
+    use EnsuresCanonicalPublicUrl;
+
     public Destination $destination;
 
-    public function mount(string $slug, SeoManager $seo): void
+    public function mount(string $slug, SeoManager $seo, PublicUrlGenerator $urls): void
     {
         $this->destination = Destination::query()
             ->where('slug', $slug)
@@ -28,8 +32,9 @@ class DestinationShow extends Component
         $meta = $this->destination->toSeoMeta();
         $seo->title($meta['title'])
             ->description($meta['description'])
-            ->image($meta['image'])
-            ->canonical(route('destinations.show', $this->destination->slug));
+            ->image($meta['image']);
+
+        $this->ensureCanonicalPublicUrl('destination', $this->destination->slug, $seo, $urls);
     }
 
     public function render(ModuleManager $modules): View

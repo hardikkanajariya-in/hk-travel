@@ -27,6 +27,8 @@
         'view-columns' => '<path stroke-linecap="round" stroke-linejoin="round" d="M9 17.25v1.007a3 3 0 0 1-.879 2.122L7.5 21h9l-.621-.621A3 3 0 0 1 15 18.257V17.25m6-12V15a2.25 2.25 0 0 1-2.25 2.25H5.25A2.25 2.25 0 0 1 3 15V5.25m18 0A2.25 2.25 0 0 0 18.75 3H5.25A2.25 2.25 0 0 0 3 5.25m18 0V12a2.25 2.25 0 0 1-2.25 2.25H5.25A2.25 2.25 0 0 1 3 12V5.25"/>',
         'queue-list' => '<path stroke-linecap="round" stroke-linejoin="round" d="M3.75 12h16.5m-16.5 3.75h16.5M3.75 19.5h16.5M5.625 4.5h12.75a1.875 1.875 0 0 1 0 3.75H5.625a1.875 1.875 0 0 1 0-3.75Z"/>',
         'bars-3' => '<path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"/>',
+        'star' => '<path stroke-linecap="round" stroke-linejoin="round" d="m11.48 3.499 2.104 4.264 4.706.684-3.405 3.32.804 4.688L11.48 14.24l-4.207 2.214.804-4.688-3.405-3.32 4.706-.684L11.48 3.5Z"/>',
+        'message-square' => '<path stroke-linecap="round" stroke-linejoin="round" d="M7.5 8.25h9m-9 3h5.25M6.375 3.75h11.25A2.625 2.625 0 0 1 20.25 6.375v7.5a2.625 2.625 0 0 1-2.625 2.625H10.5l-4.5 3v-3H6.375A2.625 2.625 0 0 1 3.75 13.875v-7.5A2.625 2.625 0 0 1 6.375 3.75Z"/>',
         'rectangle-group' => '<path stroke-linecap="round" stroke-linejoin="round" d="M2.25 7.125C2.25 6.504 2.754 6 3.375 6h6c.621 0 1.125.504 1.125 1.125v3.75c0 .621-.504 1.125-1.125 1.125h-6a1.125 1.125 0 0 1-1.125-1.125v-3.75ZM14.25 8.625c0-.621.504-1.125 1.125-1.125h5.25c.621 0 1.125.504 1.125 1.125v8.25c0 .621-.504 1.125-1.125 1.125h-5.25a1.125 1.125 0 0 1-1.125-1.125v-8.25ZM2.25 16.125c0-.621.504-1.125 1.125-1.125h5.25c.621 0 1.125.504 1.125 1.125v2.25c0 .621-.504 1.125-1.125 1.125h-5.25a1.125 1.125 0 0 1-1.125-1.125v-2.25Z"/>',
         'swatch' => '<path stroke-linecap="round" stroke-linejoin="round" d="M4.098 19.902a3.75 3.75 0 0 0 5.304 0l6.401-6.402M6.75 21A3.75 3.75 0 0 1 3 17.25V4.125C3 3.504 3.504 3 4.125 3h5.25c.621 0 1.125.504 1.125 1.125v4.072M6.75 21a3.75 3.75 0 0 0 3.75-3.75V8.197M6.75 21h13.125c.621 0 1.125-.504 1.125-1.125v-5.25c0-.621-.504-1.125-1.125-1.125h-4.072M10.5 8.197l2.88-2.88c.438-.439 1.15-.439 1.59 0l3.712 3.713c.44.44.44 1.152 0 1.59l-2.879 2.88M6.75 17.25h.008v.008H6.75v-.008Z"/>',
         'inbox-arrow-down' => '<path stroke-linecap="round" stroke-linejoin="round" d="M9 8.25 12 5.25m0 0 3 3m-3-3v9M21.75 13.5h-3.86a2.25 2.25 0 0 0-2.012 1.244l-.256.512a2.25 2.25 0 0 1-2.013 1.244h-3.218a2.25 2.25 0 0 1-2.013-1.244l-.256-.512a2.25 2.25 0 0 0-2.013-1.244H2.25m19.5 0V18a2.25 2.25 0 0 1-2.25 2.25h-15A2.25 2.25 0 0 1 2.25 18v-4.5m19.5 0-2.51-7.533A2.25 2.25 0 0 0 17.09 4.5H6.911a2.25 2.25 0 0 0-2.15 1.588L2.25 13.5"/>',
@@ -127,6 +129,27 @@
         // the first thing the user sees in the sidebar.
         array_splice($groups, 1, 0, $moduleTopLevel);
     }
+
+    $groups = collect($groups)
+        ->map(function (array $group): ?array {
+            if (($group['type'] ?? null) !== 'group') {
+                return $group;
+            }
+
+            $items = collect($group['items'] ?? [])
+                ->filter(fn (array $item): bool => \Illuminate\Support\Facades\Route::has($item['route'] ?? ''))
+                ->values()
+                ->all();
+
+            if ($items === []) {
+                return null;
+            }
+
+            return [...$group, 'items' => $items];
+        })
+        ->filter()
+        ->values()
+        ->all();
 
     $isRouteActive = fn (string $routeName): bool => request()->routeIs($routeName) || request()->routeIs($routeName.'.*');
 
@@ -305,34 +328,20 @@
             </button>
         </div>
 
-        {{-- Credit --}}
         <div
             class="border-t border-zinc-200/70 px-3 py-2 text-[11px] text-zinc-400 dark:border-zinc-800/70"
             x-show="! sidebarCollapsed"
             x-transition.opacity
         >
-            Powered by
-            <a
-                href="https://hardikkanajariya.in"
-                target="_blank"
-                rel="noopener"
-                class="font-medium text-zinc-500 hover:text-hk-primary-600 dark:text-zinc-300"
-            >hardikkanajariya.in</a>
+            {{ config('hk.brand.name', 'HK Travel') }} admin
         </div>
 
-        {{-- Collapsed credit: just a heart/initial --}}
         <div
             class="flex items-center justify-center border-t border-zinc-200/70 py-2 text-[11px] text-zinc-400 dark:border-zinc-800/70"
             x-show="sidebarCollapsed"
             x-cloak
         >
-            <a
-                href="https://hardikkanajariya.in"
-                target="_blank"
-                rel="noopener"
-                title="Powered by hardikkanajariya.in"
-                class="hover:text-hk-primary-600"
-            >HK</a>
+            {{ strtoupper(substr(config('hk.brand.name', 'HK Travel'), 0, 2)) }}
         </div>
     </div>
 </aside>

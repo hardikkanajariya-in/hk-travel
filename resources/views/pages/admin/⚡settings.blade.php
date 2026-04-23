@@ -57,6 +57,20 @@ new #[Title('Settings')] #[Layout('components.layouts.admin')] class extends Com
             'cookie_settings_label' => 'Preferences',
             'cookie_policy_url' => '/privacy',
             'cookie_position' => 'bottom',
+
+            // Transport providers
+            'flights_provider' => config('hk-modules.modules.flights.provider', 'stub'),
+            'flights_amadeus_client_id' => config('hk-modules.modules.flights.amadeus.api_key', ''),
+            'flights_amadeus_client_secret' => config('hk-modules.modules.flights.amadeus.client_secret', ''),
+            'flights_amadeus_base_url' => config('hk-modules.modules.flights.amadeus.base_url', ''),
+            'flights_duffel_token' => config('hk-modules.modules.flights.duffel.access_token', ''),
+            'flights_duffel_base_url' => config('hk-modules.modules.flights.duffel.base_url', ''),
+            'trains_provider' => config('hk-modules.modules.trains.provider', 'stub'),
+            'trains_sabre_client_id' => config('hk-modules.modules.trains.sabre.client_id', ''),
+            'trains_sabre_client_secret' => config('hk-modules.modules.trains.sabre.client_secret', ''),
+            'trains_sabre_base_url' => config('hk-modules.modules.trains.sabre.base_url', ''),
+            'trains_trainline_token' => config('hk-modules.modules.trains.trainline.api_key', ''),
+            'trains_trainline_base_url' => config('hk-modules.modules.trains.trainline.base_url', ''),
         ];
 
         $this->loadSettings();
@@ -116,6 +130,20 @@ new #[Title('Settings')] #[Layout('components.layouts.admin')] class extends Com
             'cookie_settings_label' => 'cookie.settings_label',
             'cookie_policy_url' => 'cookie.policy_url',
             'cookie_position' => 'cookie.position',
+
+            // Transport providers
+            'flights_provider' => 'modules.flights.provider',
+            'flights_amadeus_client_id' => 'modules.flights.amadeus.api_key',
+            'flights_amadeus_client_secret' => 'modules.flights.amadeus.api_secret',
+            'flights_amadeus_base_url' => 'modules.flights.amadeus.base_url',
+            'flights_duffel_token' => 'modules.flights.duffel.access_token',
+            'flights_duffel_base_url' => 'modules.flights.duffel.base_url',
+            'trains_provider' => 'modules.trains.provider',
+            'trains_sabre_client_id' => 'modules.trains.sabre.client_id',
+            'trains_sabre_client_secret' => 'modules.trains.sabre.client_secret',
+            'trains_sabre_base_url' => 'modules.trains.sabre.base_url',
+            'trains_trainline_token' => 'modules.trains.trainline.api_key',
+            'trains_trainline_base_url' => 'modules.trains.trainline.base_url',
         ];
     }
 
@@ -163,6 +191,19 @@ new #[Title('Settings')] #[Layout('components.layouts.admin')] class extends Com
             'state.cookie_settings_label' => 'nullable|string|max:64',
             'state.cookie_policy_url' => 'nullable|string|max:255',
             'state.cookie_position' => 'required|in:bottom,top,bottom-left,bottom-right',
+
+            'state.flights_provider' => 'required|in:stub,amadeus,duffel',
+            'state.flights_amadeus_client_id' => 'nullable|string|max:255',
+            'state.flights_amadeus_client_secret' => 'nullable|string|max:255',
+            'state.flights_amadeus_base_url' => 'nullable|string|max:255',
+            'state.flights_duffel_token' => 'nullable|string|max:255',
+            'state.flights_duffel_base_url' => 'nullable|string|max:255',
+            'state.trains_provider' => 'required|in:stub,sabre,trainline',
+            'state.trains_sabre_client_id' => 'nullable|string|max:255',
+            'state.trains_sabre_client_secret' => 'nullable|string|max:255',
+            'state.trains_sabre_base_url' => 'nullable|string|max:255',
+            'state.trains_trainline_token' => 'nullable|string|max:255',
+            'state.trains_trainline_base_url' => 'nullable|string|max:255',
         ];
     }
 };
@@ -180,6 +221,7 @@ new #[Title('Settings')] #[Layout('components.layouts.admin')] class extends Com
         'seo' => 'SEO',
         'analytics' => 'Analytics',
         'cookie' => 'Cookie banner',
+        'transport' => 'Transport providers',
     ]">
         <x-ui.tab-panel name="general">
             <x-ui.card>
@@ -307,6 +349,50 @@ new #[Title('Settings')] #[Layout('components.layouts.admin')] class extends Com
                         <x-ui.select wire:model="state.cookie_position" label="Banner position"
                                       :options="\App\Core\Support\Choices::cookiePositions()" />
                     </div>
+                </div>
+            </x-ui.card>
+        </x-ui.tab-panel>
+
+        <x-ui.tab-panel name="transport">
+            <x-ui.card>
+                <h2 class="text-base font-semibold mb-2">Flight search source</h2>
+                <p class="mb-4 text-sm text-zinc-500">Choose where flight results come from. If live access details are missing, your site will quietly fall back to saved local offers.</p>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <x-ui.select wire:model="state.flights_provider" label="Flight source"
+                                  :options="\App\Core\Support\Choices::flightProviders()"
+                                  hint="Saved offers are safest while you are still setting things up." />
+                    <x-ui.input wire:model="state.flights_amadeus_base_url" label="Amadeus connection address"
+                                hint="Leave the default test address unless your provider gives you another one." />
+                    <x-ui.input wire:model="state.flights_amadeus_client_id" label="Amadeus app ID"
+                                hint="Paste the app ID from your Amadeus account if you want live fares." />
+                    <x-ui.input wire:model="state.flights_amadeus_client_secret" label="Amadeus app secret"
+                                hint="Paste the matching secret for the app ID above." />
+                    <x-ui.input wire:model="state.flights_duffel_token" label="Duffel access token"
+                                hint="Paste your Duffel token if you want live fares from Duffel." />
+                    <x-ui.input wire:model="state.flights_duffel_base_url" label="Duffel connection address"
+                                hint="Leave the default address unless Duffel gives you a different one." />
+                </div>
+            </x-ui.card>
+
+            <x-ui.card>
+                <h2 class="text-base font-semibold mb-2">Train search source</h2>
+                <p class="mb-4 text-sm text-zinc-500">Choose where train results come from. If live access details are missing, your site will quietly fall back to saved local offers.</p>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <x-ui.select wire:model="state.trains_provider" label="Train source"
+                                  :options="\App\Core\Support\Choices::trainProviders()"
+                                  hint="Saved offers are safest while you are still setting things up." />
+                    <x-ui.input wire:model="state.trains_sabre_base_url" label="Sabre Rail connection address"
+                                hint="Leave the default test address unless your provider gives you another one." />
+                    <x-ui.input wire:model="state.trains_sabre_client_id" label="Sabre Rail app ID"
+                                hint="Paste the app ID from your Sabre Rail account if you want live results." />
+                    <x-ui.input wire:model="state.trains_sabre_client_secret" label="Sabre Rail app secret"
+                                hint="Paste the matching secret for the app ID above." />
+                    <x-ui.input wire:model="state.trains_trainline_token" label="Trainline access token"
+                                hint="Paste your Trainline token if you want live results from Trainline." />
+                    <x-ui.input wire:model="state.trains_trainline_base_url" label="Trainline connection address"
+                                hint="Leave the default address unless Trainline gives you a different one." />
                 </div>
             </x-ui.card>
         </x-ui.tab-panel>

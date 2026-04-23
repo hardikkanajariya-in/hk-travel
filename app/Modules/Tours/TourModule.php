@@ -3,6 +3,7 @@
 namespace App\Modules\Tours;
 
 use App\Core\Modules\Module;
+use App\Core\Routing\PublicUrlGenerator;
 use App\Modules\Tours\Models\Tour;
 use Illuminate\Support\Facades\Schema;
 
@@ -59,9 +60,11 @@ class TourModule extends Module
             return [];
         }
 
+        $urls = app(PublicUrlGenerator::class);
+
         foreach (Tour::query()->where('is_published', true)->get(['slug', 'updated_at']) as $row) {
             yield [
-                'loc' => route('tours.show', $row->slug),
+                'loc' => $urls->entity('tour', ['slug' => $row->slug]),
                 'lastmod' => $row->updated_at,
                 'changefreq' => 'weekly',
                 'priority' => 0.8,

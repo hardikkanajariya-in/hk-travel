@@ -2,6 +2,7 @@
 
 namespace App\Modules\Blog\Http\Controllers;
 
+use App\Core\Routing\PublicUrlGenerator;
 use App\Modules\Blog\Models\BlogPost;
 use Illuminate\Http\Response;
 
@@ -14,6 +15,7 @@ class BlogRssController
 {
     public function __invoke(): Response
     {
+        $urls = app(PublicUrlGenerator::class);
         $posts = BlogPost::query()
             ->published()
             ->with('author')
@@ -22,13 +24,13 @@ class BlogRssController
             ->get();
 
         $site = config('app.name', 'HK Travel');
-        $self = url('/blog/rss');
-        $home = url('/blog');
+        $self = $urls->route('blog.rss');
+        $home = $urls->route('blog.index');
         $now = now()->toRssString();
 
         $items = '';
         foreach ($posts as $post) {
-            $url = route('blog.show', $post->slug);
+            $url = $urls->entity('blog_post', ['slug' => $post->slug]);
             $items .= "    <item>\n"
                 .'      <title>'.htmlspecialchars((string) $post->title, ENT_XML1).'</title>'."\n"
                 .'      <link>'.htmlspecialchars($url, ENT_XML1).'</link>'."\n"

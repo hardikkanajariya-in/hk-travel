@@ -3,7 +3,9 @@
 namespace App\Modules\Trains;
 
 use App\Core\Modules\Module;
+use App\Core\Settings\SettingsRepository;
 use App\Modules\Trains\Contracts\TrainProvider;
+use App\Modules\Trains\Providers\FallbackTrainProvider;
 use App\Modules\Trains\Providers\SabreRailProvider;
 use App\Modules\Trains\Providers\StubProvider;
 use App\Modules\Trains\Providers\TrainlineProvider;
@@ -48,13 +50,19 @@ class TrainModule extends Module
     public function register(): void
     {
         app()->singleton(TrainProvider::class, function (): TrainProvider {
-            $driver = (string) config('hk-modules.modules.trains.provider', 'stub');
+            $settings = app(SettingsRepository::class);
+            $driver = (string) $settings->get('modules.trains.provider', config('hk-modules.modules.trains.provider', 'stub'));
+            $fallback = new StubProvider;
 
-            return match ($driver) {
-                'sabre' => new SabreRailProvider((array) config('hk-modules.modules.trains.sabre', [])),
-                'trainline' => new TrainlineProvider((array) config('hk-modules.modules.trains.trainline', [])),
-                default => new StubProvider,
+            $preferred = match ($driver) {
+                'sabre' => new SabreRailProvider((array) $settings->get('modules.trains.sabre', config('hk-modules.modules.trains.sabre', []))),
+                'trainline' => new TrainlineProvider((array) $settings->get('modules.trains.trainline', config('hk-modules.modules.trains.trainline', []))),
+                default => $fallback,
             };
+
+            return $preferred instanceof StubProvider
+                ? $preferred
+                : new FallbackTrainProvider($preferred, $fallback);
         });
     }
 

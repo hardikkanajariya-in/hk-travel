@@ -1,4 +1,5 @@
 <div>
+    @php $urls = app(\App\Core\Routing\PublicUrlGenerator::class); @endphp
     <section class="border-b border-zinc-200 bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-900/40">
         <div class="mx-auto max-w-7xl px-6 py-10">
             <h1 class="text-3xl font-bold md:text-4xl">
@@ -30,7 +31,7 @@
                     <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
                         @foreach ($posts as $post)
                             <article class="overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-sm transition hover:shadow-md dark:border-zinc-800 dark:bg-zinc-900">
-                                <a href="{{ route('blog.show', $post->slug) }}" wire:navigate>
+                                <a href="{{ $urls->entity('blog_post', ['slug' => $post->slug]) }}" wire:navigate>
                                     @if ($post->cover_image)
                                         <div class="aspect-video bg-zinc-100 dark:bg-zinc-800">
                                             <img src="{{ $post->cover_image }}" alt="{{ $post->title }}" class="h-full w-full object-cover" loading="lazy">
@@ -63,7 +64,7 @@
                     <h3 class="mb-3 text-sm font-semibold uppercase text-zinc-500">{{ __('blog::blog.categories') }}</h3>
                     <ul class="space-y-1 text-sm">
                         @foreach ($categories as $cat)
-                            <li><a href="{{ route('blog.category', $cat->slug) }}" wire:navigate class="hover:underline">{{ $cat->name }} <span class="text-xs text-zinc-400">({{ $cat->posts_count }})</span></a></li>
+                            <li><a href="{{ $urls->route('blog.category', ['slug' => $cat->slug]) }}" wire:navigate class="hover:underline">{{ $cat->name }} <span class="text-xs text-zinc-400">({{ $cat->posts_count }})</span></a></li>
                         @endforeach
                     </ul>
                 </x-ui.card>
@@ -71,7 +72,7 @@
                     <h3 class="mb-3 text-sm font-semibold uppercase text-zinc-500">{{ __('blog::blog.tags') }}</h3>
                     <div class="flex flex-wrap gap-1">
                         @foreach ($popularTags as $tag)
-                            <a href="{{ route('blog.tag', $tag->slug) }}" wire:navigate class="rounded bg-zinc-100 px-2 py-0.5 text-xs hover:bg-zinc-200 dark:bg-zinc-800 dark:hover:bg-zinc-700">{{ $tag->name }}</a>
+                            <a href="{{ $urls->route('blog.tag', ['slug' => $tag->slug]) }}" wire:navigate class="rounded bg-zinc-100 px-2 py-0.5 text-xs hover:bg-zinc-200 dark:bg-zinc-800 dark:hover:bg-zinc-700">{{ $tag->name }}</a>
                         @endforeach
                     </div>
                 </x-ui.card>

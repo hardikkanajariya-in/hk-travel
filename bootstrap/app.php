@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Middleware\EnsureAppInstalled;
+use App\Http\Middleware\EnsureModuleEnabled;
 use App\Http\Middleware\ForceHttps;
 use App\Http\Middleware\HandleLegacyPermalinks;
 use App\Http\Middleware\RedirectIfInstalled;
@@ -32,6 +33,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'not-installed' => RedirectIfInstalled::class,
             'locale' => SetLocale::class,
             'honeypot' => ProtectAgainstSpam::class,
+            'module.enabled' => EnsureModuleEnabled::class,
         ]);
 
         $middleware->web(prepend: [

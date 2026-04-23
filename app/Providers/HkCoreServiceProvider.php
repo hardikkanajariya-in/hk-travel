@@ -9,6 +9,7 @@ use App\Core\Localization\LocaleManager;
 use App\Core\Modules\ModuleManager;
 use App\Core\PageBuilder\BlockRegistry;
 use App\Core\PageBuilder\BlockRenderer;
+use App\Core\Routing\PublicUrlGenerator;
 use App\Core\Seo\BreadcrumbService;
 use App\Core\Seo\JsonLd;
 use App\Core\Seo\SeoManager;
@@ -73,6 +74,7 @@ class HkCoreServiceProvider extends ServiceProvider
         $this->app->singleton(JsonLd::class);
         $this->app->scoped(BreadcrumbService::class);
         $this->app->singleton(SitemapGenerator::class);
+        $this->app->singleton(PublicUrlGenerator::class);
     }
 
     public function boot(): void

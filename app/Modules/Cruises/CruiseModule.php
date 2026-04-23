@@ -3,6 +3,7 @@
 namespace App\Modules\Cruises;
 
 use App\Core\Modules\Module;
+use App\Core\Routing\PublicUrlGenerator;
 use App\Modules\Cruises\Models\Cruise;
 use Illuminate\Support\Facades\Schema;
 
@@ -44,9 +45,12 @@ class CruiseModule extends Module
         if (! Schema::hasTable('cruises')) {
             return [];
         }
+
+        $urls = app(PublicUrlGenerator::class);
+
         foreach (Cruise::query()->where('is_published', true)->get(['slug', 'updated_at']) as $row) {
             yield [
-                'loc' => route('cruises.show', $row->slug),
+                'loc' => $urls->entity('cruise', ['slug' => $row->slug]),
                 'lastmod' => $row->updated_at,
                 'changefreq' => 'weekly',
                 'priority' => 0.6,

@@ -1,7 +1,11 @@
 <div class="container mx-auto px-4 py-10">
+    @php
+        $urls = app(\App\Core\Routing\PublicUrlGenerator::class);
+        $modules = app(\App\Core\Modules\ModuleManager::class);
+    @endphp
     <nav class="text-xs text-zinc-500 mb-4">
-        <a href="{{ url('/') }}" class="hover:underline">Home</a> /
-        <a href="{{ route('hotels.index') }}" class="hover:underline">Hotels</a> /
+        <a href="{{ $urls->route('home') }}" class="hover:underline">Home</a> /
+        <a href="{{ $urls->route('hotels.index') }}" class="hover:underline">Hotels</a> /
         <span>{{ $hotel->name }}</span>
     </nav>
 
@@ -49,6 +53,17 @@
                         @endforeach
                     </div>
                 </x-ui.card>
+            @endif
+
+            @if ($modules->enabled('reviews'))
+                <section class="space-y-6">
+                    <livewire:reviews-public.review-list :reviewable="$hotel" />
+
+                    <x-ui.card class="p-6">
+                        <h2 class="mb-4 text-xl font-semibold">{{ __('reviews::reviews.leave_review') }}</h2>
+                        <livewire:reviews-public.review-form :reviewable="$hotel" />
+                    </x-ui.card>
+                </section>
             @endif
         </div>
 
